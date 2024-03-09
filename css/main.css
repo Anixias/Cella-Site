@@ -14,10 +14,19 @@
   src: url("../fonts/DMMono-Italic.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: 'Madimi One';
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  src: url("../fonts/MadimiOne-Regular.ttf") format("truetype");
+}
+
 :root {
   --font-mono: 'DMMono', monospace;
 
   font-size: 16px;
+  font-family: 'Madimi One', sans-serif;
   background: #11161f;
 }
 
@@ -38,6 +47,14 @@ body {
 code {
   font-family: var(--font-mono);
   tab-size: 4;
+}
+
+.title {
+  font-size: 32px;
+}
+
+.subtitle {
+  font-size: 24px;
 }
 
 .cella-keyword {
