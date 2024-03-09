@@ -48,10 +48,12 @@ pre {
   margin: 0px;
 }
 
-code {
+.code {
   font-family: var(--font-mono);
   tab-size: 4;
-  line-height: 28px;
+  -o-tab-size: 4;
+  -moz-tab-size: 4;
+  line-height: 1.2;
 }
 
 .title {
@@ -68,6 +70,22 @@ code {
   border-style: solid;
   border-radius: 8px;
   padding: 8px;
+}
+
+.line-number-section {
+  user-select: none;
+  display: table-cell;
+  color: #313a4d;
+  text-align: right;
+  padding-right: 8px;
+}
+
+.code-section {
+  display: table-cell;
+  padding-left: 12px;
+  border-left-color: #313a4d;
+  border-left-width: 3px;
+  border-left-style: solid;
 }
 
 .cella-keyword {
@@ -97,9 +115,4 @@ code {
 
 .cella-module {
   color: #95ffa1;
-}
-
-.line-number {
-  color: #313a4d;
-  user-select: none;
 }
