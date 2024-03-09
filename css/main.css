@@ -1,5 +1,5 @@
 @font-face {
-  font-family: 'DMMono'
+  font-family: 'DMMono';
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
@@ -7,7 +7,7 @@
 }
 
 @font-face {
-  font-family: 'DMMono'
+  font-family: 'DMMono';
   font-style: italic;
   font-weight: normal;
   font-variant: normal;
@@ -35,6 +35,6 @@ body {
   margin: 0px;
 }
 
-code {
+.code {
   font-family: var(--font-mono);
 }
