@@ -35,7 +35,36 @@ body {
   margin: 0px;
 }
 
-.code {
+code {
   font-family: var(--font-mono);
   tab-size: 4;
+}
+
+.cella-keyword {
+  color: #5ce0fa;
+}
+
+.cella-type {
+  font-weight: bold;
+}
+
+.cella-function {
+  color: #ff61ba;
+}
+
+.cella-literal {
+  color: #ffea61;
+}
+
+.cella-comment {
+  font-style: italic;
+  color: #313a4d;
+}
+
+.cella-parameter {
+  color: #ffc595;
+}
+
+.cella-module {
+  color: #95ffa1;
 }

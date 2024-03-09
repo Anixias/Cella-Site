@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
     <title>Cella Programming Language</title>
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.css?v=1.1">
   </head>
   <body>
     <div>
@@ -12,53 +12,18 @@
         <div>A minimalistic systems programming language</div>
       </header>
       <main>
-        <pre class="code">
-Token: type
-{
-	kind: TokenKind
-	text: String
-}
+        <pre>
+          <code>
+<span class="cella-keyword">mod</span> <span class="cella-module">helloWorld</span>
 
-TokenKind: enum
-{
-	Identifier
-	Keyword
-	Literal
-}
+<span class="cella-keyword">use</span> <span class="cella-module">std</span>.<span class="cella-module">io</span>.<span class="cella-type">Console</span>
 
-Lexer: type
+<span class="cella-function">main</span>: <span class="cella-keyword">entry</span>(<span class="cella-parameter">args</span>: <span class="cella-type">String[]</span>): <span class="cella-type">Int32</span>
 {
-	code: String
-	
-	scanTokens: fun(self): Token[]
-	{
-		var tokens = Token[]
-		
-		for (var i in 0..code.length)
-		{
-			val char = code[i]
-			
-			if with char
-			{
-				Char.isWhitespace
-					cont
-				Char.isLetter
-					tokens += identifierToken(var i)
-				Char.isDigit
-					tokens += numberToken(var i)
-			}
-		}
-	}
+	<span class="cella-type">Console</span>.<span class="cella-function">println</span>(<span class="cella-literal">"Hello, World!"</span>)
+  <span class="cella-keyword">ret</span> <span class="cella-literal">0</span>
 }
-
-main: entry(args: String[]): Int32
-{
-	val lexer: Lexer("mod helloWorld\n\nuse std.io.Console\n\nmain: entry(args: String[]): Int32\n{\n\tConsole.println("Hello, World!")\n\tret 0}")
-	for var token in lexer.scanTokens()
-	{
-		Console.println(token.text)
-	}
-}
+          </code>
         </pre>
       </main>
     </div>
