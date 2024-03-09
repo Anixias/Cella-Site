@@ -1,0 +1,40 @@
+@font-face {
+  font-family: 'DMMono'
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  src: url("../fonts/DMMono-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'DMMono'
+  font-style: italic;
+  font-weight: normal;
+  font-variant: normal;
+  src: url("../fonts/DMMono-Italic.ttf") format("truetype");
+}
+
+:root {
+  --font-mono: 'DMMono', monospace;
+
+  font-size: 16px;
+  background: #11161f;
+}
+
+html, body {
+  height: 100%;
+  width: auto;
+}
+
+html {
+  color: #f4f4ec;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0px;
+}
+
+code {
+  font-family: var(--font-mono);
+}
