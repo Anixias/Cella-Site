@@ -27,8 +27,10 @@
   --text-color: #f4f4ec;
   --text-color-faded: #313a4d;
   --shadow-color: rgba(0, 0, 0, 0.4);
+  --sidebar-width: 20%;
+  --sidebar-min-width: 250px;
 
-  font-size: 28px;
+  font-size: 24px;
   font-family: 'Madimi One', sans-serif;
   background: #11161f;
 }
@@ -84,30 +86,30 @@ a.current {
 
 .wrapper {
   display: flex;
+  flex-direction: row;
 }
 
 .main {
-  /* todo */
+  margin-left: calc(max(var(--sidebar-width), var(--sidebar-min-width)));
 }
 
 .main-content {
-  margin: 28px;
-  height: 500vh;
+  margin: 12px 28px;
 }
 
 .sidebar {
   border-right: 1px solid #313a4d;
   border-radius: 8px;
   height: 100vh;
-  position: sticky;
-  position: -webkit-sticky;
-  top: 0;
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-min-width);
+  position: fixed;
   background: #11161f;
   filter: drop-shadow(var(--shadow-color) 4px 4px 4px);
 }
 
 .sidebar-content {
-  margin: 8px;
+  margin: 8px 12px;
 }
 
 .code {
@@ -120,12 +122,12 @@ a.current {
 }
 
 .title {
-  font-size: 64px;
+  font-size: 56px;
   margin: 0px;
 }
 
 .subtitle {
-  font-size: 42px;
+  font-size: 32px;
   margin: 0px;
 }
 
@@ -156,9 +158,12 @@ a.current {
 }
 
 #message {
-  position: sticky;
-  position: -webkit-sticky;
+  position: fixed;
   width: fit-content;
+
+  left: 50%;
+  transform: translate(-50%, 0%);
+
   text-align: center;
   margin: 0 auto;
   bottom: -32px;
