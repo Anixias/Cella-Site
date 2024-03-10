@@ -3,20 +3,140 @@
   <head>
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
     <title>Cella Programming Language</title>
-    <link rel="stylesheet" href="css/main.css?v=1.3">
+    <link rel="stylesheet" href="css/main.css?v=1.4">
+    <script type="text/javascript">
+      const messageDuration = 2000;
+      var messageStartTime = 0;
+      var messageTimer = null;
+
+      function copyText(elementId)
+      {
+        if (document.selection) {
+          var range = document.body.createTextRange();
+          range.moveToElementText(document.getElementById(elementId));
+          range.select().createTextRange();
+          document.execCommand("copy");
+          document.selection = null;
+          showMessage("Copied!");
+        } else if (window.getSelection) {
+          window.getSelection().removeAllRanges();
+          var range = document.createRange();
+          range.selectNode(document.getElementById(elementId));
+          window.getSelection().addRange(range);
+          document.execCommand("copy");
+          window.getSelection().removeAllRanges();
+          showMessage("Copied!");
+        }
+      }
+
+      function showMessage(message)
+      {
+        let messageElement = document.getElementById("message");
+        messageElement.innerHTML = message;
+        messageElement.style.visibility = "visible";
+
+        messageStartTime = Date.now();
+        if (!messageTimer)
+        {
+          messageTimer = setInterval(processMessage, 10);
+        }
+      }
+
+      function processMessage()
+      {
+        let elapsed = Date.now() - messageStartTime;
+        if (elapsed >= messageDuration)
+        {
+          clearInterval(messageTimer);
+          messageTimer = null;
+          hideMessage();
+          return;
+        }
+
+        let progress = elapsed / messageDuration;
+        let messageElement = document.getElementById("message");
+
+        const inThreshold = 0.1;
+        const outThreshold = 0.1;
+        const outStart = 1 - outThreshold;
+
+        const bottomOffsetIn = 8;
+        const bottomOffsetOut = -32;
+
+        // if progress between 0 and inThreshold, fade in
+        if (progress <= inThreshold)
+        {
+          let animProgress = progress / inThreshold;
+          let value = easeOutExpo(animProgress);
+          messageElement.style.opacity = (value * 100.0).toString() + '%';
+          messageElement.style.bottom = lerp(bottomOffsetOut, bottomOffsetIn, value).toString() + 'px';
+        }
+        // if progress between outStart and 1, fade out
+        else if (progress >= 1 - outThreshold)
+        {
+          let animProgress = (progress - outStart) / outThreshold;
+          let value = easeInExpo(animProgress);
+          messageElement.style.opacity = ((1 - value) * 100.0).toString() + '%';
+          messageElement.style.bottom = lerp(bottomOffsetIn, bottomOffsetOut, value).toString() + 'px';
+        }
+        // render at normal position and opacity
+        else
+        {
+          messageElement.style.opacity = '100%';
+          messageElement.style.bottom = '8px';
+        }
+      }
+
+      function hideMessage()
+      {
+        let messageElement = document.getElementById("message");
+        messageElement.innerHTML = '';
+        messageElement.style.visibility = "hidden";
+      }
+
+      function easeOutExpo(x)
+      {
+        return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+      }
+
+      function easeInExpo(x)
+      {
+        return x === 0 ? 0 : Math.pow(2, 10 * x - 10);
+      }
+
+      function lerp(a, b, t)
+      {
+        return a + t * (b - a);
+      }
+    </script>
   </head>
   <body>
-    <div>
-      <header>
-        <div class="title">Cella</div>
-        <div class="subtitle">A minimalistic systems programming language</div>
-      </header>
-      <br/><br/>
-      <main>
-        <div class="subtitle">Hello World:</div>
-        <div class="code-block">
-          <div style="display: table-row">
-            <pre class="line-number-section code">  1
+    <div class="wrapper">
+      <div class="sidebar">
+        <div class="sidebar-content">
+          <p class="subtitle">Cella</p>
+          <ul>
+            <li><a class="current" href="index.html">Home</a></li>
+            <li><a>About</a></li>
+            <li><a>Documentation</a></li>
+            <li><a href="https://github.com/Anixias/Cella" target="_blank">Source</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="main">
+        <div class="main-content">
+          <header>
+            <div class="title">Cella</div>
+            <div class="subtitle">A minimalistic systems programming language</div>
+          </header>
+          <br/><br/>
+          <main>
+            <div class="subtitle">Hello World:</div>
+            <div class="code-block">
+              <img class="copy-button tooltip" onclick="copyText('helloWorld')" src="img/copy.svg">
+              <span class="tooltiptext">Copy Code</span>
+              <div style="display: table-row">
+                <pre class="line-number-section code">  1
 2
 3
 4
@@ -24,7 +144,7 @@
 6
 7
 8
-9</pre><pre class="code-section code"><span class="cella-keyword">mod</span> <span class="cella-module">helloWorld</span>
+9</pre><pre class="code-section code" id="helloWorld"><span class="cella-keyword">mod</span> <span class="cella-module">helloWorld</span>
 
 <span class="cella-keyword">use</span> <span class="cella-module">std</span>.<span class="cella-module">io</span>.<span class="cella-type">Console</span>
 
@@ -33,9 +153,12 @@
 &Tab;<span class="cella-type">Console</span>.<span class="cella-function">println</span>(<span class="cella-literal">"Hello, World!"</span>)
 &Tab;<span class="cella-keyword">ret</span> <span class="cella-literal">0</span>
 }</pre>
-          </div>
+              </div>
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
     </div>
+    <div id="message"></div>
   </body>
 </html>

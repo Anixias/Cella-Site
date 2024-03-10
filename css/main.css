@@ -24,6 +24,9 @@
 
 :root {
   --font-mono: 'DMMono', monospace;
+  --text-color: #f4f4ec;
+  --text-color-faded: #313a4d;
+  --shadow-color: rgba(0, 0, 0, 0.4);
 
   font-size: 28px;
   font-family: 'Madimi One', sans-serif;
@@ -33,23 +36,83 @@
 html, body {
   height: 100%;
   width: auto;
+  margin: 0px;
 }
 
 html {
-  color: #f4f4ec;
+  color: var(--text-color);
   -webkit-font-smoothing: antialiased;
-}
-
-body {
-  margin: 28px;
 }
 
 pre {
   margin: 0px;
 }
 
+ul {
+  margin: 0px;
+  list-style-type: none;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+li {
+  padding: 2px 0px;
+}
+
+a {
+  text-decoration: none;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+a:visited {
+  color: var(--text-color);
+}
+
+a:link {
+  color: var(--text-color);
+}
+
+a:hover {
+  color: var(--text-color) !important;
+  background-color: var(--text-color-faded);
+}
+
+a.current {
+  color: var(--text-color-faded);
+}
+
+.wrapper {
+  display: flex;
+}
+
+.main {
+  /* todo */
+}
+
+.main-content {
+  margin: 28px;
+  height: 500vh;
+}
+
+.sidebar {
+  border-right: 1px solid #313a4d;
+  border-radius: 8px;
+  height: 100vh;
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  background: #11161f;
+  filter: drop-shadow(var(--shadow-color) 4px 4px 4px);
+}
+
+.sidebar-content {
+  margin: 8px;
+}
+
 .code {
   font-family: var(--font-mono);
+  font-size: 20px;
   tab-size: 4;
   -o-tab-size: 4;
   -moz-tab-size: 4;
@@ -58,24 +121,28 @@ pre {
 
 .title {
   font-size: 64px;
+  margin: 0px;
 }
 
 .subtitle {
   font-size: 42px;
+  margin: 0px;
 }
 
 .code-block {
-  border-color: #313a4d;
+  border-color: var(--text-color-faded);
   border-width: 1px;
   border-style: solid;
   border-radius: 8px;
   padding: 8px;
+  background: #11161f;
+  filter: drop-shadow(var(--shadow-color) 4px 4px 4px);
 }
 
 .line-number-section {
   user-select: none;
   display: table-cell;
-  color: #313a4d;
+  color: var(--text-color-faded);
   text-align: right;
   padding-right: 8px;
 }
@@ -83,9 +150,69 @@ pre {
 .code-section {
   display: table-cell;
   padding-left: 12px;
-  border-left-color: #313a4d;
+  border-left-color: var(--text-color-faded);
   border-left-width: 3px;
   border-left-style: solid;
+}
+
+#message {
+  position: sticky;
+  position: -webkit-sticky;
+  width: fit-content;
+  text-align: center;
+  margin: 0 auto;
+  bottom: -32px;
+  font-size: 24px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background-color: var(--text-color-faded);
+  visibility: hidden;
+}
+
+.tooltip + .tooltiptext {
+  font-size: 16px;
+  display: inline-block;
+  visibility: hidden;
+  text-align: center;
+  padding: 5px;
+  border-radius: 4px;
+  background-color: var(--text-color-faded);
+
+  position: absolute;
+  top: 8px;
+  right: 48px;
+  z-index: 1;
+}
+
+.tooltip:hover + .tooltiptext {
+  visibility: visible;
+}
+
+.tooltip + .tooltiptext::after {
+  content: " ";
+  position: absolute;
+  top: 50%;
+  left: 100%; /* To the right of the tooltip */
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent transparent var(--text-color-faded);
+}
+
+.copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  border-radius: 8px;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.copy-button:hover {
+  background-color: var(--text-color-faded);
 }
 
 .cella-keyword {
@@ -106,7 +233,7 @@ pre {
 
 .cella-comment {
   font-style: italic;
-  color: #313a4d;
+  color: var(--text-color-faded);
 }
 
 .cella-parameter {
