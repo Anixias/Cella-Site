@@ -91,6 +91,7 @@ a.current {
 
 .main {
   margin-left: calc(max(var(--sidebar-width), var(--sidebar-min-width)));
+  width: 100%;
 }
 
 .main-content {
@@ -139,6 +140,8 @@ a.current {
   padding: 8px;
   background: #11161f;
   filter: drop-shadow(var(--shadow-color) 4px 4px 4px);
+  width: 70%;
+  min-width: 800px;
 }
 
 .line-number-section {
