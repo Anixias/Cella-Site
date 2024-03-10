@@ -27,7 +27,7 @@
   --text-color: #f4f4ec;
   --text-color-faded: #313a4d;
   --shadow-color: rgba(0, 0, 0, 0.4);
-  --sidebar-width: 20%;
+  --sidebar-width: 15%;
   --sidebar-min-width: 250px;
 
   font-size: 24px;
@@ -232,7 +232,7 @@ a.current {
 }
 
 .cella-function {
-  color: #ff61ba;
+  color: #ff7ac6;
 }
 
 .cella-literal {
@@ -250,4 +250,8 @@ a.current {
 
 .cella-module {
   color: #95ffa1;
+}
+
+.cella-effect {
+  color: #af84ff;
 }

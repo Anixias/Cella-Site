@@ -38,7 +38,7 @@
         messageStartTime = Date.now();
         if (!messageTimer)
         {
-          messageTimer = setInterval(processMessage, 10);
+          messageTimer = setInterval(processMessage, 1);
         }
       }
 
@@ -56,8 +56,8 @@
         let progress = elapsed / messageDuration;
         let messageElement = document.getElementById("message");
 
-        const inThreshold = 0.1;
-        const outThreshold = 0.1;
+        const inThreshold = 0.15;
+        const outThreshold = 0.15;
         const outStart = 1 - outThreshold;
 
         const bottomOffsetIn = 8;
@@ -67,7 +67,7 @@
         if (progress <= inThreshold)
         {
           let animProgress = progress / inThreshold;
-          let value = easeOutExpo(animProgress);
+          let value = easeInOutQuint(animProgress);
           messageElement.style.opacity = (value * 100.0).toString() + '%';
           messageElement.style.bottom = lerp(bottomOffsetOut, bottomOffsetIn, value).toString() + 'px';
         }
@@ -75,7 +75,7 @@
         else if (progress >= 1 - outThreshold)
         {
           let animProgress = (progress - outStart) / outThreshold;
-          let value = easeInExpo(animProgress);
+          let value = easeInOutQuint(animProgress);
           messageElement.style.opacity = ((1 - value) * 100.0).toString() + '%';
           messageElement.style.bottom = lerp(bottomOffsetIn, bottomOffsetOut, value).toString() + 'px';
         }
@@ -94,14 +94,9 @@
         messageElement.style.visibility = "hidden";
       }
 
-      function easeOutExpo(x)
+      function easeInOutQuint(x)
       {
-        return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
-      }
-
-      function easeInExpo(x)
-      {
-        return x === 0 ? 0 : Math.pow(2, 10 * x - 10);
+        return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2;
       }
 
       function lerp(a, b, t)
@@ -148,7 +143,7 @@
 
 <span class="cella-keyword">use</span> <span class="cella-module">std</span>.<span class="cella-module">io</span>.<span class="cella-type">Console</span>
 
-<span class="cella-function">main</span>: <span class="cella-keyword">entry</span>(<span class="cella-parameter">args</span>: <span class="cella-type">String[]</span>): <span class="cella-type">Int32</span>
+<span class="cella-function">main</span>: <span class="cella-keyword">entry</span>(<span class="cella-parameter">args</span>: <span class="cella-type">String[]</span>): !{<span class="cella-effect">io</span>} <span class="cella-type">Int32</span>
 {
 &Tab;<span class="cella-type">Console</span>.<span class="cella-function">println</span>(<span class="cella-literal">"Hello, World!"</span>)
 &Tab;<span class="cella-keyword">ret</span> <span class="cella-literal">0</span>
