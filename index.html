@@ -3,11 +3,71 @@
   <head>
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
     <title>Cella Programming Language</title>
-    <link rel="stylesheet" href="css/main.css?v=1.7">
+    <link rel="stylesheet" href="css/main.css?v=1.8">
     <script type="text/javascript">
       const messageDuration = 2000;
       var messageStartTime = 0;
       var messageTimer = null;
+      var isLightMode = false;
+
+      window.onload = function()
+      {
+        loadTheme();
+      }
+
+      function loadTheme()
+      {
+        var theme = window.localStorage.getItem("theme");
+        if (!theme)
+        {
+          // Detect system theme, then store it
+          const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+          if (darkThemeMq.matches)
+          {
+            theme = "dark";
+          }
+          else
+          {
+            theme = "light";
+          }
+        }
+
+        if (theme === "light" && !isLightMode)
+        {
+          toggleTheme();
+        }
+        else
+        {
+          storeTheme();
+        }
+      }
+
+      function storeTheme()
+      {
+        window.localStorage.setItem("theme", isLightMode ? "light" : "dark");
+      }
+
+      function toggleTheme()
+      {
+        var element = document.body;
+        element.classList.toggle("light-mode");
+        isLightMode = element.classList.contains("light-mode");
+
+        var themeButton = document.getElementById("theme-button");
+        if (themeButton)
+        {
+          themeButton.src = isLightMode ? "img/moon.svg" : "img/sun.svg";
+        }
+
+        var allCopyImgs = document.getElementsByClassName("copy-button");
+        for (var i = 0; i < allCopyImgs.length; i++)
+        {
+          var img = allCopyImgs[i];
+          img.src = isLightMode ? "img/copy-dark.svg" : "img/copy.svg";
+        }
+
+        storeTheme();
+      }
 
       function copyText(elementId)
       {
@@ -116,6 +176,7 @@
             <li><a>Documentation</a></li>
             <li><a href="https://github.com/Anixias/Cella" target="_blank">Source</a></li>
           </ul>
+          <img id="theme-button" class="icon-button" onclick="toggleTheme()" src="img/sun.svg">
         </div>
       </div>
       <div class="main">
@@ -128,7 +189,7 @@
           <main>
             <div class="subtitle">Hello World:</div>
             <div class="code-block">
-              <img class="copy-button tooltip" onclick="copyText('helloWorld')" src="img/copy.svg">
+              <img class="copy-button icon-button tooltip" onclick="copyText('helloWorld')" src="img/copy.svg">
               <span class="tooltiptext">Copy Code</span>
               <div style="display: table-row">
                 <pre class="line-number-section code">  1

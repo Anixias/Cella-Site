@@ -24,15 +24,35 @@
 
 :root {
   --font-mono: 'DMMono', monospace;
-  --text-color: #f4f4ec;
-  --text-color-faded: #313a4d;
-  --shadow-color: rgba(0, 0, 0, 0.4);
   --sidebar-width: 15%;
   --sidebar-min-width: 250px;
+  --shadow-color: rgba(0, 0, 0, 0.4);
+  --text-color: #f4f4ec;
+  --text-color-faded: #3e485d;
+  --background-color: #181c26;
+  --code-block-background-color: #11161f;
+  --code-teal: #5ce0fa;
+  --code-pink: #ff7ac6;
+  --code-green: #95ffa1;
+  --code-yellow: #ffea61;
+  --code-orange: #ffc595;
+  --code-purple: #af84ff;
 
   font-size: 24px;
   font-family: 'Madimi One', sans-serif;
-  background: #11161f;
+}
+
+.light-mode {
+  --text-color: #000000;
+  --text-color-faded: #9ca7c1;
+  --background-color: #ffffff;
+  --code-block-background-color: #f4f4ec;
+  --code-teal: #1e8094;
+  --code-pink: #ad397b;
+  --code-green: #339b3f;
+  --code-yellow: #a89413;
+  --code-orange: #b1682c;
+  --code-purple: #5a34a2;
 }
 
 html, body {
@@ -42,8 +62,12 @@ html, body {
 }
 
 html {
-  color: var(--text-color);
   -webkit-font-smoothing: antialiased;
+}
+
+body {
+  color: var(--text-color);
+  background: var(--background-color);
 }
 
 pre {
@@ -99,13 +123,13 @@ a.current {
 }
 
 .sidebar {
-  border-right: 1px solid #313a4d;
+  border-right: 1px solid var(--text-color-faded);
   border-radius: 8px;
   height: 100vh;
   width: var(--sidebar-width);
   min-width: var(--sidebar-min-width);
   position: fixed;
-  background: #11161f;
+  background: var(--background-color);
   filter: drop-shadow(var(--shadow-color) 4px 4px 4px);
 }
 
@@ -138,7 +162,7 @@ a.current {
   border-style: solid;
   border-radius: 8px;
   padding: 8px;
-  background: #11161f;
+  background: var(--code-block-background-color);
   filter: drop-shadow(var(--shadow-color) 4px 4px 4px);
   width: 70%;
   min-width: 800px;
@@ -220,12 +244,23 @@ a.current {
   cursor: pointer;
 }
 
-.copy-button:hover {
+#theme-button {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.icon-button:hover {
   background-color: var(--text-color-faded);
 }
 
 .cella-keyword {
-  color: #5ce0fa;
+  color: var(--code-teal);
 }
 
 .cella-type {
@@ -233,11 +268,11 @@ a.current {
 }
 
 .cella-function {
-  color: #ff7ac6;
+  color: var(--code-pink);
 }
 
 .cella-literal {
-  color: #ffea61;
+  color: var(--code-yellow);
 }
 
 .cella-comment {
@@ -246,13 +281,13 @@ a.current {
 }
 
 .cella-parameter {
-  color: #ffc595;
+  color: var(--code-orange);
 }
 
 .cella-module {
-  color: #95ffa1;
+  color: var(--code-green);
 }
 
 .cella-effect {
-  color: #af84ff;
+  color: var(--code-purple);
 }
