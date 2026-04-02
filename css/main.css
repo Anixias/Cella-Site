@@ -1,17 +1,19 @@
 @font-face {
-  font-family: 'DMMono';
+  font-family: 'CascadiaCode';
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
-  src: url("../fonts/DMMono-Regular.ttf") format("truetype");
+  font-variant-ligatures: normal;
+  src: url("../fonts/CascadiaCode-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
-  font-family: 'DMMono';
+  font-family: 'CascadiaCode';
   font-style: italic;
   font-weight: normal;
   font-variant: normal;
-  src: url("../fonts/DMMono-Italic.ttf") format("truetype");
+  font-variant-ligatures: normal;
+  src: url("../fonts/CascadiaCode-Italic-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
@@ -19,11 +21,12 @@
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
+  font-variant-ligatures: normal;
   src: url("../fonts/MadimiOne-Regular.ttf") format("truetype");
 }
 
 :root {
-  --font-mono: 'DMMono', monospace;
+  --font-mono: 'CascadiaCode', monospace;
   --sidebar-width: 15%;
   --sidebar-min-width: 250px;
   --shadow-color: rgba(0, 0, 0, 0.4);
