@@ -159,6 +159,17 @@ a.current {
   margin: 0px;
 }
 
+.description {
+  font-size: 20px;
+  line-height: 1.5;
+  width: 70%;
+  min-width: 800px;
+}
+
+code {
+  font-family: var(--font-mono);
+}
+
 .code-block {
   border-color: var(--text-color-faded);
   border-width: 1px;
@@ -289,8 +300,4 @@ a.current {
 
 .cella-module {
   color: var(--code-green);
-}
-
-.cella-effect {
-  color: var(--code-purple);
 }
