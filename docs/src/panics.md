@@ -374,6 +374,36 @@ Panic at main.ce:8:36: configuration missing
 
 The location here is inside `fail`, since that is where the `panic` is.
 
+The message is optional. A `panic` on its own stops the program with only the location:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+half: fun(value: i32) -> i32
+{
+	if value % 2 != 0
+		panic
+
+	ret value / 2
+}
+
+main: fun
+{
+	printf("%d\n", half(8))
+	printf("%d\n", half(7))
+}
+```
+
+```output
+4
+Panic at main.ce:11:3
+```
+
 ### `panic` and `never`
 
 A `panic` expression never produces a value, and its type is `never`. A path that reaches it ends there, like `ret`, so it can end a function that returns a value, or fill a `match` arm of any type:
@@ -436,7 +466,12 @@ main: fun
 
 ## Declaring a panic operator
 
-What a panic does is decided by a `panic` operator, declared at the top level of a module as `panic: op(message: str, location: str) -> never`. It takes the message and the location, a `str` such as `main.ce:11:3` that gives the file's path in its project, the line and the column, and it must never return. Built-in checks call it with their fixed messages, and `panic expr` calls it with `expr`.
+What a panic does is decided by `panic` operators, declared at the top level of a module in one of two forms:
+
+- `panic: op(message: str, location: str) -> never` takes a message and the location.
+- `panic: op(location: str) -> never` takes only the location.
+
+The location is a `str` such as `main.ce:11:3` that gives the file's path in its project, the line and the column. Neither form may return. `panic expr` calls the form with a message, passing `expr`, and a bare `panic` calls the form without one. Built-in checks call the form with a message, passing their fixed messages, or the location-only form when it's the only one. A module can declare both, as the standard library does: they are overloads of one operator.
 
 A project that doesn't use the standard library can declare its own. This one prints the panic to standard output and exits with code 3:
 
@@ -478,7 +513,7 @@ stopped at main.ce:20:18: index out of bounds
 
 A panic operator can use `when debug` and `when release` to behave differently in each build, for example exiting with a code in debug builds and crashing in release builds.
 
-The operator must have exactly a message and a `str` location, and must return `never`. The message's type is the operator's choice, but it must accept a `str`, since the built-in checks pass their messages as `str`:
+Each form must end with a `str` location and return `never`. The message's type is the operator's choice, but it must accept a `str`, since the built-in checks pass their messages as `str`:
 
 ```cella error
 ~ mod example
@@ -502,7 +537,7 @@ main: fun
 ```cella error
 ~ mod example
 ~
-panic: op(message: str) -> never
+panic: op -> never
 {
 	loop
 	{
@@ -515,7 +550,7 @@ main: fun
 ```
 
 ```errors
-'panic' operators need two parameters
+'panic' operators need one or two parameters
 ```
 
 ```cella error
@@ -551,7 +586,7 @@ main: fun
 'panic' operators must return 'never'
 ```
 
-A `panic` operator belongs to a module, not to a type, and a module has at most one:
+A `panic` operator belongs to a module, not to a type:
 
 ```cella error
 ~ mod example
@@ -629,6 +664,33 @@ stopped: 42
 ```
 
 Traits and `impl` blocks are covered in [Traits](traits.md).
+
+A message needs the form that takes one. Where only the location-only form is visible, `panic` with a message is an error:
+
+```celp group=location
+OutputType = "Executable"
+StandardLibrary = "None"
+```
+
+```cella error group=location
+~ mod example
+~
+panic: op(location: str) -> never
+{
+	loop
+	{
+	}
+}
+
+main: fun
+{
+	panic "stopped"
+}
+```
+
+```errors group=location
+'panic' doesn't accept a message
+```
 
 ## Which panic a file uses
 
@@ -752,4 +814,4 @@ main: fun
 'panic' is ambiguous
 ```
 
-When no `panic` is visible at all, as in a project without the standard library that declares none, failed checks still stop the program, but with no message: the program crashes at the failed check.
+When no `panic` is visible at all, as in a project without the standard library that declares none, failed checks still stop the program, but with no message: the program crashes at the failed check. A bare `panic` crashes the same way, and so does one when the only visible `panic` takes a message. With no `panic` visible, there is nowhere for a message to go, so `panic` with a message is an error there too: "'panic' doesn't accept a message".
