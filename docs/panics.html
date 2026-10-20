@@ -37,7 +37,7 @@ try {
 <p>Some mistakes can't be found until a program runs: an index past the end of an array, a sum too large for its type, a division by zero. Cella checks for these as the program runs, and when a check fails, the program panics: it stops with a message that says what went wrong and where. A program can also panic on purpose with a <code>panic</code> expression. What a panic does is decided by a <code>panic</code> operator that a library or the program itself declares.</p>
 <h2 id="what-a-panic-looks-like"><a class="anchor" href="#what-a-panic-looks-like">What a panic looks like</a></h2>
 <p>This program reads past the end of an array:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-1"></button><textarea hidden id="copy-1">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-852"></button><textarea hidden id="copy-852">mod example
 
 ext
 {
@@ -62,7 +62,7 @@ Panic at main.ce:11:6: index out of bounds</pre></div>
 <p>The panic in this program comes from the standard library, which every project uses unless its <code>StandardLibrary</code> setting is <code>"Core"</code> or <code>"None"</code>. Its <code>panic</code> first flushes output the program has buffered, such as <code>printf</code>'s, then writes <code>Panic at</code>, the location and the message to standard error, and then ends the program as a crash, so the operating system's crash handling and an attached debugger see it.</p>
 <h2 id="checks-at-compile-time"><a class="anchor" href="#checks-at-compile-time">Checks at compile time</a></h2>
 <p>When the compiler can see that a check would fail, it reports an error instead of building a program that panics. This happens when the values involved are constants:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-2"></button><textarea hidden id="copy-2">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-853"></button><textarea hidden id="copy-853">mod example
 
 Code: enum
 {
@@ -85,7 +85,7 @@ main: fun
 <p>Bounds checks are on in every build. Overflow checks are on in debug builds and off in release builds. Both can be changed in the project's settings, as <a href="#turning-checks-on-and-off">described below</a>.</p>
 <h3 id="bounds-checks"><a class="anchor" href="#bounds-checks">Bounds checks</a></h3>
 <p>Every index into an array or a <code>str</code> is checked against its length. Indexing a <code>str</code> reads a byte:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-3"></button><textarea hidden id="copy-3">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-854"></button><textarea hidden id="copy-854">mod example
 
 ext
 {
@@ -105,7 +105,7 @@ Panic at main.ce:8:47: index out of bounds</pre></div>
 <h3 id="overflow-checks"><a class="anchor" href="#overflow-checks">Overflow checks</a></h3>
 <p>With overflow checks on, integer arithmetic whose result doesn't fit in its type panics instead of wrapping around, and so does a conversion <code>T(x)</code> whose value doesn't fit in the new type. <a href="numbers.html#overflow">Numbers</a> shows both, along with the wrapping operators <code>+%</code>, <code>-%</code> and <code>*%</code>, which never panic.</p>
 <p>Negating the smallest value of a signed type has no result that fits, so it panics too:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-4"></button><textarea hidden id="copy-4">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-855"></button><textarea hidden id="copy-855">mod example
 
 ext
 {
@@ -122,7 +122,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>127
 Panic at main.ce:8:32: negation overflow</pre></div>
 <p><code>char</code> holds a Unicode code point, so arithmetic that leaves the range of code points is <code>char overflow</code>, and converting an integer that isn't a code point to <code>char</code> is <code>conversion overflow</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-5"></button><textarea hidden id="copy-5">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-856"></button><textarea hidden id="copy-856">mod example
 
 ext
 {
@@ -143,7 +143,7 @@ Panic at main.ce:8:46: char overflow</pre></div>
 <p>Integer division and remainder by zero panic with <code>division by zero</code>, and dividing the smallest value of a signed type by <code>-1</code> panics with <code>division overflow</code>. Both checks run in every build. Float division by zero doesn't panic; it gives an infinity or a NaN. <a href="numbers.html#division-by-zero">Numbers</a> has an example.</p>
 <h3 id="enum-checks"><a class="anchor" href="#enum-checks">Enum checks</a></h3>
 <p>Converting an integer to an enum checks that some case has that value:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-6"></button><textarea hidden id="copy-6">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-857"></button><textarea hidden id="copy-857">mod example
 
 ext
 {
@@ -167,7 +167,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>2
 Panic at main.ce:15:38: 'Level' has no case with this value</pre></div>
 <p>A tagless enum (<code>enum match</code>) case lists the values it covers, and creating the case with any other value panics:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-7"></button><textarea hidden id="copy-7">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-858"></button><textarea hidden id="copy-858">mod example
 
 ext
 {
@@ -197,7 +197,7 @@ Panic at main.ce:15:37: 'Digit.odd' can't hold this value</pre></div>
 <div class="table-wrap"><table><thead><tr><th>Setting</th><th>Default</th><th>Controls</th></tr></thead><tbody><tr><td><code>BoundsChecks</code></td><td><code>true</code></td><td>index checks</td></tr><tr><td><code>OverflowChecks</code></td><td><code>true</code> in debug builds, <code>false</code> in release builds</td><td>arithmetic, negation, conversion and <code>char</code> checks</td></tr></tbody></table></div>
 <p>Division and enum checks don't depend on either setting.</p>
 <p>With overflow checks off, integer arithmetic wraps around, integer conversions keep the low bits, float conversions saturate to the smallest or largest value of the type, and <code>char</code> values aren't checked. Built with <code>cella build --release</code>, this program wraps where a debug build would panic, but still stops at the division by zero:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-8"></button><textarea hidden id="copy-8">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-859"></button><textarea hidden id="copy-859">mod example
 
 ext
 {
@@ -217,9 +217,9 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>0 44 2147483647
 Panic at main.ce:11:47: division by zero</pre></div>
 <p>The setting overrides the build's default. This project turns overflow checks off in every build, debug builds included:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-9"></button><textarea hidden id="copy-9">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-860"></button><textarea hidden id="copy-860">OutputType = &quot;Executable&quot;
 OverflowChecks = false</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">OverflowChecks </span>= <span class="c-literal">false</span></span></code></pre></div>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-10"></button><textarea hidden id="copy-10">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-861"></button><textarea hidden id="copy-861">mod example
 
 ext
 {
@@ -239,7 +239,7 @@ main: fun
 <p>Each setting applies to the code of the project that sets it, so a library keeps its own checks whatever the program that uses it chooses. Code can test the same settings with the <code>boundsChecks</code> and <code>overflowChecks</code> flags in a <code>when</code> block; see <a href="conditional-compilation.html#built-in-flags">Conditional compilation</a>.</p>
 <h2 id="panicking-on-purpose"><a class="anchor" href="#panicking-on-purpose">Panicking on purpose</a></h2>
 <p><code>panic</code> followed by a message stops the program the same way a failed check does:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-11"></button><textarea hidden id="copy-11">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-862"></button><textarea hidden id="copy-862">mod example
 
 ext
 {
@@ -262,7 +262,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>7
 Panic at main.ce:11:3: not a digit</pre></div>
 <p><code>panic</code> is a keyword, not a function, so the message follows it without parentheses. The location in the message is where the <code>panic</code> is written. With the standard library's <code>panic</code>, the message is a <code>str</code>, and any <code>str</code> value works, not only a literal:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-12"></button><textarea hidden id="copy-12">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-863"></button><textarea hidden id="copy-863">mod example
 
 ext
 {
@@ -280,7 +280,7 @@ main: fun
 Panic at main.ce:8:36: configuration missing</pre></div>
 <p>The location here is inside <code>fail</code>, since that is where the <code>panic</code> is.</p>
 <p>The message is optional. A <code>panic</code> on its own stops the program with only the location:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-13"></button><textarea hidden id="copy-13">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-864"></button><textarea hidden id="copy-864">mod example
 
 ext
 {
@@ -304,7 +304,7 @@ main: fun
 Panic at main.ce:11:3</pre></div>
 <h3 id="panic-and-never"><a class="anchor" href="#panic-and-never"><code>panic</code> and <code>never</code></a></h3>
 <p>A <code>panic</code> expression never produces a value, and its type is <code>never</code>. A path that reaches it ends there, like <code>ret</code>, so it can end a function that returns a value, or fill a <code>match</code> arm of any type:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-14"></button><textarea hidden id="copy-14">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-865"></button><textarea hidden id="copy-865">mod example
 
 ext
 {
@@ -333,7 +333,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>4
 Panic at main.ce:19:12: a circle has no corners</pre></div>
 <p>A function that always panics, like <code>fail</code> above, is declared <code>-&gt; never</code>. Calls to it end their path the same way. Its body must not return or reach its end:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-15"></button><textarea hidden id="copy-15">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-866"></button><textarea hidden id="copy-866">mod example
 
 stop: fun(code: i32) -&gt; never
 {
@@ -350,9 +350,9 @@ main: fun
 <ul><li><code>panic: op(message: str, location: str) -&gt; never</code> takes a message and the location.</li><li><code>panic: op(location: str) -&gt; never</code> takes only the location.</li></ul>
 <p>The location is a <code>str</code> such as <code>main.ce:11:3</code> that gives the file's path in its project, the line and the column. Neither form may return. <code>panic expr</code> calls the form with a message, passing <code>expr</code>, and a bare <code>panic</code> calls the form without one. Built-in checks call the form with a message, passing their fixed messages, or the location-only form when it's the only one. A module can declare both, as the standard library does: they are overloads of one operator.</p>
 <p>A project that doesn't use the standard library can declare its own. This one prints the panic to standard output and exits with code 3:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-16"></button><textarea hidden id="copy-16">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-867"></button><textarea hidden id="copy-867">OutputType = &quot;Executable&quot;
 StandardLibrary = &quot;None&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">StandardLibrary </span>= <span class="c-literal">"None"</span></span></code></pre></div>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-17"></button><textarea hidden id="copy-17">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-868"></button><textarea hidden id="copy-868">mod example
 
 ext
 {
@@ -379,7 +379,7 @@ main: fun
 stopped at main.ce:20:18: index out of bounds</pre></div>
 <p>A panic operator can use <code>when debug</code> and <code>when release</code> to behave differently in each build, for example exiting with a code in debug builds and crashing in release builds.</p>
 <p>Each form must end with a <code>str</code> location and return <code>never</code>. The message's type is the operator's choice, but it must accept a <code>str</code>, since the built-in checks pass their messages as <code>str</code>:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-18"></button><textarea hidden id="copy-18">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-869"></button><textarea hidden id="copy-869">mod example
 
 panic: op(message: i32, location: str) -&gt; never
 {
@@ -391,7 +391,7 @@ panic: op(message: i32, location: str) -&gt; never
 main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">panic</span>: <span class="c-keyword">op</span>(<span class="c-parameter">message</span>: <span class="c-type">i32</span>, <span class="c-parameter">location</span>: <span class="c-type">str</span>) -&gt; never</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:10ch">&#x27;panic&#x27; operators need a message that accepts &#x27;str&#x27;</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">loop</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-19"></button><textarea hidden id="copy-19">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-870"></button><textarea hidden id="copy-870">mod example
 
 panic: op -&gt; never
 {
@@ -403,7 +403,7 @@ panic: op -&gt; never
 main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">panic</span>: <span class="c-keyword">op</span> -&gt; never</span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;panic&#x27; operators need one or two parameters</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">loop</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-20"></button><textarea hidden id="copy-20">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-871"></button><textarea hidden id="copy-871">mod example
 
 panic: op(message: str, location: i32) -&gt; never
 {
@@ -415,7 +415,7 @@ panic: op(message: str, location: i32) -&gt; never
 main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">panic</span>: <span class="c-keyword">op</span>(<span class="c-parameter">message</span>: <span class="c-type">str</span>, <span class="c-parameter">location</span>: <span class="c-type">i32</span>) -&gt; never</span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:24ch">&#x27;panic&#x27; operators need a &#x27;str&#x27; location</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">loop</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-21"></button><textarea hidden id="copy-21">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-872"></button><textarea hidden id="copy-872">mod example
 
 panic: op(message: str, location: str) -&gt; i32 =&gt; 0
 
@@ -423,7 +423,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">panic</span>: <span class="c-keyword">op</span>(<span class="c-parameter">message</span>: <span class="c-type">str</span>, <span class="c-parameter">location</span>: <span class="c-type">str</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:42ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:42ch">&#x27;panic&#x27; operators must return &#x27;never&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>A <code>panic</code> operator belongs to a module, not to a type:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-22"></button><textarea hidden id="copy-22">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-873"></button><textarea hidden id="copy-873">mod example
 
 Buffer: rec
 {
@@ -441,7 +441,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">size</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">panic</span>: <span class="c-keyword">op</span>(<span class="c-parameter">message</span>: <span class="c-type">str</span>, <span class="c-parameter">location</span>: <span class="c-type">str</span>) -&gt; never</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare &#x27;panic&#x27; operators in types</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">loop</span></span><span class="line">		{</span><span class="line">		}</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>A message type other than <code>str</code> lets <code>panic</code> take other values. Here the operator is generic over any type with a <code>print</code> method, so <code>panic 42</code> works:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-23"></button><textarea hidden id="copy-23">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-874"></button><textarea hidden id="copy-874">mod example
 
 ext
 {
@@ -477,15 +477,15 @@ main: fun
 	printf(&quot;start\n&quot;)
 	panic 42
 }</textarea><pre><code><span class="line"><span class="c-trait">Print</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">print</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">str</span>: <span class="c-keyword">impl</span> <span class="c-trait">Print</span></span><span class="line">{</span><span class="line">	<span class="c-function">print</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%.*s"</span>, <span class="c-type">i32</span>(<span class="c-keyword">self</span>.<span class="c-field">byteLength</span>), <span class="c-keyword">self</span>.<span class="c-field">data</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span> <span class="c-trait">Print</span></span><span class="line">{</span><span class="line">	<span class="c-function">print</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%d"</span>, <span class="c-keyword">self</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">panic</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Print</span>]: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-parameter">message</span>: <span class="c-typeparam">T</span>, <span class="c-parameter">location</span>: <span class="c-type">str</span>) -&gt; never</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"stopped: "</span>)</span><span class="line">	<span class="c-parameter">message</span>.<span class="c-function">print</span>()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"\n"</span>)</span><span class="line">	<span class="c-function">exit</span>(<span class="c-literal">4</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"start\n"</span>)</span><span class="line">	<span class="c-function">panic</span> <span class="c-literal">42</span></span><span class="line">}</span></code></pre></div>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-24"></button><textarea hidden id="copy-24">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-875"></button><textarea hidden id="copy-875">OutputType = &quot;Executable&quot;
 StandardLibrary = &quot;None&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">StandardLibrary </span>= <span class="c-literal">"None"</span></span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>start
 stopped: 42</pre></div>
 <p>Traits and <code>impl</code> blocks are covered in <a href="traits.html">Traits</a>.</p>
 <p>A message needs the form that takes one. Where only the location-only form is visible, <code>panic</code> with a message is an error:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-25"></button><textarea hidden id="copy-25">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-876"></button><textarea hidden id="copy-876">OutputType = &quot;Executable&quot;
 StandardLibrary = &quot;None&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">StandardLibrary </span>= <span class="c-literal">"None"</span></span></code></pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-26"></button><textarea hidden id="copy-26">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-877"></button><textarea hidden id="copy-877">mod example
 
 panic: op(location: str) -&gt; never
 {
@@ -501,15 +501,15 @@ main: fun
 <h2 id="which-panic-a-file-uses"><a class="anchor" href="#which-panic-a-file-uses">Which panic a file uses</a></h2>
 <p><code>panic</code> is an ordinary name, found like any other: a file uses the <code>panic</code> its module declares or that it imports. Built-in checks behave exactly like a <code>panic</code> written at the same spot, so they use the <code>panic</code> visible in the file where the checked code is written. A library's code keeps using its own <code>panic</code>, whichever program uses the library.</p>
 <p>The standard library's <code>panic</code> is visible in every file of a project that uses the whole standard library. A project can make a library's <code>panic</code> visible in all its files with the [<code>Imports</code> setting](modules.md#project-imports), which imports names into every file:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-27"></button><textarea hidden id="copy-27">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-878"></button><textarea hidden id="copy-878">OutputType = &quot;Executable&quot;
 StandardLibrary = &quot;None&quot;
 Imports = [&quot;fault.panic&quot;]
 
 [[ProjectReferences]]
 Path = &#x27;fault/fault.celp&#x27;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">StandardLibrary </span>= <span class="c-literal">"None"</span></span><span class="line"><span class="c-field">Imports </span>= [<span class="c-literal">"fault.panic"</span>]</span><span class="line"> </span><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">'fault/fault.celp'</span></span></code></pre></div>
-<div class="code toml"><div class="code-title">fault/fault.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-28"></button><textarea hidden id="copy-28">OutputType = &quot;StaticLibrary&quot;
+<div class="code toml"><div class="code-title">fault/fault.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-879"></button><textarea hidden id="copy-879">OutputType = &quot;StaticLibrary&quot;
 StandardLibrary = &quot;None&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span><span class="line"><span class="c-field">StandardLibrary </span>= <span class="c-literal">"None"</span></span></code></pre></div>
-<div class="code cella"><div class="code-title">fault/fault.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-29"></button><textarea hidden id="copy-29">mod fault
+<div class="code cella"><div class="code-title">fault/fault.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-880"></button><textarea hidden id="copy-880">mod fault
 
 ext
 {
@@ -523,7 +523,7 @@ panic: pub op(message: str, location: str) -&gt; never
 		message.data)
 	exit(9)
 }</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">fault</span></span><span class="line"> </span><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">format</span>: <span class="c-type">cstr</span>, ...) -&gt; <span class="c-type">i32</span></span><span class="line">	<span class="c-function">exit</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">code</span>: <span class="c-type">i32</span>) -&gt; never</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">panic</span>: <span class="c-keyword">pub</span> <span class="c-keyword">op</span>(<span class="c-parameter">message</span>: <span class="c-type">str</span>, <span class="c-parameter">location</span>: <span class="c-type">str</span>) -&gt; never</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"fault at %.*s: %.*s\n"</span>, <span class="c-type">i32</span>(<span class="c-parameter">location</span>.<span class="c-field">byteLength</span>), <span class="c-parameter">location</span>.<span class="c-field">data</span>, <span class="c-type">i32</span>(<span class="c-parameter">message</span>.<span class="c-field">byteLength</span>),</span><span class="line">		<span class="c-parameter">message</span>.<span class="c-field">data</span>)</span><span class="line">	<span class="c-function">exit</span>(<span class="c-literal">9</span>)</span><span class="line">}</span></code></pre></div>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-30"></button><textarea hidden id="copy-30">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-881"></button><textarea hidden id="copy-881">mod example
 
 ext
 {
@@ -541,7 +541,7 @@ main: fun
 fault at main.ce:8:39: division by zero</pre></div>
 <p>A <code>panic</code> can also be named through its module, as in <code>fault.panic "stopped"</code>, to use one that isn't imported.</p>
 <p>Two wildcard imports that both bring in a <code>panic</code> make it ambiguous. The compiler reports it at each of the imports, since the file's checks would have no single <code>panic</code> to use:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-31"></button><textarea hidden id="copy-31">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-882"></button><textarea hidden id="copy-882">OutputType = &quot;Executable&quot;
 StandardLibrary = &quot;None&quot;
 
 [[ProjectReferences]]
@@ -549,9 +549,9 @@ Path = &#x27;alpha/alpha.celp&#x27;
 
 [[ProjectReferences]]
 Path = &#x27;beta/beta.celp&#x27;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">StandardLibrary </span>= <span class="c-literal">"None"</span></span><span class="line"> </span><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">'alpha/alpha.celp'</span></span><span class="line"> </span><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">'beta/beta.celp'</span></span></code></pre></div>
-<div class="code toml"><div class="code-title">alpha/alpha.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-32"></button><textarea hidden id="copy-32">OutputType = &quot;StaticLibrary&quot;
+<div class="code toml"><div class="code-title">alpha/alpha.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-883"></button><textarea hidden id="copy-883">OutputType = &quot;StaticLibrary&quot;
 StandardLibrary = &quot;None&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span><span class="line"><span class="c-field">StandardLibrary </span>= <span class="c-literal">"None"</span></span></code></pre></div>
-<div class="code cella error"><div class="code-title">alpha/alpha.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-33"></button><textarea hidden id="copy-33">mod alpha
+<div class="code cella error"><div class="code-title">alpha/alpha.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-884"></button><textarea hidden id="copy-884">mod alpha
 
 panic: pub op(message: str, location: str) -&gt; never
 {
@@ -559,9 +559,9 @@ panic: pub op(message: str, location: str) -&gt; never
 	{
 	}
 }</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">alpha</span></span><span class="line"> </span><span class="line"><span class="c-function">panic</span>: <span class="c-keyword">pub</span> <span class="c-keyword">op</span>(<span class="c-parameter">message</span>: <span class="c-type">str</span>, <span class="c-parameter">location</span>: <span class="c-type">str</span>) -&gt; never</span><span class="line">{</span><span class="line">	<span class="c-keyword">loop</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
-<div class="code toml"><div class="code-title">beta/beta.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-34"></button><textarea hidden id="copy-34">OutputType = &quot;StaticLibrary&quot;
+<div class="code toml"><div class="code-title">beta/beta.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-885"></button><textarea hidden id="copy-885">OutputType = &quot;StaticLibrary&quot;
 StandardLibrary = &quot;None&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span><span class="line"><span class="c-field">StandardLibrary </span>= <span class="c-literal">"None"</span></span></code></pre></div>
-<div class="code cella error"><div class="code-title">beta/beta.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-35"></button><textarea hidden id="copy-35">mod beta
+<div class="code cella error"><div class="code-title">beta/beta.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-886"></button><textarea hidden id="copy-886">mod beta
 
 panic: pub op(message: str, location: str) -&gt; never
 {
@@ -569,7 +569,7 @@ panic: pub op(message: str, location: str) -&gt; never
 	{
 	}
 }</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">beta</span></span><span class="line"> </span><span class="line"><span class="c-function">panic</span>: <span class="c-keyword">pub</span> <span class="c-keyword">op</span>(<span class="c-parameter">message</span>: <span class="c-type">str</span>, <span class="c-parameter">location</span>: <span class="c-type">str</span>) -&gt; never</span><span class="line">{</span><span class="line">	<span class="c-keyword">loop</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-36"></button><textarea hidden id="copy-36">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-887"></button><textarea hidden id="copy-887">mod example
 
 use alpha.*
 use beta.*
