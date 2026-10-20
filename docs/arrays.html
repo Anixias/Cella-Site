@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arrays - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html" class="current"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Arrays</h1>
+<p>An array is a fixed number of values of one type, stored one after another. Its type is <code>array[T, N]</code>: the element type <code>T</code> and the length <code>N</code>, which is part of the type and known when the program compiles. Arrays live wherever the variable holding them lives, on the stack or inside a record, and never allocate.</p>
+<h2 id="array-literals"><a class="anchor" href="#array-literals">Array literals</a></h2>
+<p>An array literal lists its elements between brackets. Its type comes from the elements:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-228"></button><textarea hidden id="copy-228">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val primes = [2, 3, 5, 7]
+	val scores = [1.5, 2, 4.25]
+	printf(&quot;%d %f\n&quot;, primes[3], scores[1])
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> primes = [<span class="c-literal">2</span>, <span class="c-literal">3</span>, <span class="c-literal">5</span>, <span class="c-literal">7</span>]</span><span class="line">	<span class="c-keyword">val</span> scores = [<span class="c-literal">1.5</span>, <span class="c-literal">2</span>, <span class="c-literal">4.25</span>]</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %f\n"</span>, primes[<span class="c-literal">3</span>], scores[<span class="c-literal">1</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>7 2.000000</pre></div>
+<p><code>primes</code> is an <code>array[i32, 4]</code>. The elements of <code>scores</code> are an integer and two floats, so all three become <code>f64</code> and the array is an <code>array[f64, 3]</code>. Integer literals that don't fit in an <code>i32</code> make the elements a wider type, as they would in arithmetic.</p>
+<p>Elements that can't share one type are an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-229"></button><textarea hidden id="copy-229">mod example
+
+main: fun
+{
+	val mixed = [1, &quot;two&quot;]
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> mixed = [<span class="c-literal">1</span>, <span class="c-literal">"two"</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:16ch">The elements of this array have incompatible types: &#x27;i32&#x27;, &#x27;str&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h3 id="writing-the-type"><a class="anchor" href="#writing-the-type">Writing the type</a></h3>
+<p>A type on the declaration gives the elements their type, and the literal must have exactly that many elements:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-230"></button><textarea hidden id="copy-230">mod example
+
+main: fun
+{
+	val bytes: array[u8, 4] = [1, 2, 3, 4]
+	val short: array[u8, 4] = [1, 2]
+	val large: array[u8, 2] = [1, 300]
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> bytes: <span class="c-type">array</span>[<span class="c-type">u8</span>, <span class="c-literal">4</span>] = [<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>, <span class="c-literal">4</span>]</span><span class="line">	<span class="c-keyword">val</span> short: <span class="c-type">array</span>[<span class="c-type">u8</span>, <span class="c-literal">4</span>] = [<span class="c-literal">1</span>, <span class="c-literal">2</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:30ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:30ch">Cannot convert type &#x27;array[u8, 2]&#x27; to &#x27;array[u8, 4]&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> large: <span class="c-type">array</span>[<span class="c-type">u8</span>, <span class="c-literal">2</span>] = [<span class="c-literal">1</span>, <span class="c-literal">300</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:34ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:34ch">&#x27;300&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>An empty literal <code>[]</code> has no elements to take a type from, so it needs one from the declaration:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-231"></button><textarea hidden id="copy-231">mod example
+
+main: fun
+{
+	val none: array[i32, 0] = []
+	val unknown = []
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> none: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">0</span>] = []</span><span class="line">	<span class="c-keyword">val</span> unknown = []</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:18ch">Cannot infer the type of &#x27;[]&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="indexing"><a class="anchor" href="#indexing">Indexing</a></h2>
+<p><code>a[i]</code> is the element at index <code>i</code>, counting from 0. The index is a <code>usize</code>. Unsigned integers narrower than <code>usize</code> convert to it, but signed ones don't, so an <code>i32</code> index needs <code>usize(i)</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-232"></button><textarea hidden id="copy-232">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var counts = [0, 0, 0]
+	val slot: u8 = 2
+	val offset: i32 = 1
+	counts[slot] = 30
+	counts[usize(offset)] = 20
+	counts[0] += 10
+	printf(&quot;%d %d %d\n&quot;, counts[0], counts[1], counts[2])
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> counts = [<span class="c-literal">0</span>, <span class="c-literal">0</span>, <span class="c-literal">0</span>]</span><span class="line">	<span class="c-keyword">val</span> slot: <span class="c-type">u8</span> = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">val</span> offset: <span class="c-type">i32</span> = <span class="c-literal">1</span></span><span class="line">	counts[slot] = <span class="c-literal">30</span></span><span class="line">	counts[<span class="c-type">usize</span>(offset)] = <span class="c-literal">20</span></span><span class="line">	counts[<span class="c-literal">0</span>] += <span class="c-literal">10</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, counts[<span class="c-literal">0</span>], counts[<span class="c-literal">1</span>], counts[<span class="c-literal">2</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>10 20 30</pre></div>
+<p>Writing to an element changes the array, so the array must be a <code>var</code>. A <code>val</code> array can't be changed through any of its elements:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-233"></button><textarea hidden id="copy-233">mod example
+
+main: fun
+{
+	val counts = [0, 0, 0]
+	counts[0] = 5
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> counts = [<span class="c-literal">0</span>, <span class="c-literal">0</span>, <span class="c-literal">0</span>]</span><span class="line">	counts[<span class="c-literal">0</span>] = <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign values</span></span><span class="line">}</span></code></pre></div>
+<h3 id="bounds-checks"><a class="anchor" href="#bounds-checks">Bounds checks</a></h3>
+<p>An index that is a constant is checked when the program compiles:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-234"></button><textarea hidden id="copy-234">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val primes = [2, 3, 5, 7]
+	printf(&quot;%d\n&quot;, primes[4])
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> primes = [<span class="c-literal">2</span>, <span class="c-literal">3</span>, <span class="c-literal">5</span>, <span class="c-literal">7</span>]</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, primes[<span class="c-literal">4</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:26ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:26ch">Index 4 is out of range for &#x27;array[i32, 4]&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>Any other index is checked when the program runs. An index past the end stops the program with a panic instead of reading memory outside the array:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-235"></button><textarea hidden id="copy-235">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+pick: fun(index: usize) -&gt; i32
+{
+	val primes = [2, 3, 5, 7]
+	ret primes[index]
+}
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, pick(3))
+	printf(&quot;%d\n&quot;, pick(4))
+}</textarea><pre><code><span class="line"><span class="c-function">pick</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">index</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> primes = [<span class="c-literal">2</span>, <span class="c-literal">3</span>, <span class="c-literal">5</span>, <span class="c-literal">7</span>]</span><span class="line">	<span class="c-keyword">ret</span> primes[<span class="c-parameter">index</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">pick</span>(<span class="c-literal">3</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">pick</span>(<span class="c-literal">4</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>7
+Panic at main.ce:11:6: index out of bounds</pre></div>
+<p>The check runs in every build, release builds included. A project can turn it off with the <code>BoundsChecks</code> setting; <a href="panics.html">Checks and panics</a> covers panics and that setting.</p>
+<h2 id="length"><a class="anchor" href="#length">Length</a></h2>
+<p><code>a.length</code> is the number of elements, as a <code>usize</code>. Since the length is part of the type, it's the same for every value of that type:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-236"></button><textarea hidden id="copy-236">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val primes = [2, 3, 5, 7]
+	var sum = 0
+	for i in 0..primes.length
+		sum += primes[i]
+
+	printf(&quot;%zu primes, sum %d\n&quot;, primes.length, sum)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> primes = [<span class="c-literal">2</span>, <span class="c-literal">3</span>, <span class="c-literal">5</span>, <span class="c-literal">7</span>]</span><span class="line">	<span class="c-keyword">var</span> sum = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..primes.<span class="c-field">length</span></span><span class="line">		sum += primes[i]</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu primes, sum %d\n"</span>, primes.<span class="c-field">length</span>, sum)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4 primes, sum 17</pre></div>
+<h2 id="sizes-from-constants"><a class="anchor" href="#sizes-from-constants">Sizes from constants</a></h2>
+<p>The length in <code>array[T, N]</code> is a constant <code>usize</code>. It can be a literal, a named constant or any constant expression, including <code>sizeOf</code>. Here the arrays are fields of records, which group named values like a C <code>struct</code> (<a href="records.html">Records</a> covers them):</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-237"></button><textarea hidden id="copy-237">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+slotCount: const usize = 4
+
+Pair: rec
+{
+	a: i32
+	b: i64
+}
+
+Inventory: rec
+{
+	slots: array[i32, slotCount]
+	spare: array[i32, slotCount * 2]
+	raw: array[u8, sizeOf(Pair)]
+}
+
+main: fun
+{
+	val inventory = Inventory()
+	printf(&quot;%zu %zu %zu\n&quot;, inventory.slots.length, inventory.spare.length, inventory.raw.length)
+}</textarea><pre><code><span class="line"><span class="c-constant">slotCount</span>: <span class="c-keyword">const</span> <span class="c-type">usize</span> = <span class="c-literal">4</span></span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">a</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">b</span>: <span class="c-type">i64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Inventory</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">slots</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, slotCount]</span><span class="line">	<span class="c-field">spare</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, slotCount * <span class="c-literal">2</span>]</span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">array</span>[<span class="c-type">u8</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">Pair</span>)]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> inventory = <span class="c-type">Inventory</span>()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu\n"</span>, inventory.<span class="c-field">slots</span>.<span class="c-field">length</span>, inventory.<span class="c-field">spare</span>.<span class="c-field">length</span>, inventory.<span class="c-field">raw</span>.<span class="c-field">length</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4 8 16</pre></div>
+<p>A variable can't be a length, even one that never changes. Constants of other integer types need a conversion:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-238"></button><textarea hidden id="copy-238">mod example
+
+count: const i32 = 3
+
+main: fun
+{
+	var length = 3
+	var a: array[i32, length]
+	var b: array[i32, count]
+	var c: array[i32, usize(count)]
+}</textarea><pre><code><span class="line"><span class="c-constant">count</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> length = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">var</span> a: <span class="c-type">array</span>[<span class="c-type">i32</span>, length]</span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:22ch">&#x27;length&#x27; is not a constant</span></span><span class="line">	<span class="c-keyword">var</span> b: <span class="c-type">array</span>[<span class="c-type">i32</span>, count]</span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot convert type &#x27;i32&#x27; to &#x27;usize&#x27;</span></span><span class="line">	<span class="c-keyword">var</span> c: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-type">usize</span>(count)]</span><span class="line">}</span></code></pre></div>
+<p>An array's size in memory is its length times its element's size, with no header or padding between elements:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-239"></button><textarea hidden id="copy-239">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	printf(&quot;%zu %zu %zu\n&quot;, sizeOf(array[i32, 4]), sizeOf(array[u8, 3]), sizeOf(array[i32, 0]))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(array[<span class="c-type">i32</span>, <span class="c-literal">4</span>]), <span class="c-keyword">sizeOf</span>(array[<span class="c-type">u8</span>, <span class="c-literal">3</span>]), <span class="c-keyword">sizeOf</span>(array[<span class="c-type">i32</span>, <span class="c-literal">0</span>]))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>16 3 0</pre></div>
+<h2 id="zeroed-arrays"><a class="anchor" href="#zeroed-arrays">Zeroed arrays</a></h2>
+<p>An array declared without a value starts with every element zeroed, when its element type allows it:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-240"></button><textarea hidden id="copy-240">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var totals: array[f64, 3]
+	totals[1] = 2.5
+	printf(&quot;%.1f %.1f %.1f\n&quot;, totals[0], totals[1], totals[2])
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> totals: <span class="c-type">array</span>[<span class="c-type">f64</span>, <span class="c-literal">3</span>]</span><span class="line">	totals[<span class="c-literal">1</span>] = <span class="c-literal">2.5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %.1f %.1f\n"</span>, totals[<span class="c-literal">0</span>], totals[<span class="c-literal">1</span>], totals[<span class="c-literal">2</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0.0 2.5 0.0</pre></div>
+<p>Numbers, <code>bool</code>, <code>char</code> and pointers start zeroed, and so do records whose fields all can, as long as they declare no constructor and no destructor. A record that declares a constructor, a <code>new: op</code> member, can't (see <a href="records.html">Records</a>). An array of those starts uninitialized, and each element must be set before it's read:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-241"></button><textarea hidden id="copy-241">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+
+	new: op(x: i32, y: i32)
+	{
+		self.x = x
+		self.y = y
+	}
+}
+
+main: fun
+{
+	var points: array[Point, 2]
+	points[0] = Point(1, 2)
+	printf(&quot;%d\n&quot;, points[1].x)
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>, <span class="c-parameter">y</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">x</span> = <span class="c-parameter">x</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">y</span> = <span class="c-parameter">y</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> points: <span class="c-type">array</span>[<span class="c-type">Point</span>, <span class="c-literal">2</span>]</span><span class="line">	points[<span class="c-literal">0</span>] = <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, points[<span class="c-literal">1</span>].<span class="c-field">x</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot use uninitialized values</span></span><span class="line">}</span></code></pre></div>
+<p>A loop that sets every element counts, as long as its bounds are constants:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-242"></button><textarea hidden id="copy-242">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+
+	new: op(x: i32, y: i32)
+	{
+		self.x = x
+		self.y = y
+	}
+}
+
+main: fun
+{
+	var points: array[Point, 3]
+	for i in 0..3
+		points[i] = Point(i32(i), i32(i) * 10)
+
+	printf(&quot;%d %d\n&quot;, points[2].x, points[2].y)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> points: <span class="c-type">array</span>[<span class="c-type">Point</span>, <span class="c-literal">3</span>]</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">3</span></span><span class="line">		points[i] = <span class="c-type">Point</span>(<span class="c-type">i32</span>(i), <span class="c-type">i32</span>(i) * <span class="c-literal">10</span>)</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, points[<span class="c-literal">2</span>].<span class="c-field">x</span>, points[<span class="c-literal">2</span>].<span class="c-field">y</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2 20</pre></div>
+<h2 id="the-array-builder"><a class="anchor" href="#the-array-builder">The array builder</a></h2>
+<p><code>array[T, N](make)</code> builds an array by calling <code>make</code> once for each index, in order from 0, and storing what it returns. <code>make</code> takes the index as a <code>usize</code> and returns a <code>T</code>. It's often a lambda (see <a href="closures.html">Function values and closures</a>), and it can use the variables around it:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-243"></button><textarea hidden id="copy-243">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val base = 100
+	val values = array[i32, 4](fun(i) =&gt; base + i32(i) * 10)
+	printf(&quot;%d %d %d %d\n&quot;, values[0], values[1], values[2], values[3])
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> base = <span class="c-literal">100</span></span><span class="line">	<span class="c-keyword">val</span> values = array[<span class="c-type">i32</span>, <span class="c-literal">4</span>](<span class="c-keyword">fun</span>(<span class="c-parameter">i</span>) =&gt; base + <span class="c-type">i32</span>(<span class="c-parameter">i</span>) * <span class="c-literal">10</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, values[<span class="c-literal">0</span>], values[<span class="c-literal">1</span>], values[<span class="c-literal">2</span>], values[<span class="c-literal">3</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>100 110 120 130</pre></div>
+<p>Any function that takes a <code>usize</code> and returns the element type works, named functions included. The builder works for every element type, including records that can't start zeroed:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-244"></button><textarea hidden id="copy-244">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Tile: rec
+{
+	id: i32
+
+	new: op(id: i32)
+	{
+		printf(&quot;make %d\n&quot;, id)
+		self.id = id
+	}
+}
+
+makeTile: fun(index: usize) -&gt; Tile =&gt; Tile(i32(index) + 1)
+
+main: fun
+{
+	val tiles = array[Tile, 3](makeTile)
+	printf(&quot;last %d\n&quot;, tiles[2].id)
+}</textarea><pre><code><span class="line"><span class="c-type">Tile</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"make %d\n"</span>, <span class="c-parameter">id</span>)</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">id</span> = <span class="c-parameter">id</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">makeTile</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">index</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">Tile</span> =&gt; <span class="c-type">Tile</span>(<span class="c-type">i32</span>(<span class="c-parameter">index</span>) + <span class="c-literal">1</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> tiles = array[<span class="c-type">Tile</span>, <span class="c-literal">3</span>](<span class="c-function">makeTile</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"last %d\n"</span>, tiles[<span class="c-literal">2</span>].<span class="c-field">id</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>make 1
+make 2
+make 3
+last 3</pre></div>
+<p>The function must have the right shape:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-245"></button><textarea hidden id="copy-245">mod example
+
+main: fun
+{
+	val a = array[i32, 3](fun(i, j) =&gt; 0)
+	val b = array[i32, 3](5)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = array[<span class="c-type">i32</span>, <span class="c-literal">3</span>](<span class="c-keyword">fun</span>(i, j) =&gt; <span class="c-literal">0</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:26ch;width:14ch"></span><span class="diagnostic-text" style="margin-left:26ch">&#x27;fun[usize -&gt; i32]&#x27; takes one parameter</span></span><span class="line">	<span class="c-keyword">val</span> b = array[<span class="c-type">i32</span>, <span class="c-literal">3</span>](<span class="c-literal">5</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:16ch"></span><span class="diagnostic-text" style="margin-left:12ch">No constructor for &#x27;array[i32, 3]&#x27; accepts argument of type &#x27;integer literal&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="nested-arrays"><a class="anchor" href="#nested-arrays">Nested arrays</a></h2>
+<p>An array's elements can be arrays. <code>array[array[i32, 3], 2]</code> is two rows of three, and <code>grid[r][c]</code> indexes the row, then the element in it:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-246"></button><textarea hidden id="copy-246">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var grid = [[1, 2, 3], [4, 5, 6]]
+	grid[1][2] = 60
+	val table = array[array[i32, 3], 3](fun(r) =&gt; array[i32, 3](fun(c) =&gt; i32(r * c)))
+	printf(&quot;%d %d %zu %zu\n&quot;, grid[1][2], table[2][2], grid.length, grid[0].length)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> grid = [[<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>], [<span class="c-literal">4</span>, <span class="c-literal">5</span>, <span class="c-literal">6</span>]]</span><span class="line">	grid[<span class="c-literal">1</span>][<span class="c-literal">2</span>] = <span class="c-literal">60</span></span><span class="line">	<span class="c-keyword">val</span> table = array[array[<span class="c-type">i32</span>, <span class="c-literal">3</span>], <span class="c-literal">3</span>](<span class="c-keyword">fun</span>(<span class="c-parameter">r</span>) =&gt; array[<span class="c-type">i32</span>, <span class="c-literal">3</span>](<span class="c-keyword">fun</span>(<span class="c-parameter">c</span>) =&gt; <span class="c-type">i32</span>(<span class="c-parameter">r</span> * <span class="c-parameter">c</span>)))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %zu %zu\n"</span>, grid[<span class="c-literal">1</span>][<span class="c-literal">2</span>], table[<span class="c-literal">2</span>][<span class="c-literal">2</span>], grid.<span class="c-field">length</span>, grid[<span class="c-literal">0</span>].<span class="c-field">length</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>60 4 2 3</pre></div>
+<p>The rows of a nested literal share one element type, so they must all have the same length. Their elements are typed together, so a float in one row makes every row <code>f64</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-247"></button><textarea hidden id="copy-247">mod example
+
+main: fun
+{
+	val ragged = [[1, 2], [3]]
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> ragged = [[<span class="c-literal">1</span>, <span class="c-literal">2</span>], [<span class="c-literal">3</span>]]</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:17ch">The elements of this array have incompatible types: &#x27;array[i32, 2]&#x27;, &#x27;array[i32, 1]&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="copying-and-moving-arrays"><a class="anchor" href="#copying-and-moving-arrays">Copying and moving arrays</a></h2>
+<p>An array copies when its element type copies. Assigning it, passing it to a parameter without a mode, or returning it makes a new array with the same elements, and changing one leaves the other alone:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-248"></button><textarea hidden id="copy-248">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+doubled: fun(values: array[i32, 3]) -&gt; array[i32, 3]
+{
+	var result = values
+	for i in 0..3
+		result[i] *= 2
+
+	ret result
+}
+
+main: fun
+{
+	val original = [1, 2, 3]
+	val twice = doubled(original)
+	printf(&quot;%d %d\n&quot;, original[2], twice[2])
+}</textarea><pre><code><span class="line"><span class="c-function">doubled</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">values</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">3</span>]) -&gt; <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">3</span>]</span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> result = <span class="c-parameter">values</span></span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">3</span></span><span class="line">		result[i] *= <span class="c-literal">2</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> result</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> original = [<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>]</span><span class="line">	<span class="c-keyword">val</span> twice = <span class="c-function">doubled</span>(original)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, original[<span class="c-literal">2</span>], twice[<span class="c-literal">2</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 6</pre></div>
+<p>A destructor is a <code>drop: op</code> member that runs when a value is dropped (<a href="ownership.html">Ownership and destructors</a> covers them). An array of values with a destructor can't be copied, since each element has one owner. It moves instead, with <code>own</code>, and its elements are dropped when the array is, last element first:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-249"></button><textarea hidden id="copy-249">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;drop %d\n&quot;, self.id)
+	}
+}
+
+keep: fun(own names: array[Name, 3])
+{
+	printf(&quot;kept %d names\n&quot;, i32(names.length))
+}
+
+main: fun
+{
+	val names = [Name(1), Name(2), Name(3)]
+	keep(own names)
+	printf(&quot;back in main\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-type">Name</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"drop %d\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">keep</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">names</span>: <span class="c-type">array</span>[<span class="c-type">Name</span>, <span class="c-literal">3</span>])</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"kept %d names\n"</span>, <span class="c-type">i32</span>(<span class="c-parameter">names</span>.<span class="c-field">length</span>))</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> names = [<span class="c-type">Name</span>(<span class="c-literal">1</span>), <span class="c-type">Name</span>(<span class="c-literal">2</span>), <span class="c-type">Name</span>(<span class="c-literal">3</span>)]</span><span class="line">	<span class="c-function">keep</span>(<span class="c-keyword">own</span> names)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"back in main\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>kept 3 names
+drop 3
+drop 2
+drop 1
+back in main</pre></div>
+<p>Without a mode, the parameter would copy the array, which isn't allowed:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-250"></button><textarea hidden id="copy-250">mod example
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+show: fun(names: array[Name, 2])
+{
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Name</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">names</span>: <span class="c-type">array</span>[<span class="c-type">Name</span>, <span class="c-literal">2</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot copy &#x27;array[Name, 2]&#x27;</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>A single element can be moved out with <code>own</code>, as in <code>own names[1]</code>, when the index is a constant. The moved element is dropped by its new owner, and the rest of the array is still dropped when it goes out of scope:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-251"></button><textarea hidden id="copy-251">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;drop %d\n&quot;, self.id)
+	}
+}
+
+keepOne: fun(own name: Name)
+{
+	printf(&quot;kept %d\n&quot;, name.id)
+}
+
+main: fun
+{
+	val names = [Name(1), Name(2), Name(3)]
+	keepOne(own names[1])
+	printf(&quot;back in main\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-function">keepOne</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">name</span>: <span class="c-type">Name</span>)</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"kept %d\n"</span>, <span class="c-parameter">name</span>.<span class="c-field">id</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> names = [<span class="c-type">Name</span>(<span class="c-literal">1</span>), <span class="c-type">Name</span>(<span class="c-literal">2</span>), <span class="c-type">Name</span>(<span class="c-literal">3</span>)]</span><span class="line">	<span class="c-function">keepOne</span>(<span class="c-keyword">own</span> names[<span class="c-literal">1</span>])</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"back in main\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>kept 2
+drop 2
+back in main
+drop 3
+drop 1</pre></div>
+<p>The other elements can still be used, but the array as a whole can't, since part of it is gone. An index computed when the program runs can't be used to move an element out:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-252"></button><textarea hidden id="copy-252">mod example
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+keepOne: fun(own name: Name)
+{
+}
+
+keepAll: fun(own names: array[Name, 3])
+{
+}
+
+pick: fun(index: usize)
+{
+	val names = [Name(1), Name(2), Name(3)]
+	keepOne(own names[index])
+}
+
+main: fun
+{
+	val names = [Name(1), Name(2), Name(3)]
+	keepOne(own names[1])
+	keepAll(own names)
+}</textarea><pre><code><span class="line"><span class="c-function">keepOne</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">name</span>: <span class="c-type">Name</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">keepAll</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">names</span>: <span class="c-type">array</span>[<span class="c-type">Name</span>, <span class="c-literal">3</span>])</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">pick</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">index</span>: <span class="c-type">usize</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> names = [<span class="c-type">Name</span>(<span class="c-literal">1</span>), <span class="c-type">Name</span>(<span class="c-literal">2</span>), <span class="c-type">Name</span>(<span class="c-literal">3</span>)]</span><span class="line">	<span class="c-function">keepOne</span>(<span class="c-keyword">own</span> names[<span class="c-parameter">index</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:12ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot move array elements at computed indices</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> names = [<span class="c-type">Name</span>(<span class="c-literal">1</span>), <span class="c-type">Name</span>(<span class="c-literal">2</span>), <span class="c-type">Name</span>(<span class="c-literal">3</span>)]</span><span class="line">	<span class="c-function">keepOne</span>(<span class="c-keyword">own</span> names[<span class="c-literal">1</span>])</span><span class="line">	<span class="c-function">keepAll</span>(<span class="c-keyword">own</span> names)</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot use partly moved values<span class="diagnostic-note">Moved on line 29</span></span></span><span class="line">}</span></code></pre></div>
+<p><a href="ownership.html">Ownership and destructors</a> covers moves and drops in general, and <a href="parameter-modes.html">Parameter modes</a> covers <code>imm</code> and <code>mut</code> parameters, which let a function read or change an array without copying it.</p>
+<h2 id="looping-over-arrays"><a class="anchor" href="#looping-over-arrays">Looping over arrays</a></h2>
+<p><code>for x in a</code> runs its body once for each element, from the first to the last. How the loop variable holds the element depends on the word before it:</p>
+<div class="table-wrap"><table><thead><tr><th>Loop</th><th>The variable</th><th>Needs</th></tr></thead><tbody><tr><td><code>for x in a</code></td><td>a copy of the element</td><td>an element type that copies</td></tr><tr><td><code>for imm x in a</code></td><td>a read-only borrow of the element</td><td>nothing</td></tr><tr><td><code>for mut x in a</code></td><td>a mutable borrow of the element</td><td><code>a</code> can be changed</td></tr><tr><td><code>for own x in a</code></td><td>the element itself, moved out of the array</td><td><code>a</code> can be moved</td></tr></tbody></table></div>
+<p>A copy is enough for plain data. <code>mut</code> changes the elements in place:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-253"></button><textarea hidden id="copy-253">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+}
+
+main: fun
+{
+	var values = [1, 2, 3]
+	for mut v in values
+		v *= 10
+
+	var total = 0
+	for v in values
+		total += v
+
+	var points = [Point(1, 2), Point(3, 4)]
+	for mut p in points
+		p.y += p.x
+
+	printf(&quot;%d %d %d\n&quot;, total, points[0].y, points[1].y)
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> values = [<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>]</span><span class="line">	<span class="c-keyword">for</span> <span class="c-keyword">mut</span> v <span class="c-keyword">in</span> values</span><span class="line">		v *= <span class="c-literal">10</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">for</span> v <span class="c-keyword">in</span> values</span><span class="line">		total += v</span><span class="line"> </span><span class="line">	<span class="c-keyword">var</span> points = [<span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>), <span class="c-type">Point</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>)]</span><span class="line">	<span class="c-keyword">for</span> <span class="c-keyword">mut</span> p <span class="c-keyword">in</span> points</span><span class="line">		p.<span class="c-field">y</span> += p.<span class="c-field">x</span></span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, total, points[<span class="c-literal">0</span>].<span class="c-field">y</span>, points[<span class="c-literal">1</span>].<span class="c-field">y</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>60 3 7</pre></div>
+<p>Elements with a destructor can't be copied, so the loop needs <code>imm</code> to look at them:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-254"></button><textarea hidden id="copy-254">mod example
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+main: fun
+{
+	val names = [Name(1), Name(2)]
+	for n in names
+	{
+	}
+}</textarea><pre><code><span class="line"><span class="c-type">Name</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> names = [<span class="c-type">Name</span>(<span class="c-literal">1</span>), <span class="c-type">Name</span>(<span class="c-literal">2</span>)]</span><span class="line">	<span class="c-keyword">for</span> n <span class="c-keyword">in</span> names</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot copy &#x27;Name&#x27;</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-255"></button><textarea hidden id="copy-255">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;drop %d\n&quot;, self.id)
+	}
+}
+
+main: fun
+{
+	val names = [Name(4), Name(9), Name(2)]
+	var best = 0
+	for imm n in names
+	{
+		if n.id &gt; best
+			best = n.id
+	}
+
+	printf(&quot;best %d\n&quot;, best)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> names = [<span class="c-type">Name</span>(<span class="c-literal">4</span>), <span class="c-type">Name</span>(<span class="c-literal">9</span>), <span class="c-type">Name</span>(<span class="c-literal">2</span>)]</span><span class="line">	<span class="c-keyword">var</span> best = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">for</span> <span class="c-keyword">imm</span> n <span class="c-keyword">in</span> names</span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> n.<span class="c-field">id</span> &gt; best</span><span class="line">			best = n.<span class="c-field">id</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"best %d\n"</span>, best)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>best 9
+drop 2
+drop 9
+drop 4</pre></div>
+<h3 id="moving-elements-out"><a class="anchor" href="#moving-elements-out">Moving elements out</a></h3>
+<p><code>for own x in a</code> moves each element out of the array into the loop variable. An element that the body doesn't move on is dropped at the end of its pass. If the loop ends early with <code>break</code>, the elements it didn't reach are dropped when the loop ends:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-256"></button><textarea hidden id="copy-256">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;drop %d\n&quot;, self.id)
+	}
+}
+
+keep: fun(own n: Name)
+{
+	printf(&quot;keep %d\n&quot;, n.id)
+}
+
+main: fun
+{
+	val names = [Name(1), Name(2), Name(3), Name(4)]
+	for own n in names
+	{
+		if n.id == 3
+			break
+
+		if n.id == 1
+			keep(own n)
+	}
+
+	printf(&quot;after the loop\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-function">keep</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">n</span>: <span class="c-type">Name</span>)</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"keep %d\n"</span>, <span class="c-parameter">n</span>.<span class="c-field">id</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> names = [<span class="c-type">Name</span>(<span class="c-literal">1</span>), <span class="c-type">Name</span>(<span class="c-literal">2</span>), <span class="c-type">Name</span>(<span class="c-literal">3</span>), <span class="c-type">Name</span>(<span class="c-literal">4</span>)]</span><span class="line">	<span class="c-keyword">for</span> <span class="c-keyword">own</span> n <span class="c-keyword">in</span> names</span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> n.<span class="c-field">id</span> == <span class="c-literal">3</span></span><span class="line">			<span class="c-keyword">break</span></span><span class="line"> </span><span class="line">		<span class="c-keyword">if</span> n.<span class="c-field">id</span> == <span class="c-literal">1</span></span><span class="line">			<span class="c-function">keep</span>(<span class="c-keyword">own</span> n)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"after the loop\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>keep 1
+drop 1
+drop 2
+drop 3
+drop 4
+after the loop</pre></div>
+<p>After the loop the array has been moved and can't be used.</p>
+<h3 id="loops-over-temporaries"><a class="anchor" href="#loops-over-temporaries">Loops over temporaries</a></h3>
+<p>The array can be any expression, such as a call. A temporary array lives until the loop ends, so <code>imm</code> elements stay valid for the whole loop:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-257"></button><textarea hidden id="copy-257">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;drop %d\n&quot;, self.id)
+	}
+}
+
+names: fun -&gt; array[Name, 2] =&gt; [Name(7), Name(8)]
+
+main: fun
+{
+	for imm n in names()
+		printf(&quot;name %d\n&quot;, n.id)
+
+	printf(&quot;done\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-function">names</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">array</span>[<span class="c-type">Name</span>, <span class="c-literal">2</span>] =&gt; [<span class="c-type">Name</span>(<span class="c-literal">7</span>), <span class="c-type">Name</span>(<span class="c-literal">8</span>)]</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> <span class="c-keyword">imm</span> n <span class="c-keyword">in</span> <span class="c-function">names</span>()</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"name %d\n"</span>, n.<span class="c-field">id</span>)</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"done\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>name 7
+name 8
+drop 8
+drop 7
+done</pre></div>
+<h3 id="what-the-loop-rejects"><a class="anchor" href="#what-the-loop-rejects">What the loop rejects</a></h3>
+<p>For an array, the word goes before the variable, never before the array:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-258"></button><textarea hidden id="copy-258">mod example
+
+main: fun
+{
+	var counts = [1, 2, 3]
+	for c in mut counts
+	{
+	}
+
+	for c in own counts
+	{
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> counts = [<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>]</span><span class="line">	<span class="c-keyword">for</span> c <span class="c-keyword">in</span> <span class="c-keyword">mut</span> counts</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot use &#x27;mut&#x27; on &#x27;array[i32, 3]&#x27; loop sources</span></span><span class="line">	{</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">for</span> c <span class="c-keyword">in</span> <span class="c-keyword">own</span> counts</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot use &#x27;own&#x27; on &#x27;array[i32, 3]&#x27; loop sources</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<p><code>for mut</code> changes the array, so the array must be a <code>var</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-259"></button><textarea hidden id="copy-259">mod example
+
+main: fun
+{
+	val fixed = [4, 5, 6]
+	for mut c in fixed
+		c += 1
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> fixed = [<span class="c-literal">4</span>, <span class="c-literal">5</span>, <span class="c-literal">6</span>]</span><span class="line">	<span class="c-keyword">for</span> <span class="c-keyword">mut</span> c <span class="c-keyword">in</span> fixed</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot mutably borrow values</span></span><span class="line">		c += <span class="c-literal">1</span></span><span class="line">}</span></code></pre></div>
+<p>Records can define their own <code>for</code> loops with loop operators; see <a href="operators.html">Operators</a>.</p>
+</article>
+<nav class="pager"><a class="previous" href="control-flow.html"><span>Previous</span>Control flow</a><a class="next" href="records.html"><span>Next</span>Records</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#array-literals">Array literals</a></li><li class="level-3"><a href="#writing-the-type">Writing the type</a></li><li class="level-2"><a href="#indexing">Indexing</a></li><li class="level-3"><a href="#bounds-checks">Bounds checks</a></li><li class="level-2"><a href="#length">Length</a></li><li class="level-2"><a href="#sizes-from-constants">Sizes from constants</a></li><li class="level-2"><a href="#zeroed-arrays">Zeroed arrays</a></li><li class="level-2"><a href="#the-array-builder">The array builder</a></li><li class="level-2"><a href="#nested-arrays">Nested arrays</a></li><li class="level-2"><a href="#copying-and-moving-arrays">Copying and moving arrays</a></li><li class="level-2"><a href="#looping-over-arrays">Looping over arrays</a></li><li class="level-3"><a href="#moving-elements-out">Moving elements out</a></li><li class="level-3"><a href="#loops-over-temporaries">Loops over temporaries</a></li><li class="level-3"><a href="#what-the-loop-rejects">What the loop rejects</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

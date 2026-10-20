@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conditional compilation - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html" class="current"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Conditional compilation</h1>
+<p>Some code belongs only in some builds: a Windows call that doesn't exist on Linux, logging that a release build should leave out, a check that only debug builds pay for. Cella decides this at compile time with build flags. A <code>when</code> block keeps its contents only in builds whose flags match, a <code>use when</code> line keeps or drops a whole file, and a function marked <code>when</code> disappears, calls and all, from builds where its flag is off.</p>
+<h2 id="when-blocks"><a class="anchor" href="#when-blocks"><code>when</code> blocks</a></h2>
+<p><code>when</code> is followed by a flag condition and a block. In a build where the condition holds, the block's contents are compiled as if the <code>when</code> weren't there. Otherwise they're left out:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-798"></button><textarea hidden id="copy-798">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	when debug
+	{
+		printf(&quot;debug build\n&quot;)
+	}
+
+	when release
+	{
+		printf(&quot;release build\n&quot;)
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> debug</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"debug build\n"</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">when</span> release</span><span class="line">	{</span><span class="line">		printf(<span class="c-literal">"release build\n"</span>)</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>debug build</pre></div>
+<p>Built with <code>--release</code>, the same program prints the other line:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-799"></button><textarea hidden id="copy-799">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	when debug
+	{
+		printf(&quot;debug build\n&quot;)
+	}
+
+	when release
+	{
+		printf(&quot;release build\n&quot;)
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> debug</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"debug build\n"</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">when</span> release</span><span class="line">	{</span><span class="line">		printf(<span class="c-literal">"release build\n"</span>)</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>release build</pre></div>
+<p>The braces are required, even around a single statement. A <code>when</code> block doesn't start a scope, so a declaration inside it stays visible after it, as the next section shows.</p>
+<h3 id="else-when-and-else"><a class="anchor" href="#else-when-and-else"><code>else when</code> and <code>else</code></a></h3>
+<p><code>else when</code> and <code>else</code> chain further branches. The first branch whose condition holds is kept, and <code>else</code> is kept when none does:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-800"></button><textarea hidden id="copy-800">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	when release
+	{
+		val mode: cstr = &quot;release&quot;
+	}
+	else when debug &amp;&amp; overflowChecks
+	{
+		val mode: cstr = &quot;checked debug&quot;
+	}
+	else
+	{
+		val mode: cstr = &quot;debug&quot;
+	}
+
+	printf(&quot;%s\n&quot;, mode)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> release</span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> mode: cstr = <span class="c-literal">"release"</span></span><span class="line">	}</span><span class="line">	<span class="c-keyword">else</span> <span class="c-keyword">when</span> debug &amp;&amp; overflowChecks</span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> mode: <span class="c-type">cstr</span> = <span class="c-literal">"checked debug"</span></span><span class="line">	}</span><span class="line">	<span class="c-keyword">else</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> mode: cstr = <span class="c-literal">"debug"</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s\n"</span>, mode)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>checked debug</pre></div>
+<p>Each branch declares <code>mode</code>, and only one of them is ever compiled, so the <code>printf</code> after the chain sees exactly one <code>mode</code>.</p>
+<h3 id="conditions"><a class="anchor" href="#conditions">Conditions</a></h3>
+<p>A condition is made of flag names, <code>!</code>, <code>&amp;&amp;</code>, <code>||</code> and parentheses, with the same meaning and precedence as in ordinary expressions. Nothing else can appear in it: no values, no comparisons, no calls. A name that isn't a flag is an error, with a suggestion when a flag has a close spelling:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-801"></button><textarea hidden id="copy-801">mod example
+
+main: fun
+{
+	when debg
+	{
+	}
+
+	when profiling
+	{
+	}
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> debg</span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:9ch">Flag &#x27;debg&#x27; not found<span class="diagnostic-note">Did you mean &#x27;debug&#x27;?</span></span></span><span class="line">	{</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">when</span> profiling</span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:9ch">Flag &#x27;profiling&#x27; not found</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<h3 id="where-when-blocks-go"><a class="anchor" href="#where-when-blocks-go">Where <code>when</code> blocks go</a></h3>
+<p><code>when</code> blocks can surround top-level declarations, members of records, enums, traits and other types, enum cases, the members of an <code>ext</code> block, statements, and the contents of visibility blocks:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-802"></button><textarea hidden id="copy-802">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+when debug
+{
+	label: const cstr = &quot;debug&quot;
+}
+else
+{
+	label: const cstr = &quot;release&quot;
+}
+
+Counter: rec
+{
+	n: i32
+
+	when debug
+	{
+		describe: fun(self) =&gt; printf(&quot;%s counter at %d\n&quot;, label, self.n)
+	}
+	else
+	{
+		describe: fun(self) =&gt; printf(&quot;%d\n&quot;, self.n)
+	}
+}
+
+Step: enum
+{
+	start
+
+	when debug
+	{
+		traced
+	}
+
+	finish
+}
+
+main: fun
+{
+	val c = Counter(4)
+	c.describe()
+	printf(&quot;%d\n&quot;, i32(Step.finish))
+}</textarea><pre><code><span class="line"><span class="c-keyword">when</span> debug</span><span class="line">{</span><span class="line">	<span class="c-constant">label</span>: <span class="c-keyword">const</span> <span class="c-type">cstr</span> = <span class="c-literal">"debug"</span></span><span class="line">}</span><span class="line"><span class="c-keyword">else</span></span><span class="line">{</span><span class="line">	label: <span class="c-keyword">const</span> cstr = <span class="c-literal">"release"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Counter</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">n</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">when</span> debug</span><span class="line">	{</span><span class="line">		<span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%s counter at %d\n"</span>, <span class="c-constant">label</span>, <span class="c-keyword">self</span>.<span class="c-field">n</span>)</span><span class="line">	}</span><span class="line">	<span class="c-keyword">else</span></span><span class="line">	{</span><span class="line">		describe: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) =&gt; printf(<span class="c-literal">"%d\n"</span>, <span class="c-keyword">self</span>.n)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Step</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">start</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">when</span> debug</span><span class="line">	{</span><span class="line">		<span class="c-case">traced</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-case">finish</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-type">Counter</span>(<span class="c-literal">4</span>)</span><span class="line">	c.<span class="c-function">describe</span>()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-type">i32</span>(<span class="c-type">Step</span>.<span class="c-case">finish</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>debug counter at 4
+2</pre></div>
+<p><code>Step.finish</code> is 2 in a debug build, because <code>traced</code> takes the value 1. In a release build <code>traced</code> doesn't exist and <code>finish</code> is 1.</p>
+<p>Inside a <code>match</code>, <code>when</code> groups arms, with <code>else</code> for the other builds. The match's <code>else</code> arm stays the last arm:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-803"></button><textarea hidden id="copy-803">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+size: fun(x: i32) -&gt; i32 =&gt; match x
+{
+	0 =&gt; 0
+	when debug
+	{
+		1 =&gt; 10
+	}
+	else
+	{
+		1 =&gt; 20
+	}
+	else =&gt; 5
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d\n&quot;, size(0), size(1), size(2))
+}</textarea><pre><code><span class="line"><span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">x</span></span><span class="line">{</span><span class="line">	<span class="c-literal">0</span> =&gt; <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">when</span> debug</span><span class="line">	{</span><span class="line">		<span class="c-literal">1</span> =&gt; <span class="c-literal">10</span></span><span class="line">	}</span><span class="line">	<span class="c-keyword">else</span></span><span class="line">	{</span><span class="line">		<span class="c-literal">1</span> =&gt; <span class="c-literal">20</span></span><span class="line">	}</span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">5</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">size</span>(<span class="c-literal">0</span>), <span class="c-function">size</span>(<span class="c-literal">1</span>), <span class="c-function">size</span>(<span class="c-literal">2</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0 10 5</pre></div>
+<h3 id="code-in-other-builds-is-only-parsed"><a class="anchor" href="#code-in-other-builds-is-only-parsed">Code in other builds is only parsed</a></h3>
+<p>A branch that isn't kept is parsed but not checked. It can call functions that don't exist in this build, use types that don't exist and name symbols from other platforms, so platform-specific code compiles on every platform:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-804"></button><textarea hidden id="copy-804">mod example
+
+when windows
+{
+	ext(&quot;kernel32&quot;)
+	{
+		GetCurrentProcessId: fun -&gt; u32
+	}
+
+	processId: fun -&gt; u32 =&gt; GetCurrentProcessId()
+}
+else
+{
+	ext
+	{
+		getpid: fun -&gt; i32
+	}
+
+	processId: fun -&gt; u32 =&gt; u32(getpid())
+}
+
+main: fun -&gt; i32 =&gt; i32(processId() % 100)</textarea><pre><code><span class="line"><span class="c-keyword">when</span> windows</span><span class="line">{</span><span class="line">	<span class="c-keyword">ext</span>(<span class="c-literal">"kernel32"</span>)</span><span class="line">	{</span><span class="line">		<span class="c-function">GetCurrentProcessId</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">u32</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">processId</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">u32</span> =&gt; <span class="c-function">GetCurrentProcessId</span>()</span><span class="line">}</span><span class="line"><span class="c-keyword">else</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">ext</span></span><span class="line">	{</span><span class="line">		getpid: <span class="c-keyword">fun</span> -&gt; i32</span><span class="line">	}</span><span class="line"> </span><span class="line">	processId: <span class="c-keyword">fun</span> -&gt; u32 =&gt; u32(getpid())</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-type">i32</span>(<span class="c-function">processId</span>() % <span class="c-literal">100</span>)</span></code></pre></div>
+<p>On Windows, only the first branch is checked and built; on Linux, only the second. Building with <code>--target</code>, as described in <a href="projects.html">Projects and building</a>, checks the branches for another platform.</p>
+<p>Syntax errors are reported in every branch, since every branch is parsed:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-805"></button><textarea hidden id="copy-805">mod example
+
+main: fun
+{
+	when linux &amp;&amp; windows
+	{
+		val c = &#x27;ab&#x27;
+	}
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> linux &amp;&amp; windows</span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> c = <span class="c-literal">'ab'</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:16ch">Invalid character literal</span></span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<h2 id="built-in-flags"><a class="anchor" href="#built-in-flags">Built-in flags</a></h2>
+<p>These flags are always defined:</p>
+<div class="table-wrap"><table><thead><tr><th>Flag</th><th>On when</th></tr></thead><tbody><tr><td><code>windows</code>, <code>linux</code>, <code>macos</code></td><td>building for that operating system</td></tr><tr><td><code>x64</code>, <code>x86</code>, <code>arm64</code>, <code>wasm64</code></td><td>building for that processor</td></tr><tr><td><code>debug</code></td><td>building without <code>--release</code></td></tr><tr><td><code>release</code></td><td>building with <code>--release</code></td></tr><tr><td><code>boundsChecks</code></td><td>the project's <code>BoundsChecks</code> setting is on</td></tr><tr><td><code>overflowChecks</code></td><td>the project's <code>OverflowChecks</code> setting is on</td></tr></tbody></table></div>
+<p><code>boundsChecks</code> and <code>overflowChecks</code> follow the settings of the project that declares the code, so code that checks its own bounds or overflow can do it exactly when the built-in checks are on. <code>OverflowChecks</code> is on by default in debug builds only:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-806"></button><textarea hidden id="copy-806">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	when overflowChecks
+	{
+		printf(&quot;overflow checks on\n&quot;)
+	}
+	else
+	{
+		printf(&quot;overflow checks off\n&quot;)
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> overflowChecks</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"overflow checks on\n"</span>)</span><span class="line">	}</span><span class="line">	<span class="c-keyword">else</span></span><span class="line">	{</span><span class="line">		printf(<span class="c-literal">"overflow checks off\n"</span>)</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>overflow checks off</pre></div>
+<p><a href="panics.html">Checks and panics</a> covers both settings.</p>
+<h2 id="project-flags"><a class="anchor" href="#project-flags">Project flags</a></h2>
+<p>A project declares its own flags in a <code>[Flags]</code> table in its <code>.celp</code> file, each with a default value:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-807"></button><textarea hidden id="copy-807">OutputType = &quot;Executable&quot;
+
+[Flags]
+logging = true
+profiling = false</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[Flags]</span></span><span class="line"><span class="c-field">logging </span>= <span class="c-literal">true</span></span><span class="line"><span class="c-field">profiling </span>= <span class="c-literal">false</span></span></code></pre></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-808"></button><textarea hidden id="copy-808">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	when logging
+	{
+		printf(&quot;logging\n&quot;)
+	}
+
+	when profiling
+	{
+		printf(&quot;profiling\n&quot;)
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> logging</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"logging\n"</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">when</span> profiling</span><span class="line">	{</span><span class="line">		printf(<span class="c-literal">"profiling\n"</span>)</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>logging</pre></div>
+<p>The table can also be written on one line, as <code>Flags = { logging = true, profiling = false }</code>. A flag name must be a valid identifier and can't be the name of a built-in flag.</p>
+<p><code>--flag</code> sets a flag for one build, overriding its default. <code>--flag profiling</code> turns it on, and <code>--flag profiling=false</code> turns it off:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-809"></button><textarea hidden id="copy-809">cella build --flag profiling
+cella run --flag logging=false</textarea><pre><code><span class="line">cella build --flag profiling</span><span class="line">cella run --flag logging=false</span></code></pre></div>
+<p>Built with <code>--flag profiling</code>, the program above prints both lines:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-810"></button><textarea hidden id="copy-810">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	when logging
+	{
+		printf(&quot;logging\n&quot;)
+	}
+
+	when profiling
+	{
+		printf(&quot;profiling\n&quot;)
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> logging</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"logging\n"</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">when</span> profiling</span><span class="line">	{</span><span class="line">		printf(<span class="c-literal">"profiling\n"</span>)</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-811"></button><textarea hidden id="copy-811">OutputType = &quot;Executable&quot;
+
+[Flags]
+logging = true
+profiling = false</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[Flags]</span></span><span class="line"><span class="c-field">logging </span>= <span class="c-literal">true</span></span><span class="line"><span class="c-field">profiling </span>= <span class="c-literal">false</span></span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>logging
+profiling</pre></div>
+<p><code>--flag</code> only sets flags the project declares. A name that isn't declared is "Flag 'missing' not found", and setting a built-in flag such as <code>debug</code> is "Cannot set built-in flag 'debug'". Flags belong to the project that declares them: a library's code is built with the flags and defaults in the library's own <code>.celp</code>.</p>
+<h2 id="leaving-out-whole-files"><a class="anchor" href="#leaving-out-whole-files">Leaving out whole files</a></h2>
+<p><code>use when</code> with a condition, written right after the <code>mod</code> line, keeps or leaves out the whole file. A file left out is only parsed, like a <code>when</code> branch that isn't kept:</p>
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-812"></button><textarea hidden id="copy-812">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	printf(&quot;%s\n&quot;, mode())
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s\n"</span>, <span class="c-function">mode</span>())</span><span class="line">}</span></code></pre></div>
+<div class="code cella"><div class="code-title">debug.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-813"></button><textarea hidden id="copy-813">mod example
+use when debug
+
+mode: fun -&gt; cstr =&gt; &quot;debug&quot;</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"><span class="c-keyword">use</span> <span class="c-keyword">when</span> debug</span><span class="line"> </span><span class="line"><span class="c-function">mode</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"debug"</span></span></code></pre></div>
+<div class="code cella"><div class="code-title">release.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-814"></button><textarea hidden id="copy-814">mod example
+use when !debug
+
+mode: fun -&gt; cstr =&gt; &quot;release&quot;</textarea><pre><code><span class="line">mod example</span><span class="line">use <span class="c-keyword">when</span> !debug</span><span class="line"> </span><span class="line">mode: <span class="c-keyword">fun</span> -&gt; cstr =&gt; <span class="c-literal">"release"</span></span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>debug</pre></div>
+<p>Each build sees exactly one <code>mode</code>. The <code>use when</code> line must directly follow the <code>mod</code> line, before any other import ("'use when' must directly follow the module name"), and a file has at most one:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-815"></button><textarea hidden id="copy-815">mod example
+use when debug
+use when windows
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"><span class="c-keyword">use</span> <span class="c-keyword">when</span> debug</span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:0ch">Cannot declare more than one &#x27;use when&#x27;</span></span><span class="line"><span class="c-keyword">use</span> <span class="c-keyword">when</span> windows</span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:0ch">Cannot declare more than one &#x27;use when&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="when-functions"><a class="anchor" href="#when-functions"><code>when</code> functions</a></h2>
+<p>A function can carry a condition of its own, written after its signature: <code>trace: fun(value: i32) when logging</code>. Unlike a <code>when</code> block, a <code>when</code> function is checked in every build. In builds where its condition holds, it's an ordinary function. In other builds it doesn't exist, and every call to it is removed along with its arguments, so they aren't evaluated:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-816"></button><textarea hidden id="copy-816">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+calls: var i32 = 0
+
+count: fun(value: i32) -&gt; i32
+{
+	calls += 1
+	ret value
+}
+
+trace: fun(value: i32) when debug
+{
+	printf(&quot;trace %d\n&quot;, value)
+}
+
+measure: fun(value: i32) when release
+{
+	printf(&quot;measure %d\n&quot;, value)
+}
+
+main: fun
+{
+	trace(count(1))
+	measure(count(2))
+	printf(&quot;%d calls\n&quot;, calls)
+}</textarea><pre><code><span class="line">calls: <span class="c-keyword">var</span> <span class="c-type">i32</span> = <span class="c-literal">0</span></span><span class="line"> </span><span class="line"><span class="c-function">count</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	calls += <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">value</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">trace</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) <span class="c-keyword">when</span> debug</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"trace %d\n"</span>, <span class="c-parameter">value</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">measure</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) <span class="c-keyword">when</span> release</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"measure %d\n"</span>, <span class="c-parameter">value</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">trace</span>(<span class="c-function">count</span>(<span class="c-literal">1</span>))</span><span class="line">	<span class="c-function">measure</span>(<span class="c-function">count</span>(<span class="c-literal">2</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d calls\n"</span>, calls)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>trace 1
+1 calls</pre></div>
+<p>The call to <code>measure</code> and its argument <code>count(2)</code> are gone from this debug build, so <code>count</code> ran once.</p>
+<p>Because the arguments are still checked as if the call ran, a program means the same in every build. Here <code>log</code> would use <code>text</code> after it was moved, which is an error even in a release build where <code>log</code> is never called:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-817"></button><textarea hidden id="copy-817">mod example
+
+Text: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+take: fun(own text: Text)
+{
+}
+
+log: fun(imm text: Text) when release
+{
+}
+
+main: fun
+{
+	val text = Text(1)
+	take(own text)
+	log(imm text)
+}</textarea><pre><code><span class="line"><span class="c-type">Text</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">take</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">text</span>: <span class="c-type">Text</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">log</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">text</span>: <span class="c-type">Text</span>) <span class="c-keyword">when</span> release</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> text = <span class="c-type">Text</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-function">take</span>(<span class="c-keyword">own</span> text)</span><span class="line">	<span class="c-function">log</span>(<span class="c-keyword">imm</span> text)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use moved values<span class="diagnostic-note">Moved on line 23</span></span></span><span class="line">}</span></code></pre></div>
+<p>To leave code out unchecked, put it in a <code>when</code> block instead.</p>
+<p>Methods and static functions can be <code>when</code> functions too, and generic functions and functions taking templates work the same way. Since calls to them may vanish, <code>when</code> functions are limited to what a removed call can't miss:</p>
+<ul><li>They return nothing, and they can't be <code>-&gt; never</code>.</li><li>They can't take <code>own</code> parameters, since a removed call would leave the value unmoved.</li><li>They can't be used as values.</li><li><code>main</code>, constructors, destructors, getters, setters, operators and <code>ext</code> functions can't be <code>when</code> functions, a trait can't require one, and one can't implement a trait's member.</li></ul>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-818"></button><textarea hidden id="copy-818">mod example
+
+total: fun(value: i32) -&gt; i32 when debug =&gt; value
+
+keep: fun(own value: i32) when debug
+{
+}
+
+trace: fun(value: i32) when debug
+{
+}
+
+apply: fun(action: fun[i32]) =&gt; action(1)
+
+main: fun
+{
+	apply(trace)
+}</textarea><pre><code><span class="line"><span class="c-function">total</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> <span class="c-keyword">when</span> debug =&gt; <span class="c-parameter">value</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:26ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:26ch">Cannot return values from &#x27;when&#x27; functions</span></span><span class="line"> </span><span class="line"><span class="c-function">keep</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">value</span>: <span class="c-type">i32</span>) <span class="c-keyword">when</span> debug</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot take &#x27;own&#x27; parameters in &#x27;when&#x27; functions</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">trace</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) <span class="c-keyword">when</span> debug</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">apply</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">action</span>: <span class="c-keyword">fun</span>[<span class="c-type">i32</span>]) =&gt; <span class="c-parameter">action</span>(<span class="c-literal">1</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">apply</span>(trace)</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot use &#x27;when&#x27; functions as values</span></span><span class="line">}</span></code></pre></div>
+<h2 id="conditional-project-settings"><a class="anchor" href="#conditional-project-settings">Conditional project settings</a></h2>
+<p>A <code>.celp</code> file can hold tables named <code>[When."condition"]</code>, with a condition written as in <code>when</code>. Their settings apply only to builds where the condition holds and override the settings at the top of the file. A condition that is a single flag can drop the quotes, as in <code>[When.debug]</code>:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-819"></button><textarea hidden id="copy-819">OutputType = &quot;Executable&quot;
+OverflowChecks = true
+
+[Flags]
+fast = false
+
+[When.&quot;release &amp;&amp; fast&quot;]
+OverflowChecks = false</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">OverflowChecks </span>= <span class="c-literal">true</span></span><span class="line"> </span><span class="line"><span class="c-type">[Flags]</span></span><span class="line"><span class="c-field">fast </span>= <span class="c-literal">false</span></span><span class="line"> </span><span class="line"><span class="c-type">[When."release &amp;&amp; fast"]</span></span><span class="line"><span class="c-field">OverflowChecks </span>= <span class="c-literal">false</span></span></code></pre></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-820"></button><textarea hidden id="copy-820">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	when overflowChecks
+	{
+		printf(&quot;checked\n&quot;)
+	}
+	else
+	{
+		printf(&quot;unchecked\n&quot;)
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> overflowChecks</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"checked\n"</span>)</span><span class="line">	}</span><span class="line">	<span class="c-keyword">else</span></span><span class="line">	{</span><span class="line">		printf(<span class="c-literal">"unchecked\n"</span>)</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>checked</pre></div>
+<p>Built with <code>--release --flag fast</code>, the same program prints <code>unchecked</code>.</p>
+<p>A conditional table can also add project references, which are added to the ones at the top level:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-821"></button><textarea hidden id="copy-821">[[When.&quot;windows || linux&quot;.ProjectReferences]]
+Path = &#x27;platform/platform.celp&#x27;</textarea><pre><code><span class="line">[[When."windows || linux".ProjectReferences]]</span><span class="line">Path = 'platform/platform.celp'</span></code></pre></div>
+<p><code>OutputType</code> and <code>[Flags]</code> can't be set in a conditional table. When two tables that both apply set the same setting, the build fails with an error naming both tables. <a href="project-settings.html">Project settings</a> lists which settings can be conditional.</p>
+</article>
+<nav class="pager"><a class="previous" href="modules.html"><span>Previous</span>Modules and visibility</a><a class="next" href="calling-c.html"><span>Next</span>Calling C</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#when-blocks">when blocks</a></li><li class="level-3"><a href="#else-when-and-else">else when and else</a></li><li class="level-3"><a href="#conditions">Conditions</a></li><li class="level-3"><a href="#where-when-blocks-go">Where when blocks go</a></li><li class="level-3"><a href="#code-in-other-builds-is-only-parsed">Code in other builds is only parsed</a></li><li class="level-2"><a href="#built-in-flags">Built-in flags</a></li><li class="level-2"><a href="#project-flags">Project flags</a></li><li class="level-2"><a href="#leaving-out-whole-files">Leaving out whole files</a></li><li class="level-2"><a href="#when-functions">when functions</a></li><li class="level-2"><a href="#conditional-project-settings">Conditional project settings</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Built-in types - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html" class="current"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Built-in types</h1>
+<p>These are the types the language provides. Everything else, such as records, enums, unions and traits, is declared in code. Sizes and alignments are in bytes, as <code>sizeOf</code> and <code>alignOf</code> report them on the 64-bit targets Cella builds for. The default is the value a variable of the type starts with when it's declared without one.</p>
+<h2 id="summary"><a class="anchor" href="#summary">Summary</a></h2>
+<div class="table-wrap"><table><thead><tr><th>Type</th><th>Size</th><th>Alignment</th><th>Default</th></tr></thead><tbody><tr><td><code>i8</code>, <code>u8</code></td><td>1</td><td>1</td><td><code>0</code></td></tr><tr><td><code>i16</code>, <code>u16</code></td><td>2</td><td>2</td><td><code>0</code></td></tr><tr><td><code>i32</code>, <code>u32</code></td><td>4</td><td>4</td><td><code>0</code></td></tr><tr><td><code>i64</code>, <code>u64</code></td><td>8</td><td>8</td><td><code>0</code></td></tr><tr><td><code>i128</code>, <code>u128</code></td><td>16</td><td>16</td><td><code>0</code></td></tr><tr><td><code>isize</code>, <code>usize</code></td><td>8</td><td>8</td><td><code>0</code></td></tr><tr><td><code>f32</code></td><td>4</td><td>4</td><td><code>0.0</code></td></tr><tr><td><code>f64</code></td><td>8</td><td>8</td><td><code>0.0</code></td></tr><tr><td><code>bool</code></td><td>1</td><td>1</td><td><code>false</code></td></tr><tr><td><code>char</code></td><td>4</td><td>4</td><td>the character with code 0</td></tr><tr><td><code>str</code></td><td>16</td><td>8</td><td>the empty string</td></tr><tr><td><code>cstr</code></td><td>8</td><td>8</td><td><code>null</code></td></tr><tr><td><code>ptr</code>, <code>ptr[T]</code></td><td>8</td><td>8</td><td><code>null</code></td></tr><tr><td><code>ptr[dyn[K]]</code></td><td>16</td><td>8</td><td><code>null</code></td></tr><tr><td><code>array[T, N]</code></td><td><code>N</code> times the size of <code>T</code></td><td>the alignment of <code>T</code></td><td>every element at its default</td></tr><tr><td><code>imm[T]</code>, <code>mut[T]</code></td><td>8</td><td>8</td><td>none</td></tr><tr><td><code>imm[dyn[K]]</code>, <code>mut[dyn[K]]</code></td><td>16</td><td>8</td><td>none</td></tr><tr><td><code>fun[...]</code>, <code>ref fun[...]</code></td><td>16</td><td>8</td><td>none</td></tr><tr><td><code>ext fun[...]</code></td><td>8</td><td>8</td><td>none</td></tr><tr><td><code>fstr[K]</code></td><td>24</td><td>8</td><td>none</td></tr><tr><td><code>dyn[K]</code></td><td>no fixed size</td><td></td><td>none</td></tr><tr><td><code>never</code></td><td>no size</td><td></td><td>none</td></tr></tbody></table></div>
+<p><code>sizeOf</code> and <code>alignOf</code> take a type or a value and give a <code>usize</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-918"></button><textarea hidden id="copy-918">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	printf(&quot;%zu %zu\n&quot;, sizeOf(i128), alignOf(i128))
+	printf(&quot;%zu %zu\n&quot;, sizeOf(str), alignOf(str))
+	printf(&quot;%zu %zu\n&quot;, sizeOf(array[u16, 5]), alignOf(array[u16, 5]))
+	printf(&quot;%zu %zu\n&quot;, sizeOf(fun[i32 -&gt; i32]), sizeOf(ext fun[i32 -&gt; i32]))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">i128</span>), <span class="c-keyword">alignOf</span>(<span class="c-type">i128</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">str</span>), <span class="c-keyword">alignOf</span>(<span class="c-type">str</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(array[<span class="c-type">u16</span>, <span class="c-literal">5</span>]), <span class="c-keyword">alignOf</span>(array[<span class="c-type">u16</span>, <span class="c-literal">5</span>]))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(<span class="c-keyword">fun</span>[<span class="c-type">i32</span> -&gt; <span class="c-type">i32</span>]), <span class="c-keyword">sizeOf</span>(<span class="c-keyword">ext</span> <span class="c-keyword">fun</span>[<span class="c-type">i32</span> -&gt; <span class="c-type">i32</span>]))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>16 16
+16 8
+10 2
+16 8</pre></div>
+<h2 id="integers"><a class="anchor" href="#integers">Integers</a></h2>
+<div class="table-wrap"><table><thead><tr><th>Type</th><th>Smallest value</th><th>Largest value</th></tr></thead><tbody><tr><td><code>i8</code></td><td>-128</td><td>127</td></tr><tr><td><code>i16</code></td><td>-32768</td><td>32767</td></tr><tr><td><code>i32</code></td><td>-2147483648</td><td>2147483647</td></tr><tr><td><code>i64</code></td><td>-2⁶³</td><td>2⁶³ - 1</td></tr><tr><td><code>i128</code></td><td>-2¹²⁷</td><td>2¹²⁷ - 1</td></tr><tr><td><code>isize</code></td><td>-2⁶³</td><td>2⁶³ - 1</td></tr><tr><td><code>u8</code></td><td>0</td><td>255</td></tr><tr><td><code>u16</code></td><td>0</td><td>65535</td></tr><tr><td><code>u32</code></td><td>0</td><td>4294967295</td></tr><tr><td><code>u64</code></td><td>0</td><td>2⁶⁴ - 1</td></tr><tr><td><code>u128</code></td><td>0</td><td>2¹²⁸ - 1</td></tr><tr><td><code>usize</code></td><td>0</td><td>2⁶⁴ - 1</td></tr></tbody></table></div>
+<p>Signed integers use two's complement. <code>isize</code> and <code>usize</code> are as wide as a pointer; <code>usize</code> is the type of sizes and lengths. <a href="numbers.html">Numbers</a> covers literals, arithmetic and overflow.</p>
+<h2 id="floating-point-numbers"><a class="anchor" href="#floating-point-numbers">Floating-point numbers</a></h2>
+<p><code>f32</code> and <code>f64</code> are IEEE 754 single and double precision numbers. <a href="numbers.html">Numbers</a> covers them.</p>
+<h2 id="bool-and-char"><a class="anchor" href="#bool-and-char"><code>bool</code> and <code>char</code></a></h2>
+<p><code>bool</code> is <code>true</code> or <code>false</code>, stored in one byte. <code>char</code> is a Unicode scalar value: a code point from 0 to 0x10FFFF, other than the surrogates 0xD800 to 0xDFFF. <a href="text.html">Bool, char and strings</a> covers both.</p>
+<h2 id="str-and-cstr"><a class="anchor" href="#str-and-cstr"><code>str</code> and <code>cstr</code></a></h2>
+<p>A <code>str</code> is a run of UTF-8 bytes it doesn't own, with two read-only properties: <code>data</code>, a <code>ptr[u8]</code> to the first byte, and <code>byteLength</code>, a <code>usize</code>. A <code>cstr</code> is a single pointer to zero-terminated bytes, the form C functions take. A string literal becomes either, depending on the type it's given. <a href="text.html">Bool, char and strings</a> covers both.</p>
+<h2 id="pointers"><a class="anchor" href="#pointers">Pointers</a></h2>
+<p><code>ptr[T]</code> points to a <code>T</code>, and <code>ptr</code> points to memory of no particular type. Nothing is checked through a pointer. A pointer to a trait object, <code>ptr[dyn[K]]</code>, also carries what it needs to call the trait's members, so it's twice as large. <a href="pointers.html">Pointers</a> covers them.</p>
+<h2 id="arrays"><a class="anchor" href="#arrays">Arrays</a></h2>
+<p><code>array[T, N]</code> holds <code>N</code> values of type <code>T</code> in a row, with no padding between them, so its size is <code>N</code> times the size of <code>T</code>. <code>N</code> is a <code>usize</code> known at compile time and can be 0. <a href="arrays.html">Arrays</a> covers them.</p>
+<h2 id="borrow-types"><a class="anchor" href="#borrow-types">Borrow types</a></h2>
+<p><code>imm[T]</code> and <code>mut[T]</code> borrow a <code>T</code> that lives somewhere else, without and with the right to write it. A borrow is the size of a pointer, or twice that when it borrows a trait object. <a href="borrows.html">Borrows</a> covers them.</p>
+<h2 id="function-types"><a class="anchor" href="#function-types">Function types</a></h2>
+<p><code>fun[A, B -&gt; R]</code> holds a function that takes <code>A</code> and <code>B</code> and returns <code>R</code>. <code>ref fun[...]</code> can also hold closures, which borrow the variables they capture. <code>ext fun[...]</code> holds a C function pointer, the only kind C can call. <a href="closures.html#function-types">Function values and closures</a> covers them.</p>
+<h2 id="trait-objects"><a class="anchor" href="#trait-objects">Trait objects</a></h2>
+<p><code>dyn[K]</code> is a value of some type that implements the trait <code>K</code>, chosen at run time. Its size depends on that type, so it's used only behind a borrow or a pointer, never by value. <a href="trait-objects.html">Trait objects</a> covers it.</p>
+<h2 id="templates"><a class="anchor" href="#templates">Templates</a></h2>
+<p><code>fstr[K]</code> holds the pieces of an interpolated string, with every value it fills in implementing the trait <code>K</code>. <a href="templates.html">String templates</a> covers it.</p>
+<h2 id="never"><a class="anchor" href="#never"><code>never</code></a></h2>
+<p><code>never</code> is the result type of a function that doesn't return, such as one that always exits or loops forever. It's only allowed as a result type, and it has no size. <a href="functions.html#functions-that-never-return">Functions</a> covers it.</p>
+<h2 id="defaults"><a class="anchor" href="#defaults">Defaults</a></h2>
+<p>Writing a built-in type's name with empty parentheses gives its default, and a variable declared with <code>var</code> and no value starts at its default. For every type that has one, the default is all zero bytes:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-919"></button><textarea hidden id="copy-919">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	printf(&quot;%d %.1f %d %u\n&quot;, i32(), f64(), bool(), u32(char()))
+	printf(&quot;%zu %d %d\n&quot;, str().byteLength, cstr() == null, ptr[u8]() == null)
+	var counts: array[i32, 3]
+	counts[1] += 5
+	printf(&quot;%d %d %d\n&quot;, counts[0], counts[1], counts[2])
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %.1f %d %u\n"</span>, <span class="c-type">i32</span>(), <span class="c-type">f64</span>(), <span class="c-type">bool</span>(), <span class="c-type">u32</span>(<span class="c-type">char</span>()))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %d %d\n"</span>, <span class="c-type">str</span>().<span class="c-field">byteLength</span>, <span class="c-type">cstr</span>() == <span class="c-keyword">null</span>, ptr[<span class="c-type">u8</span>]() == <span class="c-keyword">null</span>)</span><span class="line">	<span class="c-keyword">var</span> counts: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">3</span>]</span><span class="line">	counts[<span class="c-literal">1</span>] += <span class="c-literal">5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, counts[<span class="c-literal">0</span>], counts[<span class="c-literal">1</span>], counts[<span class="c-literal">2</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0 0.0 0 0
+0 1 1
+0 5 0</pre></div>
+<p>Borrows, function values, templates and trait objects have no default, since all zero bytes isn't a valid value of them. A variable of one of these types must be given a value before it's used:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-920"></button><textarea hidden id="copy-920">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val handler: fun[i32 -&gt; i32]
+	printf(&quot;%d\n&quot;, handler(1))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> handler: <span class="c-keyword">fun</span>[<span class="c-type">i32</span> -&gt; <span class="c-type">i32</span>]</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, handler(<span class="c-literal">1</span>))</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot use uninitialized values</span></span><span class="line">}</span></code></pre></div>
+<p>The types with a default meet the <code>T: default</code> constraint, and an array has one when its element type does. <a href="generics.html#constraints">Generics</a> covers constraints.</p>
+<h2 id="copies-and-borrows"><a class="anchor" href="#copies-and-borrows">Copies and borrows</a></h2>
+<p>Every built-in type other than <code>dyn[K]</code> and <code>never</code> can be copied, so they meet <code>T: copy</code>. Borrow types, <code>str</code>, <code>ref fun[...]</code>, <code>fstr[K]</code>, borrowed trait objects and arrays of any of them hold borrows, so they don't meet <code>T: noref</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-921"></button><textarea hidden id="copy-921">mod example
+
+keep[T: noref]: fun(own value: T) -&gt; T =&gt; value
+
+main: fun
+{
+	val word: str = &quot;hi&quot;
+	val kept = keep(word)
+}</textarea><pre><code><span class="line"><span class="c-function">keep</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">noref</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-typeparam">T</span> =&gt; <span class="c-parameter">value</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> word: <span class="c-type">str</span> = <span class="c-literal">"hi"</span></span><span class="line">	<span class="c-keyword">val</span> kept = keep(word)</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:15ch">&#x27;keep&#x27; requires &#x27;T: noref&#x27;<span class="diagnostic-note">&#x27;str&#x27; holds borrows</span></span></span><span class="line">}</span></code></pre></div>
+<p><code>cstr</code> and pointers hold no borrows: nothing is checked through them. <a href="borrows.html">Borrows</a> explains what holding a borrow means.</p>
+<h2 id="built-in-names"><a class="anchor" href="#built-in-names">Built-in names</a></h2>
+<p>None of these type names can be used to declare anything else, as <a href="keywords.html">Keywords</a> shows.</p>
+</article>
+<nav class="pager"><a class="previous" href="operator-reference.html"><span>Previous</span>Operators and precedence</a><a class="next" href="project-settings.html"><span>Next</span>Project settings</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#summary">Summary</a></li><li class="level-2"><a href="#integers">Integers</a></li><li class="level-2"><a href="#floating-point-numbers">Floating-point numbers</a></li><li class="level-2"><a href="#bool-and-char">bool and char</a></li><li class="level-2"><a href="#str-and-cstr">str and cstr</a></li><li class="level-2"><a href="#pointers">Pointers</a></li><li class="level-2"><a href="#arrays">Arrays</a></li><li class="level-2"><a href="#borrow-types">Borrow types</a></li><li class="level-2"><a href="#function-types">Function types</a></li><li class="level-2"><a href="#trait-objects">Trait objects</a></li><li class="level-2"><a href="#templates">Templates</a></li><li class="level-2"><a href="#never">never</a></li><li class="level-2"><a href="#defaults">Defaults</a></li><li class="level-2"><a href="#copies-and-borrows">Copies and borrows</a></li><li class="level-2"><a href="#built-in-names">Built-in names</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

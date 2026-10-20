@@ -174,7 +174,7 @@
           <ul>
             <li><a class="current" href="index.html">Home</a></li>
             <li><a>About</a></li>
-            <li><a>Documentation</a></li>
+            <li><a href="docs/index.html">Documentation</a></li>
             <li><a href="https://github.com/Anixias/Cella" target="_blank">Source</a></li>
           </ul>
           <img id="theme-button" class="icon-button" onclick="toggleTheme()" src="img/sun.svg">
@@ -308,7 +308,7 @@
 	<span class="cella-function">rect</span>(width: <span class="cella-type">f64</span>, height: <span class="cella-type">f64</span>)
 }
 
-<span class="cella-function">area</span>: <span class="cella-keyword">fun</span>(<span class="cella-parameter">shape</span>: <span class="cella-type">Shape</span>) -&gt; <span class="cella-type">f64</span> = <span class="cella-keyword">match</span> shape
+<span class="cella-function">area</span>: <span class="cella-keyword">fun</span>(<span class="cella-parameter">shape</span>: <span class="cella-type">Shape</span>) -&gt; <span class="cella-type">f64</span> =&gt; <span class="cella-keyword">match</span> shape
 {
 	<span class="cella-function">circle</span>(<span class="cella-keyword">val</span> r) =&gt; <span class="cella-literal">3.14159</span> * r * r
 	<span class="cella-function">rect</span>(<span class="cella-keyword">val</span> w, <span class="cella-keyword">val</span> h) =&gt; w * h

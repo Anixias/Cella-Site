@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functions - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html" class="current"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Functions</h1>
+<p>A function is a named piece of code that takes parameters and may return a result. This chapter covers declaring and calling functions, default values, overloading, functions that never return, the order arguments run in, and <code>main</code>, where a program starts.</p>
+<h2 id="declaring-a-function"><a class="anchor" href="#declaring-a-function">Declaring a function</a></h2>
+<p>A function is declared like everything else in Cella: a name, a colon, then what the name is. <code>fun</code> makes it a function. The parameters follow in parentheses, then <code>-&gt;</code> and the result type, then the body in braces:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-177"></button><textarea hidden id="copy-177">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+area: fun(width: i32, height: i32) -&gt; i32
+{
+	ret width * height
+}
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, area(3, 4))
+}</textarea><pre><code><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">width</span>: <span class="c-type">i32</span>, <span class="c-parameter">height</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">width</span> * <span class="c-parameter">height</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">area</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>12</pre></div>
+<p>A call names the function and passes its arguments in parentheses, separated by commas. <code>ret</code> ends the function and gives back its result.</p>
+<p>A function that takes no parameters leaves out the parentheses, as <code>main</code> does above. Empty parentheses, as in <code>answer: fun() -&gt; i32</code>, are accepted too, and <code>--hints</code> reports them as redundant. A call always has parentheses, even when it passes nothing:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-178"></button><textarea hidden id="copy-178">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+answer: fun -&gt; i32
+{
+	ret 42
+}
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, answer())
+}</textarea><pre><code><span class="line"><span class="c-function">answer</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-literal">42</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">answer</span>())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>42</pre></div>
+<p>A function's name without them is a function value, covered in <a href="closures.html">Function values and closures</a>.</p>
+<h2 id="parameters"><a class="anchor" href="#parameters">Parameters</a></h2>
+<p>Each parameter has a name and a type, written <code>name: type</code>. Parameter names in one function must be different, and <code>_</code> names a parameter the body doesn't use:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-179"></button><textarea hidden id="copy-179">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+second: fun(_: i32, b: i32) -&gt; i32
+{
+	ret b
+}
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, second(1, 2))
+}</textarea><pre><code><span class="line"><span class="c-function">second</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">_</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">b</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">second</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2</pre></div>
+<p>A parameter like these gets a copy of the argument, and the function can't change it; to work with a changing value, copy it into a <code>var</code>. Reassigning a parameter is an error, and so is using one name twice:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-180"></button><textarea hidden id="copy-180">mod example
+
+countdown: fun(n: i32) -&gt; i32
+{
+	n -= 1
+	ret n
+}
+
+same: fun(a: i32, a: i32) -&gt; i32
+{
+	ret a
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">countdown</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-parameter">n</span> -= <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign read-only parameters</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">n</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">same</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">a</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:10ch">Parameter &#x27;a&#x27; is declared more than once</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:18ch">Parameter &#x27;a&#x27; is declared more than once</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">a</span></span><span class="line">}</span></code></pre></div>
+<p>A parameter can also borrow its argument or take ownership of it, with the modes <code>imm</code>, <code>mut</code> and <code>own</code> written before its name. <a href="parameter-modes.html">Parameter modes</a> covers them.</p>
+<h2 id="results-and-ret"><a class="anchor" href="#results-and-ret">Results and <code>ret</code></a></h2>
+<p>The type after <code>-&gt;</code> is the function's result. Every path through the body must end in a <code>ret</code> with a value of that type, or in something that never finishes, such as an endless <code>loop</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-181"></button><textarea hidden id="copy-181">mod example
+
+sign: fun(n: i32) -&gt; i32
+{
+	if n &gt; 0
+		ret 1
+	else if n &lt; 0
+		ret -1
+}
+
+answer: fun -&gt; i32
+{
+	ret
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">sign</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:0ch">Not all paths return a value</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">n</span> &gt; <span class="c-literal">0</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">else</span> <span class="c-keyword">if</span> <span class="c-parameter">n</span> &lt; <span class="c-literal">0</span></span><span class="line">		<span class="c-keyword">ret</span> -<span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">answer</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">ret</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;answer&#x27; must return a value</span></span><span class="line">}</span></code></pre></div>
+<p>A function without <code>-&gt;</code> returns nothing. Its body runs to its end, or to a <code>ret</code> with no value:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-182"></button><textarea hidden id="copy-182">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+report: fun(count: i32)
+{
+	if count == 0
+	{
+		printf(&quot;nothing\n&quot;)
+		ret
+	}
+
+	printf(&quot;%d items\n&quot;, count)
+}
+
+main: fun
+{
+	report(0)
+	report(3)
+}</textarea><pre><code><span class="line"><span class="c-function">report</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">count</span>: <span class="c-type">i32</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">count</span> == <span class="c-literal">0</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"nothing\n"</span>)</span><span class="line">		<span class="c-keyword">ret</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d items\n"</span>, <span class="c-parameter">count</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">report</span>(<span class="c-literal">0</span>)</span><span class="line">	<span class="c-function">report</span>(<span class="c-literal">3</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>nothing
+3 items</pre></div>
+<p>Such a function can't return a value, and a call to it can't be used as one:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-183"></button><textarea hidden id="copy-183">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+greet: fun
+{
+	printf(&quot;hi\n&quot;)
+	ret 5
+}
+
+main: fun
+{
+	val x = greet()
+}</textarea><pre><code><span class="line"><span class="c-function">greet</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"hi\n"</span>)</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot return a value from &#x27;greet&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x = greet()</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:12ch">&#x27;greet&#x27; doesn&#x27;t return a value</span></span><span class="line">}</span></code></pre></div>
+<p>A function with a result can be called as a statement, and its result is thrown away. That's how the examples in this documentation call <code>printf</code>, which returns an <code>i32</code>.</p>
+<p>Code right after a <code>ret</code>, which can never run, gets the warning "Unreachable code".</p>
+<h2 id="expression-bodies"><a class="anchor" href="#expression-bodies">Expression bodies</a></h2>
+<p>When a function's body is a single expression, <code>=&gt;</code> replaces the braces and the <code>ret</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-184"></button><textarea hidden id="copy-184">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+square: fun(n: i32) -&gt; i32 =&gt; n * n
+
+volume: fun(width: i64, height: i64, depth: i64) -&gt; i64 =&gt;
+	width * height * depth
+
+show: fun(n: i32) =&gt; printf(&quot;%d\n&quot;, n)
+
+main: fun
+{
+	show(square(5))
+	printf(&quot;%lld\n&quot;, volume(2, 3, 4))
+}</textarea><pre><code><span class="line"><span class="c-function">square</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">n</span> * <span class="c-parameter">n</span></span><span class="line"> </span><span class="line"><span class="c-function">volume</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">width</span>: <span class="c-type">i64</span>, <span class="c-parameter">height</span>: <span class="c-type">i64</span>, <span class="c-parameter">depth</span>: <span class="c-type">i64</span>) -&gt; <span class="c-type">i64</span> =&gt;</span><span class="line">	<span class="c-parameter">width</span> * <span class="c-parameter">height</span> * <span class="c-parameter">depth</span></span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-parameter">n</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>(<span class="c-function">square</span>(<span class="c-literal">5</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%lld\n"</span>, <span class="c-function">volume</span>(<span class="c-literal">2</span>, <span class="c-literal">3</span>, <span class="c-literal">4</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>25
+24</pre></div>
+<p>In a function with a result, the expression is the result. In a function without one, like <code>show</code>, the expression runs and its value, if any, is thrown away. A long expression wraps after <code>=&gt;</code>, never before it.</p>
+<p>The expression can be a <code>match</code>, with its arms on the lines below. <a href="pattern-matching.html">Pattern matching</a> covers <code>match</code>.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-185"></button><textarea hidden id="copy-185">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+describe: fun(n: i32) -&gt; cstr =&gt; match n
+{
+	0 =&gt; &quot;zero&quot;
+	1..=9 =&gt; &quot;small&quot;
+	else =&gt; &quot;large&quot;
+}
+
+main: fun
+{
+	printf(&quot;%s %s %s\n&quot;, describe(0), describe(7), describe(250))
+}</textarea><pre><code><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">n</span></span><span class="line">{</span><span class="line">	<span class="c-literal">0</span> =&gt; <span class="c-literal">"zero"</span></span><span class="line">	<span class="c-literal">1</span>..=<span class="c-literal">9</span> =&gt; <span class="c-literal">"small"</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">"large"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s %s %s\n"</span>, <span class="c-function">describe</span>(<span class="c-literal">0</span>), <span class="c-function">describe</span>(<span class="c-literal">7</span>), <span class="c-function">describe</span>(<span class="c-literal">250</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>zero small large</pre></div>
+<h2 id="default-parameter-values"><a class="anchor" href="#default-parameter-values">Default parameter values</a></h2>
+<p>A parameter can have a default value, written <code>= value</code> after its type. A call may leave out trailing parameters that have defaults:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-186"></button><textarea hidden id="copy-186">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+greet: fun(name: cstr = &quot;world&quot;, times: i32 = 1)
+{
+	for _ in 0..times
+		printf(&quot;hello, %s\n&quot;, name)
+}
+
+main: fun
+{
+	greet()
+	greet(&quot;Ada&quot;)
+	greet(&quot;Bob&quot;, 2)
+}</textarea><pre><code><span class="line"><span class="c-function">greet</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">name</span>: <span class="c-type">cstr</span> = <span class="c-literal">"world"</span>, <span class="c-parameter">times</span>: <span class="c-type">i32</span> = <span class="c-literal">1</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> _ <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-parameter">times</span></span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"hello, %s\n"</span>, <span class="c-parameter">name</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">greet</span>()</span><span class="line">	<span class="c-function">greet</span>(<span class="c-literal">"Ada"</span>)</span><span class="line">	<span class="c-function">greet</span>(<span class="c-literal">"Bob"</span>, <span class="c-literal">2</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>hello, world
+hello, Ada
+hello, Bob
+hello, Bob</pre></div>
+<p>Arguments fill parameters from the left, so a call can't skip a parameter and pass a later one. The rules for defaults:</p>
+<ul><li>A default must be a constant: a literal, a named <code>const</code>, an enum case, <code>null</code> or a function's name. It can't call a function.</li><li>Every parameter after one with a default needs a default too.</li><li><code>mut</code> parameters can't have defaults, since they need a place to change.</li></ul>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-187"></button><textarea hidden id="copy-187">mod example
+
+limit: fun -&gt; i32 =&gt; 10
+
+clamp: fun(value: i32, low: i32 = 0, high: i32) -&gt; i32 =&gt; value
+
+reset: fun(mut value: i32 = 0) =&gt; value = 0
+
+cap: fun(value: i32, high: i32 = limit()) -&gt; i32 =&gt; value
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">limit</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">10</span></span><span class="line"> </span><span class="line"><span class="c-function">clamp</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>, <span class="c-parameter">low</span>: <span class="c-type">i32</span> = <span class="c-literal">0</span>, <span class="c-parameter">high</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">value</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:37ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:37ch">Cannot take parameters without defaults after parameters with defaults</span></span><span class="line"> </span><span class="line"><span class="c-function">reset</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">value</span>: <span class="c-type">i32</span> = <span class="c-literal">0</span>) =&gt; <span class="c-parameter">value</span> = <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:28ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:28ch">Cannot declare defaults for &#x27;mut&#x27; parameters</span></span><span class="line"> </span><span class="line"><span class="c-function">cap</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>, <span class="c-parameter">high</span>: <span class="c-type">i32</span> = limit()) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">value</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:33ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:33ch">The default value of &#x27;high&#x27; must be a constant</span></span></code></pre></div>
+<p>Defaults belong to the declaration, not to the function's type. A call through a function value passes every argument:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-188"></button><textarea hidden id="copy-188">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+greet: fun(name: cstr = &quot;world&quot;, times: i32 = 1) =&gt; printf(&quot;hello, %s\n&quot;, name)
+
+main: fun
+{
+	val f = greet
+	f(&quot;Ada&quot;)
+}</textarea><pre><code><span class="line"><span class="c-function">greet</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">name</span>: <span class="c-type">cstr</span> = <span class="c-literal">"world"</span>, <span class="c-parameter">times</span>: <span class="c-type">i32</span> = <span class="c-literal">1</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"hello, %s\n"</span>, <span class="c-parameter">name</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> f = <span class="c-function">greet</span></span><span class="line">	f(<span class="c-literal">"Ada"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;f&#x27; takes 2 arguments</span></span><span class="line">}</span></code></pre></div>
+<h2 id="overloading"><a class="anchor" href="#overloading">Overloading</a></h2>
+<p>Several functions can share a name if their parameters differ in number or in type. A call picks the one its arguments fit:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-189"></button><textarea hidden id="copy-189">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+show: fun(n: i32) =&gt; printf(&quot;i32 %d\n&quot;, n)
+show: fun(n: i64) =&gt; printf(&quot;i64 %lld\n&quot;, n)
+show: fun(n: f64) =&gt; printf(&quot;f64 %.1f\n&quot;, n)
+show: fun(n: i32, width: i32) =&gt; printf(&quot;%*d\n&quot;, width, n)
+
+main: fun
+{
+	val small: i16 = 7
+	val count: u32 = 8
+	show(5)
+	show(small)
+	show(count)
+	show(2.5)
+	show(5000000000)
+	show(42, 6)
+}</textarea><pre><code><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"i32 %d\n"</span>, <span class="c-parameter">n</span>)</span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i64</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"i64 %lld\n"</span>, <span class="c-parameter">n</span>)</span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">f64</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"f64 %.1f\n"</span>, <span class="c-parameter">n</span>)</span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>, <span class="c-parameter">width</span>: <span class="c-type">i32</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%*d\n"</span>, <span class="c-parameter">width</span>, <span class="c-parameter">n</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">i16</span> = <span class="c-literal">7</span></span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">u32</span> = <span class="c-literal">8</span></span><span class="line">	<span class="c-function">show</span>(<span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">show</span>(small)</span><span class="line">	<span class="c-function">show</span>(count)</span><span class="line">	<span class="c-function">show</span>(<span class="c-literal">2.5</span>)</span><span class="line">	<span class="c-function">show</span>(<span class="c-literal">5000000000</span>)</span><span class="line">	<span class="c-function">show</span>(<span class="c-literal">42</span>, <span class="c-literal">6</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>i32 5
+i32 7
+i64 8
+f64 2.5
+i64 5000000000
+    42</pre></div>
+<p>An argument that matches a parameter's type exactly is the best fit. Otherwise the argument converts, and a call prefers the overload whose conversions are cheapest: an <code>i16</code> reaches both <code>i32</code> and <code>i64</code>, and the narrower <code>i32</code> wins. A <code>u32</code> doesn't fit in an <code>i32</code>, so it goes to <code>i64</code>. A literal takes the type of the overload it fits best, so <code>5</code> is an <code>i32</code> and <code>5000000000</code>, too large for one, is an <code>i64</code>. <a href="conversions.html">Conversions</a> lists which conversions happen implicitly.</p>
+<p>When no overload is a better fit than the others, the call is ambiguous, and the error lists the candidates:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-190"></button><textarea hidden id="copy-190">mod example
+
+pick: fun(a: i32, b: i64) -&gt; i32 =&gt; 1
+pick: fun(a: i64, b: i32) -&gt; i32 =&gt; 2
+
+main: fun
+{
+	val x: i16 = 1
+	val y = pick(x, x)
+}</textarea><pre><code><span class="line"><span class="c-function">pick</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i64</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="line"><span class="c-function">pick</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i64</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">2</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x: <span class="c-type">i16</span> = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> y = pick(x, x)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:12ch">Call to &#x27;pick&#x27; is ambiguous<span class="diagnostic-note">Candidate on line 3</span><span class="diagnostic-note">Candidate on line 4</span></span></span><span class="line">}</span></code></pre></div>
+<p>A call that fits no overload says so:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-191"></button><textarea hidden id="copy-191">mod example
+
+scale: fun(n: i32) -&gt; i32 =&gt; n * 2
+scale: fun(n: i32, factor: i32) -&gt; i32 =&gt; n * factor
+
+main: fun
+{
+	val x = scale(1, 2, 3)
+}</textarea><pre><code><span class="line"><span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">n</span> * <span class="c-literal">2</span></span><span class="line"><span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>, <span class="c-parameter">factor</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">n</span> * <span class="c-parameter">factor</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x = scale(<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:12ch">No overload of &#x27;scale&#x27; accepts these arguments</span></span><span class="line">}</span></code></pre></div>
+<h3 id="overloads-that-conflict"><a class="anchor" href="#overloads-that-conflict">Overloads that conflict</a></h3>
+<p>Overloads must be told apart by the arguments of a call. Parameter names, result types and parameter modes don't count. Two overloads also conflict when defaults let one call reach both. Each of these is an error on every declaration involved:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-192"></button><textarea hidden id="copy-192">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+area: fun(width: i32, height: i32) -&gt; i32 =&gt; width * height
+area: fun(w: i32, h: i32) -&gt; i32 =&gt; w + h
+
+parse: fun(text: cstr) -&gt; i32 =&gt; 0
+parse: fun(text: cstr) -&gt; f64 =&gt; 0.0
+
+reset: fun(mut value: i32) =&gt; value = 0
+reset: fun(value: i32) =&gt; printf(&quot;%d\n&quot;, value)
+
+log: fun(level: i32 = 0) =&gt; printf(&quot;level %d\n&quot;, level)
+log: fun =&gt; printf(&quot;log\n&quot;)
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">width</span>: <span class="c-type">i32</span>, <span class="c-parameter">height</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">width</span> * <span class="c-parameter">height</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;area&#x27; is declared more than once with the same signature</span></span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">w</span>: <span class="c-type">i32</span>, <span class="c-parameter">h</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">w</span> + <span class="c-parameter">h</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;area&#x27; is declared more than once with the same signature</span></span><span class="line"> </span><span class="line"><span class="c-function">parse</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">cstr</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;parse&#x27; overloads cannot differ only in return type</span></span><span class="line"><span class="c-function">parse</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">cstr</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-literal">0.0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;parse&#x27; overloads cannot differ only in return type</span></span><span class="line"> </span><span class="line"><span class="c-function">reset</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">value</span>: <span class="c-type">i32</span>) =&gt; <span class="c-parameter">value</span> = <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;reset&#x27; overloads cannot differ only in parameter modes</span></span><span class="line"><span class="c-function">reset</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-parameter">value</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;reset&#x27; overloads cannot differ only in parameter modes</span></span><span class="line"> </span><span class="line"><span class="c-function">log</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">level</span>: <span class="c-type">i32</span> = <span class="c-literal">0</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"level %d\n"</span>, <span class="c-parameter">level</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;log&#x27; overloads cannot accept the same arguments</span></span><span class="line"><span class="c-function">log</span>: <span class="c-keyword">fun</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"log\n"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;log&#x27; overloads cannot accept the same arguments</span></span></code></pre></div>
+<p><code>log()</code> could call either <code>log</code>, so the default on the first one could never be used.</p>
+<h2 id="recursion-and-declaration-order"><a class="anchor" href="#recursion-and-declaration-order">Recursion and declaration order</a></h2>
+<p>A function can call itself, and functions can call each other. The order of declarations in a file doesn't matter: a function can call one declared below it, and <code>main</code> can come first or last.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-193"></button><textarea hidden id="copy-193">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	printf(&quot;%lld %d %d\n&quot;, factorial(10), isEven(10), isEven(7))
+}
+
+factorial: fun(n: i64) -&gt; i64
+{
+	if n &lt;= 1
+		ret 1
+
+	ret n * factorial(n - 1)
+}
+
+isEven: fun(n: i32) -&gt; bool
+{
+	if n == 0
+		ret true
+
+	ret isOdd(n - 1)
+}
+
+isOdd: fun(n: i32) -&gt; bool
+{
+	if n == 0
+		ret false
+
+	ret isEven(n - 1)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%lld %d %d\n"</span>, <span class="c-function">factorial</span>(<span class="c-literal">10</span>), <span class="c-function">isEven</span>(<span class="c-literal">10</span>), <span class="c-function">isEven</span>(<span class="c-literal">7</span>))</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">factorial</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i64</span>) -&gt; <span class="c-type">i64</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">n</span> &lt;= <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-literal">1</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">n</span> * <span class="c-function">factorial</span>(<span class="c-parameter">n</span> - <span class="c-literal">1</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">isEven</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">bool</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">n</span> == <span class="c-literal">0</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-keyword">true</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> <span class="c-function">isOdd</span>(<span class="c-parameter">n</span> - <span class="c-literal">1</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">isOdd</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">bool</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">n</span> == <span class="c-literal">0</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-keyword">false</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> <span class="c-function">isEven</span>(<span class="c-parameter">n</span> - <span class="c-literal">1</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3628800 1 0</pre></div>
+<p>The same holds across files: every function in a project can be used from anywhere the <a href="modules.html">module rules</a> allow.</p>
+<h2 id="calling-through-a-module"><a class="anchor" href="#calling-through-a-module">Calling through a module</a></h2>
+<p>Every function belongs to the module named by its file's <code>mod</code> line. A function in another module is called through that module's name:</p>
+<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-194"></button><textarea hidden id="copy-194">mod geometry
+
+area: fun(width: i32, height: i32) -&gt; i32 =&gt; width * height</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">geometry</span></span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">width</span>: <span class="c-type">i32</span>, <span class="c-parameter">height</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">width</span> * <span class="c-parameter">height</span></span></code></pre></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-195"></button><textarea hidden id="copy-195">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, geometry.area(2, 3))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-module">geometry</span>.<span class="c-function">area</span>(<span class="c-literal">2</span>, <span class="c-literal">3</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>6</pre></div>
+<p>Without the module name, <code>area</code> isn't found from <code>example</code>, unless the file imports it with <code>use</code>. Code can name a function of its own module the same way. <a href="modules.html">Modules and visibility</a> covers imports, nested modules and which declarations other modules can see.</p>
+<h2 id="functions-that-never-return"><a class="anchor" href="#functions-that-never-return">Functions that never return</a></h2>
+<p>A function whose result type is <code>never</code> doesn't return to its caller: it ends the program, or loops forever. C's <code>exit</code> is one, declared that way in an <code>ext</code> block:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-196"></button><textarea hidden id="copy-196">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+ext
+{
+	exit: fun(code: i32) -&gt; never
+}
+
+fail: fun(message: cstr) -&gt; never
+{
+	printf(&quot;error: %s\n&quot;, message)
+	exit(1)
+}
+
+divide: fun(a: i32, b: i32) -&gt; i32
+{
+	if b != 0
+		ret a / b
+
+	fail(&quot;division by zero&quot;)
+}
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, divide(10, 2))
+	divide(1, 0)
+	printf(&quot;not printed\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">exit</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">code</span>: <span class="c-type">i32</span>) -&gt; never</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">fail</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">message</span>: <span class="c-type">cstr</span>) -&gt; never</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"error: %s\n"</span>, <span class="c-parameter">message</span>)</span><span class="line">	<span class="c-function">exit</span>(<span class="c-literal">1</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">divide</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">b</span> != <span class="c-literal">0</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-parameter">a</span> / <span class="c-parameter">b</span></span><span class="line"> </span><span class="line">	<span class="c-function">fail</span>(<span class="c-literal">"division by zero"</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">divide</span>(<span class="c-literal">10</span>, <span class="c-literal">2</span>))</span><span class="line">	<span class="c-function">divide</span>(<span class="c-literal">1</span>, <span class="c-literal">0</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"not printed\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>5
+error: division by zero</pre></div>
+<p><code>divide</code> has no <code>ret</code> after the call to <code>fail</code>, and it doesn't need one: since <code>fail</code> never returns, the compiler knows that path never reaches the end of <code>divide</code>. Code after a call to a <code>never</code> function gets the "Unreachable code" warning.</p>
+<p>A <code>never</code> function can't <code>ret</code> at all, and no path may reach the end of its body. <code>never</code> is only a result type; parameters, variables and fields can't have it:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-197"></button><textarea hidden id="copy-197">mod example
+
+ext
+{
+	abort: fun -&gt; never
+}
+
+stop: fun(n: i32) -&gt; never
+{
+	if n == 0
+		ret
+
+	abort()
+}
+
+falls: fun(n: i32) -&gt; never
+{
+	if n == 0
+		abort()
+}
+
+take: fun(value: never)
+{
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">abort</span>: <span class="c-keyword">fun</span> -&gt; never</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">stop</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; never</span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">n</span> == <span class="c-literal">0</span></span><span class="line">		<span class="c-keyword">ret</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot return from &#x27;stop&#x27;</span></span><span class="line"> </span><span class="line">	<span class="c-function">abort</span>()</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">falls</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; never</span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;falls&#x27; can reach its end</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">n</span> == <span class="c-literal">0</span></span><span class="line">		<span class="c-function">abort</span>()</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">take</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">never</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;never&#x27; can only be a return type</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p><a href="panics.html">Checks and panics</a> covers <code>panic</code>, the usual way to stop a program with an error.</p>
+<h2 id="evaluation-order"><a class="anchor" href="#evaluation-order">Evaluation order</a></h2>
+<p>Arguments run from left to right, before the call. Operands of an operator run left to right too, whatever the operator's precedence:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-198"></button><textarea hidden id="copy-198">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+trace: fun(name: cstr, value: i32) -&gt; i32
+{
+	printf(&quot;%s &quot;, name)
+	ret value
+}
+
+sum: fun(a: i32, b: i32, c: i32) -&gt; i32 =&gt; a + b + c
+
+main: fun
+{
+	val total = sum(trace(&quot;a&quot;, 1), trace(&quot;b&quot;, 2) + trace(&quot;c&quot;, 3) * trace(&quot;d&quot;, 4), trace(&quot;e&quot;, 5))
+	printf(&quot;= %d\n&quot;, total)
+}</textarea><pre><code><span class="line"><span class="c-function">trace</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">name</span>: <span class="c-type">cstr</span>, <span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s "</span>, <span class="c-parameter">name</span>)</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">value</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">sum</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>, <span class="c-parameter">c</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">a</span> + <span class="c-parameter">b</span> + <span class="c-parameter">c</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> total = <span class="c-function">sum</span>(<span class="c-function">trace</span>(<span class="c-literal">"a"</span>, <span class="c-literal">1</span>), <span class="c-function">trace</span>(<span class="c-literal">"b"</span>, <span class="c-literal">2</span>) + <span class="c-function">trace</span>(<span class="c-literal">"c"</span>, <span class="c-literal">3</span>) * <span class="c-function">trace</span>(<span class="c-literal">"d"</span>, <span class="c-literal">4</span>), <span class="c-function">trace</span>(<span class="c-literal">"e"</span>, <span class="c-literal">5</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"= %d\n"</span>, total)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>a b c d e = 20</pre></div>
+<p>Arguments passed with <code>mut</code> or <code>imm</code> reach their place at the call, after the other arguments have run. <a href="parameter-modes.html#evaluation-order">Parameter modes</a> shows where that matters.</p>
+<h2 id="the-main-function"><a class="anchor" href="#the-main-function">The <code>main</code> function</a></h2>
+<p>A program starts in the function named <code>main</code>. A project that builds a program needs exactly one.</p>
+<h3 id="results-and-exit-codes"><a class="anchor" href="#results-and-exit-codes">Results and exit codes</a></h3>
+<p><code>main</code> can return nothing, an <code>i32</code> or <code>never</code>:</p>
+<ul><li>With no result, the program exits with code 0 when <code>main</code> ends.</li><li>With <code>-&gt; i32</code>, the value <code>main</code> returns is the program's exit code.</li><li>With <code>-&gt; never</code>, <code>main</code> never returns, and the program ends some other way, such as a call to C's <code>exit</code>.</li></ul>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-199"></button><textarea hidden id="copy-199">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+countErrors: fun -&gt; i32 =&gt; 2
+
+main: fun -&gt; i32
+{
+	val errors = countErrors()
+	if errors &gt; 0
+	{
+		printf(&quot;%d errors\n&quot;, errors)
+		ret 1
+	}
+
+	ret 0
+}</textarea><pre><code><span class="line"><span class="c-function">countErrors</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">2</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> errors = <span class="c-function">countErrors</span>()</span><span class="line">	<span class="c-keyword">if</span> errors &gt; <span class="c-literal">0</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d errors\n"</span>, errors)</span><span class="line">		<span class="c-keyword">ret</span> <span class="c-literal">1</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> <span class="c-literal">0</span></span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2 errors</pre></div>
+<p>This program exits with code 1.</p>
+<h3 id="command-line-arguments"><a class="anchor" href="#command-line-arguments">Command-line arguments</a></h3>
+<p>To read its command-line arguments, <code>main</code> takes a pointer to the first one and their count:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-200"></button><textarea hidden id="copy-200">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun(args: ptr[str], count: usize)
+{
+	for i in 1..count
+	{
+		val arg = args[i]
+		printf(&quot;%zu: %.*s\n&quot;, i, i32(arg.byteLength), arg.data)
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">args</span>: <span class="c-type">ptr</span>[<span class="c-type">str</span>], <span class="c-parameter">count</span>: <span class="c-type">usize</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">1</span>..<span class="c-parameter">count</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> arg = <span class="c-parameter">args</span>[i]</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%zu: %.*s\n"</span>, i, <span class="c-type">i32</span>(arg.<span class="c-field">byteLength</span>), arg.<span class="c-field">data</span>)</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1: red
+2: green
+3: blue</pre></div>
+<p>Each argument is a <code>str</code>, UTF-8 text. The first one, at index 0, is the path of the program itself, so a program's own arguments start at index 1. <a href="pointers.html">Pointers</a> covers <code>ptr[T]</code> and indexing through it, and <a href="text.html">Bool, char and strings</a> covers <code>str</code>.</p>
+<p><code>main</code> can instead take one parameter of any type that can be built from that pointer and count, that is, one with a constructor taking a <code>ptr[str]</code> and a <code>usize</code>. A record with those two fields works, through its field-by-field constructor:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-201"></button><textarea hidden id="copy-201">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Arguments: rec
+{
+	items: ptr[str]
+	count: usize
+}
+
+main: fun(args: Arguments)
+{
+	val last = args.items[args.count - 1]
+	printf(&quot;%zu arguments, last %.*s\n&quot;, args.count - 1, i32(last.byteLength), last.data)
+}</textarea><pre><code><span class="line"><span class="c-type">Arguments</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">items</span>: <span class="c-type">ptr</span>[<span class="c-type">str</span>]</span><span class="line">	<span class="c-field">count</span>: <span class="c-type">usize</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">args</span>: <span class="c-type">Arguments</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> last = <span class="c-parameter">args</span>.<span class="c-field">items</span>[<span class="c-parameter">args</span>.<span class="c-field">count</span> - <span class="c-literal">1</span>]</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu arguments, last %.*s\n"</span>, <span class="c-parameter">args</span>.<span class="c-field">count</span> - <span class="c-literal">1</span>, <span class="c-type">i32</span>(last.<span class="c-field">byteLength</span>), last.<span class="c-field">data</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 arguments, last blue</pre></div>
+<p>A type with a destructor is taken with <code>imm</code> or <code>own</code>, as in <code>main: fun(own args: Arguments)</code>, and its destructor runs when <code>main</code> ends. <a href="records.html">Records</a> covers constructors.</p>
+<h3 id="rules-for-main"><a class="anchor" href="#rules-for-main">Rules for <code>main</code></a></h3>
+<p><code>main</code> must have one of the shapes above, with no defaults, no type parameters and no <code>mut</code> parameter:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-202"></button><textarea hidden id="copy-202">mod example
+
+main: fun(count: i32) -&gt; i32
+{
+	ret count
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">count</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;main&#x27; must take no parameters, &#x27;ptr[str]&#x27; and &#x27;usize&#x27;, or one parameter that meets &#x27;new(ptr[str], usize)&#x27;</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">count</span></span><span class="line">}</span></code></pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-203"></button><textarea hidden id="copy-203">mod example
+
+main: fun -&gt; i64
+{
+	ret 0
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i64</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;main&#x27; must return &#x27;i32&#x27;, &#x27;never&#x27; or nothing</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-literal">0</span></span><span class="line">}</span></code></pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-204"></button><textarea hidden id="copy-204">mod example
+
+main: fun -&gt; i32 =&gt; 0
+
+main: fun(args: ptr[str], count: usize) -&gt; i32 =&gt; 1</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:0ch">The program has more than one &#x27;main&#x27; function</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">args</span>: <span class="c-type">ptr</span>[<span class="c-type">str</span>], <span class="c-parameter">count</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:0ch">The program has more than one &#x27;main&#x27; function</span></span></code></pre></div>
+<p>A program with no <code>main</code> at all fails with "The program has no 'main' function".</p>
+<h2 id="starting-somewhere-else-with---entry"><a class="anchor" href="#starting-somewhere-else-with---entry">Starting somewhere else with <code>--entry</code></a></h2>
+<p><code>cella build</code> and <code>cella run</code> take <code>--entry</code> with a function's full name, module first. The program then starts in that function instead of <code>main</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-205"></button><textarea hidden id="copy-205">mod tools
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+selfTest: pub fun -&gt; i32
+{
+	printf(&quot;self test\n&quot;)
+	ret 2
+}
+
+main: fun
+{
+	printf(&quot;main\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-function">selfTest</span>: <span class="c-keyword">pub</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"self test\n"</span>)</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-literal">2</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"main\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-206"></button><textarea hidden id="copy-206">cella run
+cella run --entry tools.selfTest</textarea><pre><code><span class="line">cella run</span><span class="line">cella run --entry tools.selfTest</span></code></pre></div>
+<p>The first command prints <code>main</code> and exits with 0. The second prints <code>self test</code> and exits with 2.</p>
+<p>The entry function must be <code>pub</code>, take no parameters, have no type parameters, and return <code>i32</code>, <code>never</code> or nothing, like <code>main</code>. The project then doesn't need a <code>main</code>, and one that exists is ignored, whatever its shape. <a href="projects.html">Projects and building</a> covers the build commands and their options.</p>
+</article>
+<nav class="pager"><a class="previous" href="variables.html"><span>Previous</span>Variables and constants</a><a class="next" href="control-flow.html"><span>Next</span>Control flow</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#declaring-a-function">Declaring a function</a></li><li class="level-2"><a href="#parameters">Parameters</a></li><li class="level-2"><a href="#results-and-ret">Results and ret</a></li><li class="level-2"><a href="#expression-bodies">Expression bodies</a></li><li class="level-2"><a href="#default-parameter-values">Default parameter values</a></li><li class="level-2"><a href="#overloading">Overloading</a></li><li class="level-3"><a href="#overloads-that-conflict">Overloads that conflict</a></li><li class="level-2"><a href="#recursion-and-declaration-order">Recursion and declaration order</a></li><li class="level-2"><a href="#calling-through-a-module">Calling through a module</a></li><li class="level-2"><a href="#functions-that-never-return">Functions that never return</a></li><li class="level-2"><a href="#evaluation-order">Evaluation order</a></li><li class="level-2"><a href="#the-main-function">The main function</a></li><li class="level-3"><a href="#results-and-exit-codes">Results and exit codes</a></li><li class="level-3"><a href="#command-line-arguments">Command-line arguments</a></li><li class="level-3"><a href="#rules-for-main">Rules for main</a></li><li class="level-2"><a href="#starting-somewhere-else-with---entry">Starting somewhere else with --entry</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lexical structure - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html" class="current"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Lexical structure</h1>
+<p>This chapter covers how Cella source text is put together: source files, comments, names, keywords, where lines may break, and how lists of members are separated.</p>
+<h2 id="source-files"><a class="anchor" href="#source-files">Source files</a></h2>
+<p>Cella source files have the <code>.ce</code> extension and hold UTF-8 text. Lines may end in <code>\n</code>, <code>\r\n</code> or <code>\r</code>. Spaces and tabs separate tokens and mean nothing else: indentation is never significant.</p>
+<p>Every source file starts with a <code>mod</code> line naming the module the file belongs to:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-47"></button><textarea hidden id="copy-47">mod game
+
+ext
+{
+	puts: fun(text: cstr) -&gt; i32
+}
+
+main: fun
+{
+	puts(&quot;ready&quot;)
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">game</span></span><span class="line"> </span><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">puts</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">cstr</span>) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">puts</span>(<span class="c-literal">"ready"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>ready</pre></div>
+<p>Only comments and blank lines may come before it. A file without a <code>mod</code> line, a file with two of them, and a file with anything else before it are errors:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-48"></button><textarea hidden id="copy-48">mod first
+
+main: fun
+{
+}
+
+mod second</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-keyword">mod</span> second</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare more than one module name</span></span></code></pre></div>
+<p>The other two cases report:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-49"></button><textarea hidden id="copy-49">All files must begin with a module name
+Module name must precede all other declarations or imports</textarea><pre><code><span class="line">All files must begin with a module name</span><span class="line">Module name must precede all other declarations or imports</span></code></pre></div>
+<p>A module name can have several parts separated by dots, such as <code>mod game.physics</code>. <a href="modules.html">Modules and visibility</a> covers modules, and how files share them.</p>
+<p>Characters that change how text is displayed without being visible themselves, such as the Unicode controls that reverse the direction of text, are errors anywhere in a file, even in comments and strings:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-50"></button><textarea hidden id="copy-50">Cannot use U+202E in source</textarea><pre><code><span class="line">Cannot use U+202E in source</span></code></pre></div>
+<h2 id="comments"><a class="anchor" href="#comments">Comments</a></h2>
+<p><code>//</code> starts a comment that runs to the end of the line. <code>/*</code> starts a block comment that runs to the next <code>*/</code>, across lines if needed. Block comments nest, so a block comment can comment out code that has block comments of its own:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-51"></button><textarea hidden id="copy-51">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+// The program starts here.
+main: fun
+{
+	val width = 4 // in tiles
+	/* val height = 2
+	/* the old size */
+	*/
+	printf(&quot;%d\n&quot;, width /* not height */)
+}</textarea><pre><code><span class="line"><span class="c-comment">// The program starts here.</span></span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> width = <span class="c-literal">4</span> <span class="c-comment">// in tiles</span></span><span class="line">	<span class="c-comment">/* val height = 2</span></span><span class="line"><span class="c-comment">	/* the old size */</span></span><span class="line"><span class="c-comment">	*/</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, width <span class="c-comment">/* not height */</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4</pre></div>
+<p>A block comment that is never closed is an error, reported at its <code>/*</code>:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-52"></button><textarea hidden id="copy-52">Unterminated block comment</textarea><pre><code><span class="line">Unterminated block comment</span></code></pre></div>
+<h2 id="names"><a class="anchor" href="#names">Names</a></h2>
+<p>A name, also called an identifier, starts with a letter or <code>_</code> and continues with letters, digits and <code>_</code>. Letters include those of every script, not only ASCII, and digits are only allowed after the first character. Names are case-sensitive: <code>count</code> and <code>Count</code> are different names.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-53"></button><textarea hidden id="copy-53">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val count = 1
+	val Count = 2
+	val player2 = 3
+	val _offset = 4
+	printf(&quot;%d %d %d %d\n&quot;, count, Count, player2, _offset)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> Count = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">val</span> player2 = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> _offset = <span class="c-literal">4</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, count, Count, player2, _offset)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 2 3 4</pre></div>
+<p>Names are compared after Unicode normalization (NFC), so a letter written as one character and the same letter written as a base letter and a combining mark are the same name.</p>
+<p><code>_</code> on its own isn't a name. It marks a value or parameter that is never used, such as <code>val _ = make()</code> or a parameter written <code>_: i32</code>, and it can't be read:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-54"></button><textarea hidden id="copy-54">mod example
+
+main: fun
+{
+	val _ = 3
+	val copy = _
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> _ = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> copy = _</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:15ch">Cannot use &#x27;_&#x27; as a value</span></span><span class="line">}</span></code></pre></div>
+<p>Names are usually written in camelCase for values and functions and PascalCase for types. The compiler doesn't enforce either.</p>
+<h2 id="keywords"><a class="anchor" href="#keywords">Keywords</a></h2>
+<p>Keywords are words with a meaning of their own. Reserved keywords can never be names:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-55"></button><textarea hidden id="copy-55">alignOf  atomic   break    const    cont     default  do       drop
+dyn      else     false    for      fun      if       imm      in
+is       loop     match    mut      nameOf   new      null     own
+panic    ref      ret      self     sizeOf   true     undef    val
+var      when     while</textarea><pre><code><span class="line">alignOf  atomic   break    const    cont     default  do       drop</span><span class="line">dyn      else     false    for      fun      if       imm      in</span><span class="line">is       loop     match    mut      nameOf   new      null     own</span><span class="line">panic    ref      ret      self     sizeOf   true     undef    val</span><span class="line">var      when     while</span></code></pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-56"></button><textarea hidden id="copy-56">mod example
+
+main: fun
+{
+	val loop = 1
+	val default = 2
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> <span class="c-keyword">loop</span> = <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:8ch">&#x27;loop&#x27; is a keyword</span></span><span class="line">	<span class="c-keyword">val</span> <span class="c-keyword">default</span> = <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:8ch">&#x27;default&#x27; is a keyword</span></span><span class="line">}</span></code></pre></div>
+<p>Contextual keywords mean something only in certain places, such as the start of a declaration or after a declaration's colon. Everywhere else they are ordinary names, such as the fields of this record (<a href="records.html">Records</a> covers records):</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-57"></button><textarea hidden id="copy-57">as       copy     enum     ext      get      impl     mod      noref
+op       prop     pub      pvt      rec      req      set      trait
+union    use</textarea><pre><code><span class="line">as       copy     enum     ext      get      impl     mod      noref</span><span class="line">op       prop     pub      pvt      rec      req      set      trait</span><span class="line">union    use</span></code></pre></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-58"></button><textarea hidden id="copy-58">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Range: rec
+{
+	get: i32
+	set: i32
+}
+
+main: fun
+{
+	val copy = Range(1, 2)
+	printf(&quot;%d %d\n&quot;, copy.get, copy.set)
+}</textarea><pre><code><span class="line"><span class="c-type">Range</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">get</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">set</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> copy = <span class="c-type">Range</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, copy.<span class="c-field">get</span>, copy.<span class="c-field">set</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 2</pre></div>
+<p><a href="keywords.html">Keywords</a> lists every keyword with what it does.</p>
+<h2 id="lines-and-statements"><a class="anchor" href="#lines-and-statements">Lines and statements</a></h2>
+<p>A new line ends a statement. There are no semicolons. Most statements fit on one line:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-59"></button><textarea hidden id="copy-59">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val width = 3
+	val height = 4
+	printf(&quot;%d\n&quot;, width * height)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> width = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> height = <span class="c-literal">4</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, width * height)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>12</pre></div>
+<h3 id="wrapping-long-lines"><a class="anchor" href="#wrapping-long-lines">Wrapping long lines</a></h3>
+<p>A statement continues on the next line when its line ends in a way that needs more: after a binary operator, an assignment operator, <code>is</code> or <code>=&gt;</code>. Wrap a long expression after an operator. <code>volume</code> below has an expression body, <code>=&gt;</code> followed by its result, which <a href="functions.html#expression-bodies">Functions</a> covers:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-60"></button><textarea hidden id="copy-60">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+volume: fun(width: i64, height: i64, depth: i64) -&gt; i64 =&gt;
+	width * height * depth
+
+main: fun
+{
+	val total = 1 +
+		2 *
+		3
+	val inRange = total &gt; 2 &amp;&amp;
+		total &lt; 10
+	printf(&quot;%d %d %lld\n&quot;, total, inRange, volume(2, 3, 4))
+}</textarea><pre><code><span class="line"><span class="c-function">volume</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">width</span>: <span class="c-type">i64</span>, <span class="c-parameter">height</span>: <span class="c-type">i64</span>, <span class="c-parameter">depth</span>: <span class="c-type">i64</span>) -&gt; <span class="c-type">i64</span> =&gt;</span><span class="line">	<span class="c-parameter">width</span> * <span class="c-parameter">height</span> * <span class="c-parameter">depth</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> total = <span class="c-literal">1</span> +</span><span class="line">		<span class="c-literal">2</span> *</span><span class="line">		<span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> inRange = total &gt; <span class="c-literal">2</span> &amp;&amp;</span><span class="line">		total &lt; <span class="c-literal">10</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %lld\n"</span>, total, inRange, <span class="c-function">volume</span>(<span class="c-literal">2</span>, <span class="c-literal">3</span>, <span class="c-literal">4</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>7 1 24</pre></div>
+<p>A line can't start with a binary operator, an assignment operator, <code>is</code> or <code>=&gt;</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-61"></button><textarea hidden id="copy-61">mod example
+
+main: fun
+{
+	val total = 3
+	val inRange = total &gt; 2
+		&amp;&amp; total &lt; 10
+	val small = total
+		is 3
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> total = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> inRange = total &gt; <span class="c-literal">2</span></span><span class="line">		&amp;&amp; total &lt; <span class="c-literal">10</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot start a line with &#x27;&amp;&amp;&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> small = total</span><span class="line">		<span class="c-keyword">is</span> <span class="c-literal">3</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot start a line with &#x27;is&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p><code>+</code>, <code>-</code> and <code>*</code> are different, because they can also start an expression: <code>+ 2</code>, <code>- 2</code> and <code>* p</code> are complete expressions on their own. A line that starts with one of them starts a new statement, and a value on its own isn't a statement:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-62"></button><textarea hidden id="copy-62">mod example
+
+main: fun
+{
+	val total = 1
+		+ 2
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> total = <span class="c-literal">1</span></span><span class="line">		+ <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot use values as statements</span></span><span class="line">}</span></code></pre></div>
+<p>The same goes for declarations. The <code>=</code> before a value and the <code>=&gt;</code> before an expression body must stay on the line before:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-63"></button><textarea hidden id="copy-63">mod example
+
+limit: const i32
+	= 5
+
+twice: fun(x: i32) -&gt; i32
+	=&gt; x * 2
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-constant">limit</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span></span><span class="line">	= <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot start a line with &#x27;=&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-function">twice</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">	=&gt; x * <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot start a line with &#x27;=&gt;&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h3 id="inside-parentheses-and-brackets"><a class="anchor" href="#inside-parentheses-and-brackets">Inside parentheses and brackets</a></h3>
+<p>Inside <code>( )</code> and <code>[ ]</code>, new lines don't end anything, so arguments, array elements and parenthesized expressions can be split anywhere:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-64"></button><textarea hidden id="copy-64">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+add: fun(a: i32, b: i32) -&gt; i32 =&gt; a + b
+
+main: fun
+{
+	val sum = add(
+		10,
+		20
+	)
+	val values = [
+		1,
+		2,
+		3
+	]
+	val scaled = (sum
+		* 2)
+	printf(&quot;%d %d %d\n&quot;, sum, values[2], scaled)
+}</textarea><pre><code><span class="line"><span class="c-function">add</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">a</span> + <span class="c-parameter">b</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> sum = <span class="c-function">add</span>(</span><span class="line">		<span class="c-literal">10</span>,</span><span class="line">		<span class="c-literal">20</span></span><span class="line">	)</span><span class="line">	<span class="c-keyword">val</span> values = [</span><span class="line">		<span class="c-literal">1</span>,</span><span class="line">		<span class="c-literal">2</span>,</span><span class="line">		<span class="c-literal">3</span></span><span class="line">	]</span><span class="line">	<span class="c-keyword">val</span> scaled = (sum</span><span class="line">		* <span class="c-literal">2</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, sum, values[<span class="c-literal">2</span>], scaled)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>30 3 60</pre></div>
+<p>The <code>(</code> of a call and the <code>[</code> of an index must still be on the same line as what they apply to. On the next line, they start a new statement:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-65"></button><textarea hidden id="copy-65">mod example
+
+twice: fun(x: i32) -&gt; i32 =&gt; x * 2
+
+main: fun
+{
+	val result = twice
+		(4)
+}</textarea><pre><code><span class="line"><span class="c-function">twice</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span> * <span class="c-literal">2</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> result = <span class="c-function">twice</span></span><span class="line">		(<span class="c-literal">4</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:9ch">Cannot use values as statements</span></span><span class="line">}</span></code></pre></div>
+<h3 id="member-access"><a class="anchor" href="#member-access">Member access</a></h3>
+<p><code>.</code> may start a line, so a chain of member accesses can be written one per line:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-66"></button><textarea hidden id="copy-66">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Size: rec
+{
+	width: i32
+	height: i32
+}
+
+Window: rec
+{
+	size: Size
+}
+
+main: fun
+{
+	val window = Window(Size(640, 480))
+	val width = window
+		.size
+		.width
+	printf(&quot;%d\n&quot;, width)
+}</textarea><pre><code><span class="line"><span class="c-type">Size</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">width</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">height</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Window</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">size</span>: <span class="c-type">Size</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> window = <span class="c-type">Window</span>(<span class="c-type">Size</span>(<span class="c-literal">640</span>, <span class="c-literal">480</span>))</span><span class="line">	<span class="c-keyword">val</span> width = window</span><span class="line">		.<span class="c-field">size</span></span><span class="line">		.<span class="c-field">width</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, width)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>640</pre></div>
+<h3 id="prefix-operators"><a class="anchor" href="#prefix-operators">Prefix operators</a></h3>
+<p>A prefix operator, such as <code>-</code>, <code>!</code>, <code>~</code>, <code>@</code> or <code>*</code>, must have its operand on the same line:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-67"></button><textarea hidden id="copy-67">mod example
+
+main: fun
+{
+	val negative = -
+		5
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> negative = -</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:19ch">Expected an expression</span></span><span class="line">		<span class="c-literal">5</span></span><span class="line">}</span></code></pre></div>
+<h2 id="separating-members"><a class="anchor" href="#separating-members">Separating members</a></h2>
+<p>Lists of members in braces, such as the fields of a record, the cases of an enum and the arms of a <code>match</code>, follow one rule: neighbouring items are separated either by a <code>,</code> on the same line or by a new line. One item per line needs no commas, and several items on one line need them. <a href="records.html">Records</a>, <a href="enums.html">Enums</a> and <a href="pattern-matching.html">Pattern matching</a> cover the forms in this example:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-68"></button><textarea hidden id="copy-68">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Color: enum { red, green, blue }
+
+Size: rec
+{
+	width: i32
+	height: i32
+}
+
+main: fun
+{
+	val size = Size(3, 4)
+	val code = match Color.green { red =&gt; 1, green =&gt; 2, blue =&gt; 3 }
+	printf(&quot;%d %d\n&quot;, size.width * size.height, code)
+}</textarea><pre><code><span class="line"><span class="c-type">Color</span>: <span class="c-keyword">enum</span> { <span class="c-case">red</span>, <span class="c-case">green</span>, <span class="c-case">blue</span> }</span><span class="line"> </span><span class="line"><span class="c-type">Size</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">width</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">height</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> size = <span class="c-type">Size</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>)</span><span class="line">	<span class="c-keyword">val</span> code = <span class="c-keyword">match</span> <span class="c-type">Color</span>.<span class="c-case">green</span> { red =&gt; <span class="c-literal">1</span>, green =&gt; <span class="c-literal">2</span>, blue =&gt; <span class="c-literal">3</span> }</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, size.<span class="c-field">width</span> * size.<span class="c-field">height</span>, code)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>12 2</pre></div>
+<p>A <code>,</code> at the end of a line, a <code>,</code> after the last item, and two items on one line without a <code>,</code> are errors:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-69"></button><textarea hidden id="copy-69">mod example
+
+Size: rec
+{
+	width: i32,
+	height: i32
+}
+
+Pair: rec { first: i32, second: i32, }
+
+Point: rec { x: i32 y: i32 }
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Size</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">width</span>: <span class="c-type">i32</span>,</span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot separate members on separate lines with &#x27;,&#x27;</span></span><span class="line">	<span class="c-field">height</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>: <span class="c-keyword">rec</span> { <span class="c-field">first</span>: <span class="c-type">i32</span>, <span class="c-field">second</span>: <span class="c-type">i32</span>, }</span><span class="diagnostic"><span class="squiggle" style="margin-left:35ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:35ch">Cannot end lists with &#x27;,&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span> { <span class="c-field">x</span>: <span class="c-type">i32</span> <span class="c-field">y</span>: <span class="c-type">i32</span> }</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:20ch">Expected &#x27;,&#x27; or a new line before the next member</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>Lists in parentheses and brackets, such as arguments, parameters and array elements, always use commas, and they can't end with one either.</p>
+<p>Top-level declarations are separated by new lines only:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-70"></button><textarea hidden id="copy-70">mod example
+
+one: fun -&gt; i32 =&gt; 1 two: fun -&gt; i32 =&gt; 2
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">one</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span> <span class="c-function">two</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:21ch">Expected a new line before the next declaration</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="literals"><a class="anchor" href="#literals">Literals</a></h2>
+<p>Literals write values directly in the source. Each kind has its own chapter:</p>
+<div class="table-wrap"><table><thead><tr><th>Literal</th><th>Examples</th><th>Chapter</th></tr></thead><tbody><tr><td>Integers</td><td><code>42</code>, <code>1_000_000</code>, <code>0xFF</code>, <code>0b1010</code>, <code>0o17</code>, <code>7u8</code></td><td><a href="numbers.html">Numbers and arithmetic</a></td></tr><tr><td>Floats</td><td><code>3.14</code>, <code>1.5e3</code>, <code>2.0f32</code></td><td><a href="numbers.html">Numbers and arithmetic</a></td></tr><tr><td>Booleans</td><td><code>true</code>, <code>false</code></td><td><a href="text.html">Bool, char and strings</a></td></tr><tr><td>Characters</td><td><code>'a'</code>, <code>'\n'</code></td><td><a href="text.html">Bool, char and strings</a></td></tr><tr><td>Strings</td><td><code>"hello"</code>, <code>"tab\there"</code></td><td><a href="text.html">Bool, char and strings</a></td></tr><tr><td>Interpolated strings</td><td><code>"{count} items"</code></td><td><a href="text.html#interpolated-strings">Bool, char and strings</a>, <a href="templates.html">String templates</a></td></tr><tr><td>Arrays</td><td><code>[1, 2, 3]</code></td><td><a href="arrays.html">Arrays</a></td></tr><tr><td>Null pointers</td><td><code>null</code></td><td><a href="pointers.html">Pointers and raw memory</a></td></tr><tr><td>Uninitialized storage</td><td><code>undef</code></td><td><a href="variables.html">Variables and constants</a></td></tr></tbody></table></div>
+<p>A character that can't start any token is an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-71"></button><textarea hidden id="copy-71">mod example
+
+main: fun
+{
+	val price = 5 $
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> price = <span class="c-literal">5</span> $</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:18ch">Unexpected character &#x27;$&#x27;</span></span><span class="line">}</span></code></pre></div>
+</article>
+<nav class="pager"><a class="previous" href="projects.html"><span>Previous</span>Projects and building</a><a class="next" href="numbers.html"><span>Next</span>Numbers and arithmetic</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#source-files">Source files</a></li><li class="level-2"><a href="#comments">Comments</a></li><li class="level-2"><a href="#names">Names</a></li><li class="level-2"><a href="#keywords">Keywords</a></li><li class="level-2"><a href="#lines-and-statements">Lines and statements</a></li><li class="level-3"><a href="#wrapping-long-lines">Wrapping long lines</a></li><li class="level-3"><a href="#inside-parentheses-and-brackets">Inside parentheses and brackets</a></li><li class="level-3"><a href="#member-access">Member access</a></li><li class="level-3"><a href="#prefix-operators">Prefix operators</a></li><li class="level-2"><a href="#separating-members">Separating members</a></li><li class="level-2"><a href="#literals">Literals</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

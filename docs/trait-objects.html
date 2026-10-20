@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trait objects - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html" class="current"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Trait objects</h1>
+<p>A trait object, written <code>dyn[Shape]</code>, is a value of some type that implements <code>Shape</code>, where the type is only known when the program runs. Calls through it look up the right member at run time. This chapter covers making trait objects, what can be called through them, testing which type one holds, and owning one through a pointer.</p>
+<h2 id="from-generics-to-trait-objects"><a class="anchor" href="#from-generics-to-trait-objects">From generics to trait objects</a></h2>
+<p>A function with a <a href="traits.html">trait bound</a>, like <code>report[T: Shape]</code>, is compiled once for each type it's called with, and each copy calls that type's members directly. That works when the type is known where the code is compiled. A trait object handles the other case: one compiled function that works on any <code>Shape</code>, whichever type it turns out to be.</p>
+<p>A <code>dyn[Shape]</code> refers to a value that lives somewhere else, together with a table of that value's <code>Shape</code> members. A call like <code>shape.area()</code> reads the table to find the member to call:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-587"></button><textarea hidden id="copy-587">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+	name: fun(imm self) -&gt; cstr
+	scale: fun(mut self, factor: f64)
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; 3.14159 * self.radius * self.radius
+	name: fun(imm self) -&gt; cstr =&gt; &quot;circle&quot;
+	scale: fun(mut self, factor: f64) =&gt; self.radius *= factor
+}
+
+Square: rec impl Shape
+{
+	side: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.side * self.side
+	name: fun(imm self) -&gt; cstr =&gt; &quot;square&quot;
+	scale: fun(mut self, factor: f64) =&gt; self.side *= factor
+}
+
+report: fun(imm shape: dyn[Shape])
+{
+	printf(&quot;%s %.2f\n&quot;, shape.name(), shape.area())
+}
+
+double: fun(mut shape: dyn[Shape]) =&gt; shape.scale(2.0)
+
+main: fun
+{
+	val circle = Circle(1.0)
+	var square = Square(2.0)
+	report(imm circle)
+	report(imm square)
+	double(mut square)
+	report(imm square)
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-literal">3.14159</span> * <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-keyword">self</span>.<span class="c-field">radius</span></span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"circle"</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> *= <span class="c-parameter">factor</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">side</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-keyword">self</span>.<span class="c-field">side</span></span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"square"</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> *= <span class="c-parameter">factor</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">report</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>])</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s %.2f\n"</span>, <span class="c-parameter">shape</span>.<span class="c-function">name</span>(), <span class="c-parameter">shape</span>.<span class="c-function">area</span>())</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">double</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]) =&gt; <span class="c-parameter">shape</span>.<span class="c-function">scale</span>(<span class="c-literal">2.0</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> circle = <span class="c-type">Circle</span>(<span class="c-literal">1.0</span>)</span><span class="line">	<span class="c-keyword">var</span> square = <span class="c-type">Square</span>(<span class="c-literal">2.0</span>)</span><span class="line">	<span class="c-function">report</span>(<span class="c-keyword">imm</span> circle)</span><span class="line">	<span class="c-function">report</span>(<span class="c-keyword">imm</span> square)</span><span class="line">	<span class="c-function">double</span>(<span class="c-keyword">mut</span> square)</span><span class="line">	<span class="c-function">report</span>(<span class="c-keyword">imm</span> square)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>circle 3.14
+square 4.00
+square 16.00</pre></div>
+<p><code>report</code> and <code>double</code> are each compiled once. Since a trait object always refers to a value somewhere else, it's taken by a parameter with <code>imm</code> or <code>mut</code>, which borrows the value for the call, as described in <a href="parameter-modes.html">Parameter modes</a>. <code>double</code> changes <code>square</code> itself.</p>
+<h2 id="making-a-trait-object"><a class="anchor" href="#making-a-trait-object">Making a trait object</a></h2>
+<p>Passing a value to a <code>dyn[Shape]</code> parameter converts it, as above. The value must implement the trait, and the call site writes <code>imm</code> or <code>mut</code> as for any borrowed parameter. A temporary, such as <code>Circle(5.0)</code>, can be passed as it is.</p>
+<p><code>dyn[Shape](circle)</code> converts explicitly, and borrows <code>circle</code> read-only. <code>dyn[Shape](mut circle)</code> borrows it writably:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-588"></button><textarea hidden id="copy-588">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+	scale: fun(mut self, factor: f64)
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.radius
+	scale: fun(mut self, factor: f64) =&gt; self.radius *= factor
+}
+
+report: fun(imm shape: dyn[Shape]) -&gt; f64 =&gt; shape.area()
+
+main: fun
+{
+	var circle = Circle(1.0)
+	val a = report(Circle(4.0))
+	val b = report(imm circle)
+	val c = report(dyn[Shape](circle))
+	dyn[Shape](mut circle).scale(3.0)
+	val d = dyn[Shape](circle).area()
+	printf(&quot;%.1f %.1f %.1f %.1f\n&quot;, a, b, c, d)
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> *= <span class="c-parameter">factor</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">report</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-parameter">shape</span>.<span class="c-function">area</span>()</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> circle = <span class="c-type">Circle</span>(<span class="c-literal">1.0</span>)</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-function">report</span>(<span class="c-type">Circle</span>(<span class="c-literal">4.0</span>))</span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-function">report</span>(<span class="c-keyword">imm</span> circle)</span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-function">report</span>(<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>](circle))</span><span class="line">	<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>](<span class="c-keyword">mut</span> circle).<span class="c-function">scale</span>(<span class="c-literal">3.0</span>)</span><span class="line">	<span class="c-keyword">val</span> d = <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>](circle).<span class="c-function">area</span>()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %.1f %.1f %.1f\n"</span>, a, b, c, d)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4.0 1.0 1.0 3.0</pre></div>
+<p>Built-in types can implement traits too, so a literal can become a trait object:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-589"></button><textarea hidden id="copy-589">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Show: trait
+{
+	show: fun(imm self)
+}
+
+i32: impl Show
+{
+	show: fun(imm self) =&gt; printf(&quot;&lt;%d&gt;&quot;, self)
+}
+
+cstr: impl Show
+{
+	show: fun(imm self) =&gt; printf(&quot;&lt;%s&gt;&quot;, self)
+}
+
+display: fun(imm value: dyn[Show]) =&gt; value.show()
+
+main: fun
+{
+	display(5)
+	display(2 + 3)
+	display(&quot;text&quot;)
+	printf(&quot;\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-trait">Show</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span> <span class="c-trait">Show</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"&lt;%d&gt;"</span>, <span class="c-keyword">self</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">cstr</span>: <span class="c-keyword">impl</span> <span class="c-trait">Show</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"&lt;%s&gt;"</span>, <span class="c-keyword">self</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">display</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Show</span>]) =&gt; <span class="c-parameter">value</span>.<span class="c-function">show</span>()</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">display</span>(<span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">display</span>(<span class="c-literal">2</span> + <span class="c-literal">3</span>)</span><span class="line">	<span class="c-function">display</span>(<span class="c-literal">"text"</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>&lt;5&gt;&lt;5&gt;&lt;text&gt;</pre></div>
+<p>A type that doesn't implement the trait doesn't convert. A named value needs <code>imm</code> or <code>mut</code> at the call, a trait object made without <code>mut</code> is read-only, and one made from a temporary can't be kept and used after its statement ends:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-590"></button><textarea hidden id="copy-590">mod example
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+	scale: fun(mut self, factor: f64)
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.radius
+	scale: fun(mut self, factor: f64) =&gt; self.radius *= factor
+}
+
+Point: rec
+{
+	x: f64
+}
+
+report: fun(imm shape: dyn[Shape]) -&gt; f64 =&gt; shape.area()
+
+wrongType: fun
+{
+	val point = Point(1.0)
+	report(imm point)
+}
+
+implicit: fun
+{
+	val circle = Circle(1.0)
+	report(circle)
+}
+
+readOnly: fun
+{
+	val circle = Circle(1.0)
+	dyn[Shape](circle).scale(2.0)
+}
+
+unstored: fun
+{
+	val held = dyn[Shape](Circle(2.0))
+	val area = held.area()
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> *= <span class="c-parameter">factor</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">report</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-parameter">shape</span>.<span class="c-function">area</span>()</span><span class="line"> </span><span class="line"><span class="c-function">wrongType</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> point = <span class="c-type">Point</span>(<span class="c-literal">1.0</span>)</span><span class="line">	report(<span class="c-keyword">imm</span> point)</span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot convert type &#x27;imm[Point]&#x27; to &#x27;dyn[Shape]&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">implicit</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> circle = <span class="c-type">Circle</span>(<span class="c-literal">1.0</span>)</span><span class="line">	<span class="c-function">report</span>(circle)</span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot borrow arguments implicitly</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">readOnly</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> circle = <span class="c-type">Circle</span>(<span class="c-literal">1.0</span>)</span><span class="line">	<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>](circle).<span class="c-function">scale</span>(<span class="c-literal">2.0</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:15ch">Cannot mutably borrow through read-only borrows</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">unstored</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> held = <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>](<span class="c-type">Circle</span>(<span class="c-literal">2.0</span>))</span><span class="diagnostic"><span class="squiggle" style="margin-left:26ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:26ch">Cannot borrow unstored values</span></span><span class="line">	<span class="c-keyword">val</span> area = held.<span class="c-function">area</span>()</span><span class="line">}</span></code></pre></div>
+<h2 id="what-can-be-called-through-one"><a class="anchor" href="#what-can-be-called-through-one">What can be called through one</a></h2>
+<p>Through a <code>dyn[Shape]</code>, code can call the trait's methods and use its properties, default bodies included. A read-only trait object allows only members that take <code>imm self</code> or <code>self</code>, as with any read-only borrow. Some members can't go through the table at all: static functions, which have no value to look up; members that take or return <code>Self</code> in other places, since the type is unknown; generic methods, which have no single compiled copy; and members that take <code>own self</code>, since a trait object doesn't own its value:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-591"></button><textarea hidden id="copy-591">mod example
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+	label: fun -&gt; i32
+	same: fun(imm self, imm other: Self) -&gt; bool
+	map[T]: fun(imm self, own value: T) -&gt; T
+	take: fun(own self) -&gt; i32
+}
+
+describe: fun(imm shape: dyn[Shape])
+{
+	shape.label()
+	shape.same(shape)
+	shape.map(1)
+	shape.take()
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">label</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">	<span class="c-function">same</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">other</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-type">bool</span></span><span class="line">	<span class="c-function">map</span>[T]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>, <span class="c-keyword">own</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-typeparam">T</span></span><span class="line">	<span class="c-function">take</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>])</span><span class="line">{</span><span class="line">	<span class="c-parameter">shape</span>.label()</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot use static functions through values</span></span><span class="line">	<span class="c-parameter">shape</span>.same(<span class="c-parameter">shape</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot call &#x27;same&#x27; through &#x27;dyn[Shape]&#x27;</span></span><span class="line">	<span class="c-parameter">shape</span>.map(<span class="c-literal">1</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot call &#x27;map&#x27; through &#x27;dyn[Shape]&#x27;</span></span><span class="line">	<span class="c-parameter">shape</span>.take()</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot call &#x27;take&#x27; through &#x27;dyn[Shape]&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>Members of a generic trait are called through <code>dyn[Write[i32]]</code> like any others, using the trait's own signature:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-592"></button><textarea hidden id="copy-592">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Write[T]: trait
+{
+	write: fun(mut self, imm value: T)
+}
+
+Console: rec impl Write[i32]
+{
+	count: i32
+
+	write: fun(mut self, value: i32)
+	{
+		printf(&quot;%d\n&quot;, value)
+		self.count += 1
+	}
+}
+
+emit: fun(mut out: dyn[Write[i32]], value: i32) =&gt; out.write(imm value)
+
+main: fun
+{
+	var console = Console(0)
+	emit(mut console, 4)
+	emit(mut console, 5)
+	printf(&quot;%d\n&quot;, console.count)
+}</textarea><pre><code><span class="line"><span class="c-trait">Write</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">write</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Console</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Write</span>[<span class="c-type">i32</span>]</span><span class="line">{</span><span class="line">	<span class="c-field">count</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">write</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">value</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-parameter">value</span>)</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">count</span> += <span class="c-literal">1</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">emit</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">out</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Write</span>[<span class="c-type">i32</span>]], <span class="c-parameter">value</span>: <span class="c-type">i32</span>) =&gt; <span class="c-parameter">out</span>.<span class="c-function">write</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> console = <span class="c-type">Console</span>(<span class="c-literal">0</span>)</span><span class="line">	<span class="c-function">emit</span>(<span class="c-keyword">mut</span> console, <span class="c-literal">4</span>)</span><span class="line">	<span class="c-function">emit</span>(<span class="c-keyword">mut</span> console, <span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, console.<span class="c-field">count</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4
+5
+2</pre></div>
+<p><code>Console.write</code> takes its value by copy, but <code>Write</code>'s requirement takes <code>imm value</code>, so the call through the trait object passes <code>imm value</code>.</p>
+<h2 id="trait-objects-arent-values"><a class="anchor" href="#trait-objects-arent-values">Trait objects aren't values</a></h2>
+<p>A <code>dyn[Shape]</code> has no fixed size, since the value it refers to can be any type. It can't be stored, returned, copied or put in an array by value. A borrow of one can: <code>imm[dyn[Shape]]</code> and <code>mut[dyn[Shape]]</code> work as locals, results and <code>ref rec</code> fields, as <a href="borrows.html">Borrows</a> describes, and a value or borrow of a type that implements the trait converts to them:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-593"></button><textarea hidden id="copy-593">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+	scale: fun(mut self, factor: f64)
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.radius * self.radius * 3.0
+	scale: fun(mut self, factor: f64) =&gt; self.radius *= factor
+}
+
+Square: rec impl Shape
+{
+	side: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.side * self.side
+	scale: fun(mut self, factor: f64) =&gt; self.side *= factor
+}
+
+Scene: ref rec
+{
+	focus: imm[dyn[Shape]]
+}
+
+larger: fun(imm a: Circle, imm b: Square) -&gt; imm[dyn[Shape]]
+{
+	if a.area() &gt; b.area()
+		ret a
+
+	ret b
+}
+
+main: fun
+{
+	var circle = Circle(1.0)
+	val square = Square(2.0)
+	val grow: mut[dyn[Shape]] = mut circle
+	grow.scale(2.0)
+	val view: imm[dyn[Shape]] = circle
+	val scene = Scene(square)
+	printf(&quot;%.1f %.1f %.1f\n&quot;, view.area(), scene.focus.area(), larger(imm circle, imm square).area())
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-literal">3.0</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> *= <span class="c-parameter">factor</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">side</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-keyword">self</span>.<span class="c-field">side</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> *= <span class="c-parameter">factor</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Scene</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">focus</span>: <span class="c-keyword">imm</span>[<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">larger</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-type">Circle</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-type">Square</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]]</span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">a</span>.<span class="c-function">area</span>() &gt; <span class="c-parameter">b</span>.<span class="c-function">area</span>()</span><span class="line">		<span class="c-keyword">ret</span> <span class="c-parameter">a</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">b</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> circle = <span class="c-type">Circle</span>(<span class="c-literal">1.0</span>)</span><span class="line">	<span class="c-keyword">val</span> square = <span class="c-type">Square</span>(<span class="c-literal">2.0</span>)</span><span class="line">	<span class="c-keyword">val</span> grow: <span class="c-keyword">mut</span>[<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]] = <span class="c-keyword">mut</span> circle</span><span class="line">	grow.<span class="c-function">scale</span>(<span class="c-literal">2.0</span>)</span><span class="line">	<span class="c-keyword">val</span> view: <span class="c-keyword">imm</span>[<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]] = circle</span><span class="line">	<span class="c-keyword">val</span> scene = <span class="c-type">Scene</span>(square)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %.1f %.1f\n"</span>, view.<span class="c-function">area</span>(), scene.<span class="c-field">focus</span>.<span class="c-function">area</span>(), <span class="c-function">larger</span>(<span class="c-keyword">imm</span> circle, <span class="c-keyword">imm</span> square).<span class="c-function">area</span>())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>12.0 4.0 12.0</pre></div>
+<p>These borrows follow the usual rules: they can't outlive the value they refer to. Using <code>dyn[Shape]</code> itself as a value is an error, and so is using it in an <code>ext</code> signature, even behind a pointer:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-594"></button><textarea hidden id="copy-594">mod example
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+}
+
+Scene: rec
+{
+	focus: dyn[Shape]
+}
+
+ext
+{
+	show: fun(shape: ptr[dyn[Shape]])
+}
+
+make: fun -&gt; dyn[Shape] =&gt; make()
+
+copy: fun(imm shape: dyn[Shape])
+{
+	val kept: dyn[Shape] = shape
+	val n = sizeOf(dyn[Shape])
+	val items = [shape]
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Scene</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">focus</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot use &#x27;dyn[Shape]&#x27; by value</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">shape</span>: <span class="c-type">ptr</span>[<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]])</span><span class="diagnostic"><span class="squiggle" style="margin-left:25ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:25ch">Cannot use &#x27;dyn[Shape]&#x27; in &#x27;ext&#x27; signatures</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">make</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>] =&gt; <span class="c-function">make</span>()</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot use &#x27;dyn[Shape]&#x27; by value</span></span><span class="line"> </span><span class="line"><span class="c-function">copy</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>])</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> kept: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>] = <span class="c-parameter">shape</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot use &#x27;dyn[Shape]&#x27; by value</span></span><span class="line">	<span class="c-keyword">val</span> n = <span class="c-keyword">sizeOf</span>(<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:18ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use &#x27;dyn[Shape]&#x27; by value</span></span><span class="line">	<span class="c-keyword">val</span> items = [<span class="c-parameter">shape</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot use &#x27;dyn[Shape]&#x27; by value</span></span><span class="line">}</span></code></pre></div>
+<p>A generic function with a bound, like <code>measure[T: Shape]</code>, can pass its <code>T</code> on as a <code>dyn[Shape]</code>, but a <code>dyn[Shape]</code> can't be its <code>T</code>, since that would make <code>T</code> a type without a size:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-595"></button><textarea hidden id="copy-595">mod example
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+}
+
+describe: fun(imm shape: dyn[Shape]) -&gt; f64 =&gt; shape.area()
+
+erase[T: Shape]: fun(imm value: T) -&gt; f64 =&gt; describe(imm value)
+
+measure[T: Shape]: fun(imm value: T) -&gt; f64 =&gt; value.area()
+
+again: fun(imm shape: dyn[Shape]) -&gt; f64 =&gt; measure(imm shape)
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-parameter">shape</span>.<span class="c-function">area</span>()</span><span class="line"> </span><span class="line"><span class="c-function">erase</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Shape</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-function">describe</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">measure</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Shape</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-parameter">value</span>.<span class="c-function">area</span>()</span><span class="line"> </span><span class="line"><span class="c-function">again</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]) -&gt; <span class="c-type">f64</span> =&gt; measure(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:44ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:44ch">Cannot use &#x27;dyn[Shape]&#x27; by value</span></span></code></pre></div>
+<h2 id="required-traits"><a class="anchor" href="#required-traits">Required traits</a></h2>
+<p>When a trait requires another, as <code>Shape: trait req Named</code> does, a <code>dyn[Shape]</code> reaches <code>Named</code>'s members too, and converts to a <code>dyn[Named]</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-596"></button><textarea hidden id="copy-596">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Named: trait
+{
+	name: fun(imm self) -&gt; cstr
+}
+
+Shape: trait req Named
+{
+	area: fun(imm self) -&gt; f64
+	label: fun(imm self) =&gt; printf(&quot;%s %.1f\n&quot;, self.name(), self.area())
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	name: fun(imm self) -&gt; cstr =&gt; &quot;circle&quot;
+	area: fun(imm self) -&gt; f64 =&gt; self.radius * self.radius * 3.0
+}
+
+greet: fun(imm item: dyn[Named]) =&gt; printf(&quot;hello, %s\n&quot;, item.name())
+
+show: fun(imm shape: dyn[Shape])
+{
+	shape.label()
+	greet(dyn[Named](shape))
+	greet(imm shape)
+}
+
+main: fun
+{
+	show(Circle(1.0))
+}</textarea><pre><code><span class="line"><span class="c-trait">Named</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-trait">Named</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">label</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%s %.1f\n"</span>, <span class="c-keyword">self</span>.<span class="c-function">name</span>(), <span class="c-keyword">self</span>.<span class="c-function">area</span>())</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"circle"</span></span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-literal">3.0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">greet</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">item</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Named</span>]) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"hello, %s\n"</span>, <span class="c-parameter">item</span>.<span class="c-function">name</span>())</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>])</span><span class="line">{</span><span class="line">	<span class="c-parameter">shape</span>.<span class="c-function">label</span>()</span><span class="line">	<span class="c-function">greet</span>(<span class="c-keyword">dyn</span>[<span class="c-trait">Named</span>](<span class="c-parameter">shape</span>))</span><span class="line">	<span class="c-function">greet</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>(<span class="c-type">Circle</span>(<span class="c-literal">1.0</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>circle 3.0
+hello, circle
+hello, circle</pre></div>
+<p>The conversion only goes that way. A <code>dyn[Named]</code> might hold a type that isn't a <code>Shape</code>, so it doesn't convert to a <code>dyn[Shape]</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-597"></button><textarea hidden id="copy-597">mod example
+
+Named: trait
+{
+	name: fun(imm self) -&gt; cstr
+}
+
+Shape: trait req Named
+{
+	area: fun(imm self) -&gt; f64
+}
+
+narrow: fun(imm item: dyn[Named]) -&gt; f64 =&gt; dyn[Shape](item).area()
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Named</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-trait">Named</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">narrow</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">item</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Named</span>]) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>](<span class="c-parameter">item</span>).<span class="c-function">area</span>()</span><span class="diagnostic"><span class="squiggle" style="margin-left:55ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:55ch">&#x27;dyn[Named]&#x27; doesn&#x27;t implement &#x27;Shape&#x27;</span></span></code></pre></div>
+<p>To find out what type a trait object holds, test for the type itself, as the next section shows.</p>
+<h2 id="testing-the-type"><a class="anchor" href="#testing-the-type">Testing the type</a></h2>
+<p><code>is</code> and <code>match</code> test which type a trait object holds, and can bind the value as that type with a name after it. A test can look at fields as well, as <code>Circle(radius: &gt; 10.0)</code> does. A <code>match</code> on a trait object needs an <code>else</code> arm, since any number of types can implement the trait. <code>match mut</code> and <code>if mut ... is</code> bind writable borrows, so the arm can change the value:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-598"></button><textarea hidden id="copy-598">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.radius * self.radius * 3.0
+}
+
+Square: rec impl Shape
+{
+	side: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.side * self.side
+}
+
+Triangle: rec impl Shape
+{
+	base: f64
+	height: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.base * self.height / 2.0
+}
+
+kind: fun(imm shape: dyn[Shape]) -&gt; cstr =&gt; match shape
+{
+	Circle(radius: &gt; 10.0) =&gt; &quot;big circle&quot;
+	Circle =&gt; &quot;circle&quot;
+	Square =&gt; &quot;square&quot;
+	else =&gt; &quot;other&quot;
+}
+
+describe: fun(imm shape: dyn[Shape])
+{
+	if shape is Circle c
+		printf(&quot;circle of radius %.1f\n&quot;, c.radius)
+	else
+		printf(&quot;%s with area %.1f\n&quot;, kind(imm shape), shape.area())
+}
+
+stretch: fun(mut shape: dyn[Shape])
+{
+	match mut shape
+	{
+		Circle c =&gt; c.radius *= 2.0
+		Square s =&gt; s.side += 1.0
+		else =&gt; {}
+	}
+}
+
+main: fun
+{
+	var circle = Circle(6.0)
+	var square = Square(3.0)
+	val triangle = Triangle(4.0, 2.0)
+	describe(imm circle)
+	describe(imm square)
+	describe(imm triangle)
+	stretch(mut circle)
+	stretch(mut square)
+	printf(&quot;%s %.1f %.1f\n&quot;, kind(imm circle), circle.radius, square.side)
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-literal">3.0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">side</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-keyword">self</span>.<span class="c-field">side</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Triangle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">base</span>: <span class="c-type">f64</span></span><span class="line">	<span class="c-field">height</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">base</span> * <span class="c-keyword">self</span>.<span class="c-field">height</span> / <span class="c-literal">2.0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">kind</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">shape</span></span><span class="line">{</span><span class="line">	<span class="c-type">Circle</span>(radius: &gt; <span class="c-literal">10.0</span>) =&gt; <span class="c-literal">"big circle"</span></span><span class="line">	<span class="c-type">Circle</span> =&gt; <span class="c-literal">"circle"</span></span><span class="line">	<span class="c-type">Square</span> =&gt; <span class="c-literal">"square"</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">"other"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>])</span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">shape</span> <span class="c-keyword">is</span> <span class="c-type">Circle</span> c</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"circle of radius %.1f\n"</span>, c.<span class="c-field">radius</span>)</span><span class="line">	<span class="c-keyword">else</span></span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%s with area %.1f\n"</span>, <span class="c-function">kind</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>), <span class="c-parameter">shape</span>.<span class="c-function">area</span>())</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">stretch</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>])</span><span class="line">{</span><span class="line">	<span class="c-keyword">match</span> <span class="c-keyword">mut</span> <span class="c-parameter">shape</span></span><span class="line">	{</span><span class="line">		<span class="c-type">Circle</span> c =&gt; c.<span class="c-field">radius</span> *= <span class="c-literal">2.0</span></span><span class="line">		<span class="c-type">Square</span> s =&gt; s.<span class="c-field">side</span> += <span class="c-literal">1.0</span></span><span class="line">		<span class="c-keyword">else</span> =&gt; {}</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> circle = <span class="c-type">Circle</span>(<span class="c-literal">6.0</span>)</span><span class="line">	<span class="c-keyword">var</span> square = <span class="c-type">Square</span>(<span class="c-literal">3.0</span>)</span><span class="line">	<span class="c-keyword">val</span> triangle = <span class="c-type">Triangle</span>(<span class="c-literal">4.0</span>, <span class="c-literal">2.0</span>)</span><span class="line">	<span class="c-function">describe</span>(<span class="c-keyword">imm</span> circle)</span><span class="line">	<span class="c-function">describe</span>(<span class="c-keyword">imm</span> square)</span><span class="line">	<span class="c-function">describe</span>(<span class="c-keyword">imm</span> triangle)</span><span class="line">	<span class="c-function">stretch</span>(<span class="c-keyword">mut</span> circle)</span><span class="line">	<span class="c-function">stretch</span>(<span class="c-keyword">mut</span> square)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s %.1f %.1f\n"</span>, <span class="c-function">kind</span>(<span class="c-keyword">imm</span> circle), circle.<span class="c-field">radius</span>, square.<span class="c-field">side</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>circle of radius 6.0
+square with area 9.0
+other with area 4.0
+big circle 12.0 4.0</pre></div>
+<p>A tested type can be a generic instantiation, as in <code>shape is Box[Circle]</code>, or a type parameter, as in <code>shape is T</code>. Testing works through required traits too: a <code>dyn[Named]</code> made from a <code>Circle</code> is still a <code>Circle</code>. Patterns are covered in full in <a href="pattern-matching.html">Pattern matching</a>.</p>
+<p>A type that doesn't implement the trait can never match, and a trait object can't be tested for another trait object type:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-599"></button><textarea hidden id="copy-599">mod example
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.radius
+}
+
+Point: rec
+{
+	x: f64
+}
+
+kind: fun(imm shape: dyn[Shape]) -&gt; i32 =&gt; match shape
+{
+	Circle =&gt; 1
+}
+
+test: fun(imm shape: dyn[Shape]) -&gt; bool =&gt; shape is Point
+
+again: fun(imm shape: dyn[Shape]) -&gt; bool =&gt; shape is dyn[Shape]
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">kind</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">shape</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:43ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:43ch">This match doesn&#x27;t handle every value of &#x27;dyn[Shape]&#x27;</span></span><span class="line">{</span><span class="line">	<span class="c-type">Circle</span> =&gt; <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">test</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">shape</span> <span class="c-keyword">is</span> <span class="c-type">Point</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:53ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:53ch">&#x27;Point&#x27; doesn&#x27;t implement &#x27;Shape&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-function">again</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">shape</span> <span class="c-keyword">is</span> <span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:54ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:54ch">Cannot test for &#x27;dyn[Shape]&#x27;</span></span></code></pre></div>
+<h2 id="pointers-to-trait-objects"><a class="anchor" href="#pointers-to-trait-objects">Pointers to trait objects</a></h2>
+<p>A <code>ptr[dyn[Shape]]</code> is a raw pointer to a value of any type that implements <code>Shape</code>, along with its table. A pointer to a <code>Circle</code> converts to one. Calls go through it with <code>.</code>, like other <a href="pointers.html">pointers</a>, and <code>sizeOf(*p)</code> and <code>alignOf(*p)</code> give the size and alignment of the value it points to, read from the table:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-600"></button><textarea hidden id="copy-600">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+	scale: fun(mut self, factor: f64)
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.radius * self.radius * 3.0
+	scale: fun(mut self, factor: f64) =&gt; self.radius *= factor
+}
+
+Dot: rec impl Shape
+{
+	x: u8
+
+	area: fun(imm self) -&gt; f64 =&gt; 0.0
+	scale: fun(mut self, factor: f64) =&gt; ret
+}
+
+main: fun
+{
+	var circle = Circle(1.0)
+	var dot = Dot(3)
+	var p: ptr[dyn[Shape]] = @circle
+	p.scale(2.0)
+	printf(&quot;%.1f %.1f %zu %zu\n&quot;, circle.radius, p.area(), sizeOf(*p), alignOf(*p))
+	p = @dot
+	printf(&quot;%.1f %zu %zu\n&quot;, (*p).area(), sizeOf(*p), alignOf(*p))
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-literal">3.0</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> *= <span class="c-parameter">factor</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Dot</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">u8</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-literal">0.0</span></span><span class="line">	<span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">factor</span>: <span class="c-type">f64</span>) =&gt; <span class="c-keyword">ret</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> circle = <span class="c-type">Circle</span>(<span class="c-literal">1.0</span>)</span><span class="line">	<span class="c-keyword">var</span> dot = <span class="c-type">Dot</span>(<span class="c-literal">3</span>)</span><span class="line">	<span class="c-keyword">var</span> p: <span class="c-type">ptr</span>[<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]] = @circle</span><span class="line">	p.<span class="c-function">scale</span>(<span class="c-literal">2.0</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %.1f %zu %zu\n"</span>, circle.<span class="c-field">radius</span>, p.<span class="c-function">area</span>(), <span class="c-keyword">sizeOf</span>(*p), <span class="c-keyword">alignOf</span>(*p))</span><span class="line">	p = @dot</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %zu %zu\n"</span>, (*p).<span class="c-function">area</span>(), <span class="c-keyword">sizeOf</span>(*p), <span class="c-keyword">alignOf</span>(*p))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2.0 12.0 8 8
+0.0 1 1</pre></div>
+<p>As with any raw pointer, nothing checks that the value is still there. <code>*p</code> is still a <code>dyn[Shape]</code>, so it can't be moved out or stored by value, and since the size of each value is only known at run time, the pointer can't be indexed:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-601"></button><textarea hidden id="copy-601">mod example
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.radius
+}
+
+main: fun
+{
+	var circle = Circle(1.0)
+	val p: ptr[dyn[Shape]] = @circle
+	val first = p[0]
+	val moved = own *p
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> circle = <span class="c-type">Circle</span>(<span class="c-literal">1.0</span>)</span><span class="line">	<span class="c-keyword">val</span> p: <span class="c-type">ptr</span>[<span class="c-keyword">dyn</span>[<span class="c-trait">Shape</span>]] = @circle</span><span class="line">	<span class="c-keyword">val</span> first = p[<span class="c-literal">0</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot index into type &#x27;ptr[dyn[Shape]]&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> moved = <span class="c-keyword">own</span> *p</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot use &#x27;dyn[Shape]&#x27; by value</span></span><span class="line">}</span></code></pre></div>
+<h2 id="owning-a-trait-object"><a class="anchor" href="#owning-a-trait-object">Owning a trait object</a></h2>
+<p><code>drop *p</code> runs the destructor of the value a <code>ptr[dyn[Shape]]</code> points to, found through its table, and a <code>ptr[dyn[Shape]]</code> converts to a plain <code>ptr</code>, so it can be freed. With these, a record can own a trait object on the heap. <code>Boxed</code> below works for any trait: <code>K: trait</code> makes <code>K</code> a trait parameter, and <code>of[T: K]</code> takes any value whose type implements it:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-602"></button><textarea hidden id="copy-602">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+	malloc: fun(size: usize) -&gt; ptr
+	free: fun(memory: ptr)
+}
+
+Boxed[K: trait]: rec
+{
+	object: pvt ptr[dyn[K]]
+
+	of[T: K]: fun(own value: T) -&gt; Boxed[K]
+	{
+		val memory = ptr[T](malloc(sizeOf(T)))
+		own *memory = own value
+		ret Boxed[K](memory)
+	}
+
+	*: op(imm self) -&gt; imm[dyn[K]] =&gt; imm *self.object
+
+	*: op(mut self) -&gt; mut[dyn[K]] =&gt; mut *self.object
+
+	drop: op
+	{
+		printf(&quot;freeing %zu bytes\n&quot;, sizeOf(*self.object))
+		drop *self.object
+		free(self.object)
+	}
+}
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.radius * self.radius * 3.0
+}
+
+Label: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;label %d gone\n&quot;, self.id)
+	}
+}
+
+Tagged: rec impl Shape
+{
+	label: Label
+	side: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.side * self.side
+}
+
+main: fun
+{
+	val shapes = [Boxed[Shape].of(Circle(1.0)), Boxed[Shape].of(Tagged(Label(7), 2.0))]
+	for imm shape in shapes
+		printf(&quot;%.1f\n&quot;, shape.area())
+}</textarea><pre><code><span class="line"><span class="c-type">Boxed</span>[<span class="c-typeparam">K</span>: <span class="c-keyword">trait</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">object</span>: <span class="c-keyword">pvt</span> <span class="c-type">ptr</span>[<span class="c-keyword">dyn</span>[<span class="c-typeparam">K</span>]]</span><span class="line"> </span><span class="line">	<span class="c-function">of</span>[<span class="c-typeparam">T</span>: <span class="c-typeparam">K</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">Boxed</span>[<span class="c-typeparam">K</span>]</span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> memory = ptr[<span class="c-typeparam">T</span>](<span class="c-function">malloc</span>(<span class="c-keyword">sizeOf</span>(<span class="c-typeparam">T</span>)))</span><span class="line">		<span class="c-keyword">own</span> *memory = <span class="c-keyword">own</span> <span class="c-parameter">value</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-type">Boxed</span>[<span class="c-typeparam">K</span>](memory)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">*</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-keyword">dyn</span>[<span class="c-typeparam">K</span>]] =&gt; <span class="c-keyword">imm</span> *<span class="c-keyword">self</span>.<span class="c-field">object</span></span><span class="line"> </span><span class="line">	<span class="c-function">*</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-keyword">dyn</span>[<span class="c-typeparam">K</span>]] =&gt; <span class="c-keyword">mut</span> *<span class="c-keyword">self</span>.<span class="c-field">object</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"freeing %zu bytes\n"</span>, <span class="c-keyword">sizeOf</span>(*<span class="c-keyword">self</span>.<span class="c-field">object</span>))</span><span class="line">		<span class="c-keyword">drop</span> *<span class="c-keyword">self</span>.<span class="c-field">object</span></span><span class="line">		<span class="c-function">free</span>(<span class="c-keyword">self</span>.<span class="c-field">object</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-literal">3.0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Label</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"label %d gone\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Tagged</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">label</span>: <span class="c-type">Label</span></span><span class="line">	<span class="c-field">side</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-keyword">self</span>.<span class="c-field">side</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> shapes = [<span class="c-type">Boxed</span>[<span class="c-trait">Shape</span>].<span class="c-function">of</span>(<span class="c-type">Circle</span>(<span class="c-literal">1.0</span>)), <span class="c-type">Boxed</span>[<span class="c-trait">Shape</span>].<span class="c-function">of</span>(<span class="c-type">Tagged</span>(<span class="c-type">Label</span>(<span class="c-literal">7</span>), <span class="c-literal">2.0</span>))]</span><span class="line">	<span class="c-keyword">for</span> <span class="c-keyword">imm</span> shape <span class="c-keyword">in</span> shapes</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%.1f\n"</span>, shape<span class="c-function">.area</span>())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3.0
+4.0
+freeing 16 bytes
+label 7 gone
+freeing 8 bytes</pre></div>
+<p>Each <code>Boxed[Shape]</code> has the same size whatever it holds, so values of different types fit in one array. <code>own *memory = own value</code> moves the value into memory that holds nothing yet, <code>*</code> lets <code>shape.area()</code> reach the object as a <a href="operators.html">dereference operator</a>, and the destructor drops the object, the <code>Tagged</code> one's <code>Label</code> included, before freeing its memory.</p>
+<h2 id="trait-parameters"><a class="anchor" href="#trait-parameters">Trait parameters</a></h2>
+<p>A type parameter declared <code>K: trait</code> takes a trait instead of a type. Inside the declaration, <code>dyn[K]</code> is a trait object of that trait, and <code>T: K</code> bounds another type parameter by it. A trait parameter can't be combined with other constraints, and its argument must be a trait:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-603"></button><textarea hidden id="copy-603">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+}
+
+Named: trait
+{
+	name: fun(imm self) -&gt; cstr
+}
+
+Circle: rec impl Shape + Named
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.radius * self.radius * 3.0
+	name: fun(imm self) -&gt; cstr =&gt; &quot;circle&quot;
+}
+
+Square: rec impl Shape + Named
+{
+	side: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.side * self.side
+	name: fun(imm self) -&gt; cstr =&gt; &quot;square&quot;
+}
+
+Pair[K: trait]: ref rec
+{
+	first: imm[dyn[K]]
+	second: imm[dyn[K]]
+}
+
+holds[K: trait, T: K]: fun(imm item: dyn[K]) -&gt; bool =&gt; item is T
+
+main: fun
+{
+	val circle = Circle(1.0)
+	val square = Square(2.0)
+	val shapes = Pair[Shape](circle, square)
+	val names = Pair[Named](circle, square)
+	printf(&quot;%.1f %s\n&quot;, shapes.first.area() + shapes.second.area(), names.second.name())
+	printf(&quot;%d %d\n&quot;, holds[Shape, Circle](imm circle), holds[Named, Circle](imm square))
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Named</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span> + <span class="c-trait">Named</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-literal">3.0</span></span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"circle"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span> + <span class="c-trait">Named</span></span><span class="line">{</span><span class="line">	<span class="c-field">side</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-keyword">self</span>.<span class="c-field">side</span></span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"square"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>[<span class="c-typeparam">K</span>: <span class="c-keyword">trait</span>]: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">first</span>: <span class="c-keyword">imm</span>[<span class="c-keyword">dyn</span>[<span class="c-typeparam">K</span>]]</span><span class="line">	<span class="c-field">second</span>: <span class="c-keyword">imm</span>[<span class="c-keyword">dyn</span>[<span class="c-typeparam">K</span>]]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">holds</span>[<span class="c-typeparam">K</span>: <span class="c-keyword">trait</span>, <span class="c-typeparam">T</span>: <span class="c-typeparam">K</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">item</span>: <span class="c-keyword">dyn</span>[<span class="c-typeparam">K</span>]) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">item</span> <span class="c-keyword">is</span> <span class="c-typeparam">T</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> circle = <span class="c-type">Circle</span>(<span class="c-literal">1.0</span>)</span><span class="line">	<span class="c-keyword">val</span> square = <span class="c-type">Square</span>(<span class="c-literal">2.0</span>)</span><span class="line">	<span class="c-keyword">val</span> shapes = <span class="c-type">Pair</span>[<span class="c-trait">Shape</span>](circle, square)</span><span class="line">	<span class="c-keyword">val</span> names = <span class="c-type">Pair</span>[<span class="c-trait">Named</span>](circle, square)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %s\n"</span>, shapes.<span class="c-field">first</span>.<span class="c-function">area</span>() + shapes.<span class="c-field">second</span>.<span class="c-function">area</span>(), names.<span class="c-field">second</span>.<span class="c-function">name</span>())</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">holds</span>[<span class="c-trait">Shape</span>, <span class="c-type">Circle</span>](<span class="c-keyword">imm</span> circle), <span class="c-function">holds</span>[<span class="c-trait">Named</span>, <span class="c-type">Circle</span>](<span class="c-keyword">imm</span> square))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>7.0 square
+1 0</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-604"></button><textarea hidden id="copy-604">mod example
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.radius
+}
+
+Cell[K: trait]: rec
+{
+	object: ptr[dyn[K]]
+}
+
+first[K: trait + noref]: fun -&gt; i32 =&gt; 0
+
+second[T: dyn[Shape]]: fun(imm x: T) -&gt; i32 =&gt; 0
+
+main: fun
+{
+	val c: Cell[Circle] = undef
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">radius</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Cell</span>[<span class="c-typeparam">K</span>: <span class="c-keyword">trait</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">object</span>: <span class="c-type">ptr</span>[<span class="c-keyword">dyn</span>[<span class="c-typeparam">K</span>]]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">first</span>[<span class="c-typeparam">K</span>: <span class="c-keyword">trait</span> + <span class="c-keyword">noref</span>]: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:9ch">Cannot combine &#x27;trait&#x27; with other constraints</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot combine &#x27;trait&#x27; with other constraints</span></span><span class="line"> </span><span class="line">second[T: <span class="c-keyword">dyn</span>[Shape]]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> x: T) -&gt; i32 =&gt; <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot use &#x27;dyn&#x27; types as constraints</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> c: <span class="c-type">Cell</span>[<span class="c-type">Circle</span>] = <span class="c-keyword">undef</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:16ch">&#x27;Circle&#x27; is not a trait</span></span><span class="line">}</span></code></pre></div>
+<p>A bound is written with the trait itself, as <code>T: Shape</code>; <code>dyn[Shape]</code> is a type, not a constraint.</p>
+</article>
+<nav class="pager"><a class="previous" href="traits.html"><span>Previous</span>Traits</a><a class="next" href="operators.html"><span>Next</span>Operators</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#from-generics-to-trait-objects">From generics to trait objects</a></li><li class="level-2"><a href="#making-a-trait-object">Making a trait object</a></li><li class="level-2"><a href="#what-can-be-called-through-one">What can be called through one</a></li><li class="level-2"><a href="#trait-objects-arent-values">Trait objects aren&#x27;t values</a></li><li class="level-2"><a href="#required-traits">Required traits</a></li><li class="level-2"><a href="#testing-the-type">Testing the type</a></li><li class="level-2"><a href="#pointers-to-trait-objects">Pointers to trait objects</a></li><li class="level-2"><a href="#owning-a-trait-object">Owning a trait object</a></li><li class="level-2"><a href="#trait-parameters">Trait parameters</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

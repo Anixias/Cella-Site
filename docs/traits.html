@@ -1,0 +1,1200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Traits - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html" class="current"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Traits</h1>
+<p>A trait names a set of members that several types can provide: methods, properties, static functions, operators, constructors and constants. A type implements a trait by saying so and supplying those members. Generic code can then require the trait and use its members on any type that implements it.</p>
+<h2 id="what-a-trait-is"><a class="anchor" href="#what-a-trait-is">What a trait is</a></h2>
+<p>A <a href="generics.html">generic</a> function can't call methods on a <code>T</code>, since most types don't have them. A trait solves this. It lists what a type must have, here an <code>area</code> method and a <code>name</code> method:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-553"></button><textarea hidden id="copy-553">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+	name: fun(imm self) -&gt; cstr
+}
+
+Circle: rec impl Shape
+{
+	radius: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; 3.14159 * self.radius * self.radius
+	name: fun(imm self) -&gt; cstr =&gt; &quot;circle&quot;
+}
+
+Square: rec impl Shape
+{
+	side: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.side * self.side
+	name: fun(imm self) -&gt; cstr =&gt; &quot;square&quot;
+}
+
+report[T: Shape]: fun(imm shape: T)
+{
+	printf(&quot;%s %.2f\n&quot;, shape.name(), shape.area())
+}
+
+main: fun
+{
+	report(Circle(1.0))
+	report(Square(2.0))
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Circle</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">radius</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-literal">3.14159</span> * <span class="c-keyword">self</span>.<span class="c-field">radius</span> * <span class="c-keyword">self</span>.<span class="c-field">radius</span></span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"circle"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">side</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-keyword">self</span>.<span class="c-field">side</span></span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"square"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">report</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Shape</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-typeparam">T</span>)</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s %.2f\n"</span>, <span class="c-parameter">shape</span>.<span class="c-function">name</span>(), <span class="c-parameter">shape</span>.<span class="c-function">area</span>())</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">report</span>(<span class="c-type">Circle</span>(<span class="c-literal">1.0</span>))</span><span class="line">	<span class="c-function">report</span>(<span class="c-type">Square</span>(<span class="c-literal">2.0</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>circle 3.14
+square 4.00</pre></div>
+<p><code>Circle: rec impl Shape</code> declares that <code>Circle</code> implements <code>Shape</code>, and its body supplies the members <code>Shape</code> requires. <code>[T: Shape]</code> is a trait bound: <code>report</code> accepts any type that implements <code>Shape</code>, and its body can call <code>Shape</code>'s members on a <code>T</code>. Each type <code>report</code> is called with gets its own compiled copy, so the calls go straight to <code>Circle.area</code> and <code>Square.area</code>, with no lookup at run time. When the type is only known at run time, use a <a href="trait-objects.html">trait object</a> instead.</p>
+<p>A type implements a trait only by saying so. Having methods with the right names isn't enough:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-554"></button><textarea hidden id="copy-554">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+}
+
+Point: rec
+{
+	x: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; 0.0
+}
+
+report[T: Shape]: fun(imm shape: T) =&gt; printf(&quot;%.2f\n&quot;, shape.area())
+
+main: fun
+{
+	report(Point(1.0))
+	report(5)
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-literal">0.0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">report</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Shape</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-typeparam">T</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%.2f\n"</span>, <span class="c-parameter">shape</span>.<span class="c-function">area</span>())</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	report(<span class="c-type">Point</span>(<span class="c-literal">1.0</span>))</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;report&#x27; requires &#x27;T: Shape&#x27;<span class="diagnostic-note">&#x27;Point&#x27; doesn&#x27;t implement &#x27;Shape&#x27;</span></span></span><span class="line">	report(<span class="c-literal">5</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;report&#x27; requires &#x27;T: Shape&#x27;<span class="diagnostic-note">&#x27;i32&#x27; doesn&#x27;t implement &#x27;Shape&#x27;</span></span></span><span class="line">}</span></code></pre></div>
+<h2 id="requirements"><a class="anchor" href="#requirements">Requirements</a></h2>
+<p>A trait's body lists its requirements, written like the members of a record without their bodies. <code>Self</code> stands for the implementing type. Besides methods, a trait can require properties, static functions, operators, constructors and constants.</p>
+<h3 id="properties-and-static-functions"><a class="anchor" href="#properties-and-static-functions">Properties and static functions</a></h3>
+<p>A property requirement is a standalone <code>get</code> or a <code>prop</code> with both accessors. A function without a receiver is a static function; generic code calls it through the type parameter, as in <code>T.start()</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-555"></button><textarea hidden id="copy-555">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Counter: trait
+{
+	count: get(imm self) -&gt; i32
+	limit: prop i32
+	{
+		get(imm self)
+		set(mut self, value)
+	}
+	start: fun -&gt; Self
+	bump: fun(mut self)
+}
+
+Clicks: rec impl Counter
+{
+	clicks: i32
+	cap: i32
+
+	count: get(imm self) -&gt; i32 =&gt; self.clicks
+	limit: prop i32
+	{
+		get(imm self) =&gt; self.cap
+		set(mut self, value)
+		{
+			self.cap = value
+		}
+	}
+
+	start: fun -&gt; Clicks =&gt; Clicks(0, 3)
+
+	bump: fun(mut self)
+	{
+		if self.clicks &lt; self.cap
+			self.clicks += 1
+	}
+}
+
+run[T: Counter]: fun(times: i32) -&gt; T
+{
+	var counter = T.start()
+	counter.limit += 2
+	for i in 0..times
+		counter.bump()
+
+	ret counter
+}
+
+main: fun
+{
+	val result = run[Clicks](10)
+	printf(&quot;%d %d\n&quot;, result.count, result.limit)
+}</textarea><pre><code><span class="line"><span class="c-trait">Counter</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	count: <span class="c-keyword">get</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="line">	limit: <span class="c-keyword">prop</span> <span class="c-type">i32</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">get</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>)</span><span class="line">		<span class="c-keyword">set</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, value)</span><span class="line">	}</span><span class="line">	<span class="c-function">start</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-typeparam">Self</span></span><span class="line">	<span class="c-function">bump</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Clicks</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Counter</span></span><span class="line">{</span><span class="line">	<span class="c-field">clicks</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">cap</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	count: <span class="c-keyword">get</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">clicks</span></span><span class="line">	limit: <span class="c-keyword">prop</span> <span class="c-type">i32</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">get</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">cap</span></span><span class="line">		<span class="c-keyword">set</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">value</span>)</span><span class="line">		{</span><span class="line">			<span class="c-keyword">self</span>.<span class="c-field">cap</span> = <span class="c-parameter">value</span></span><span class="line">		}</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">start</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">Clicks</span> =&gt; <span class="c-type">Clicks</span>(<span class="c-literal">0</span>, <span class="c-literal">3</span>)</span><span class="line"> </span><span class="line">	<span class="c-function">bump</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> <span class="c-keyword">self</span>.<span class="c-field">clicks</span> &lt; <span class="c-keyword">self</span>.<span class="c-field">cap</span></span><span class="line">			<span class="c-keyword">self</span>.<span class="c-field">clicks</span> += <span class="c-literal">1</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">run</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Counter</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">times</span>: <span class="c-type">i32</span>) -&gt; <span class="c-typeparam">T</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> counter = <span class="c-typeparam">T</span>.<span class="c-function">start</span>()</span><span class="line">	counter.limit += <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-parameter">times</span></span><span class="line">		counter.<span class="c-function">bump</span>()</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> counter</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> result = <span class="c-function">run</span>[<span class="c-type">Clicks</span>](<span class="c-literal">10</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, result.<span class="c-function">count</span>, result.<span class="c-function">limit</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>5 5</pre></div>
+<p><code>Self</code> exists only inside traits. An implementation writes its own type's name, as <code>start: fun -&gt; Clicks</code> does:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-556"></button><textarea hidden id="copy-556">mod example
+
+Counter: trait
+{
+	start: fun -&gt; Self
+}
+
+Clicks: rec impl Counter
+{
+	clicks: i32
+
+	start: fun -&gt; Self =&gt; Clicks(0)
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Counter</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">start</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-typeparam">Self</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Clicks</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Counter</span></span><span class="line">{</span><span class="line">	<span class="c-field">clicks</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">start</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">Self</span> =&gt; <span class="c-type">Clicks</span>(<span class="c-literal">0</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;start&#x27; doesn&#x27;t match &#x27;Counter.start&#x27;</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:18ch">Type &#x27;Self&#x27; not found in this scope</span></span><span class="line">}</span></code></pre></div>
+<h3 id="operators"><a class="anchor" href="#operators">Operators</a></h3>
+<p>Operator requirements are written like <a href="operators.html">operator members</a>. Built-in types meet them with their built-in operators, so <code>i32: impl Sum</code> only has to add <code>empty</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-557"></button><textarea hidden id="copy-557">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Sum: trait
+{
+	+: op(imm a: Self, imm b: Self) -&gt; Self
+	empty: fun -&gt; Self
+}
+
+i32: impl Sum
+{
+	empty: fun -&gt; i32 =&gt; 0
+}
+
+f64: impl Sum
+{
+	empty: fun -&gt; f64 =&gt; 0.0
+}
+
+Money: rec impl Sum
+{
+	cents: i64
+
+	+: op(a: Money, b: Money) -&gt; Money =&gt; Money(a.cents + b.cents)
+	empty: fun -&gt; Money =&gt; Money(0)
+}
+
+total[T: Sum + noref, N: const usize]: fun(imm values: array[T, N]) -&gt; T
+{
+	var sum = T.empty()
+	for imm value in values
+		sum = sum + value
+
+	ret sum
+}
+
+main: fun
+{
+	val prices = [Money(250), Money(199)]
+	printf(&quot;%d %.2f %lld\n&quot;, total([1, 2, 3]), total([0.5, 0.25]), total(imm prices).cents)
+}</textarea><pre><code><span class="line"><span class="c-trait">Sum</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">+</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-typeparam">Self</span></span><span class="line">	<span class="c-function">empty</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-typeparam">Self</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span> <span class="c-trait">Sum</span></span><span class="line">{</span><span class="line">	<span class="c-function">empty</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">f64</span>: <span class="c-keyword">impl</span> <span class="c-trait">Sum</span></span><span class="line">{</span><span class="line">	<span class="c-function">empty</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">f64</span> =&gt; <span class="c-literal">0.0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Money</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Sum</span></span><span class="line">{</span><span class="line">	<span class="c-field">cents</span>: <span class="c-type">i64</span></span><span class="line"> </span><span class="line">	<span class="c-function">+</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Money</span>, <span class="c-parameter">b</span>: <span class="c-type">Money</span>) -&gt; <span class="c-type">Money</span> =&gt; <span class="c-type">Money</span>(<span class="c-parameter">a</span>.<span class="c-field">cents</span> + <span class="c-parameter">b</span>.<span class="c-field">cents</span>)</span><span class="line">	<span class="c-function">empty</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">Money</span> =&gt; <span class="c-type">Money</span>(<span class="c-literal">0</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">total</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Sum</span> + <span class="c-keyword">noref</span>, <span class="c-typeparam">N</span>: <span class="c-keyword">const</span> <span class="c-type">usize</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">values</span>: <span class="c-type">array</span>[<span class="c-typeparam">T</span>, <span class="c-typeparam">N</span>]) -&gt; <span class="c-typeparam">T</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> sum = <span class="c-typeparam">T</span>.<span class="c-function">empty</span>()</span><span class="line">	<span class="c-keyword">for</span> <span class="c-keyword">imm</span> value <span class="c-keyword">in</span> <span class="c-parameter">values</span></span><span class="line">		sum = sum <span class="c-function">+</span> value</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> sum</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> prices = [<span class="c-type">Money</span>(<span class="c-literal">250</span>), <span class="c-type">Money</span>(<span class="c-literal">199</span>)]</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %.2f %lld\n"</span>, <span class="c-function">total</span>([<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>]), <span class="c-function">total</span>([<span class="c-literal">0.5</span>, <span class="c-literal">0.25</span>]), <span class="c-function">total</span>(<span class="c-keyword">imm</span> prices).<span class="c-field">cents</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>6 0.75 449</pre></div>
+<p>The <code>noref</code> bound matters here: for a <code>T</code> that could hold borrows, <code>sum + value</code> could borrow from <code>sum</code>, and <code>sum</code> couldn't then be reassigned with it. See <a href="generics.html#noref">Generics</a>.</p>
+<h3 id="constructors"><a class="anchor" href="#constructors">Constructors</a></h3>
+<p>A constructor requirement lets generic code build a <code>T</code> with <code>T(...)</code>. A type meets it the way it meets a [<code>new(...)</code> constraint](generics.md#new): with a declared constructor that takes the same parameters, or, when it declares none, with its field-by-field constructor. Built-in conversions count, so <code>u64</code> meets <code>new: op(capacity: usize)</code> with its conversion from <code>usize</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-558"></button><textarea hidden id="copy-558">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Sized: trait
+{
+	new: op(capacity: usize)
+}
+
+Buffer: rec impl Sized
+{
+	size: usize
+
+	new: op(capacity: usize)
+	{
+		self.size = capacity * 2
+	}
+}
+
+Slot: rec impl Sized
+{
+	capacity: usize
+}
+
+u64: impl Sized
+
+make[T: Sized]: fun -&gt; T =&gt; T(64)
+
+main: fun
+{
+	printf(&quot;%zu %zu %llu\n&quot;, make[Buffer]().size, make[Slot]().capacity, make[u64]())
+}</textarea><pre><code><span class="line"><span class="c-trait">Sized</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">capacity</span>: <span class="c-type">usize</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Sized</span></span><span class="line">{</span><span class="line">	<span class="c-field">size</span>: <span class="c-type">usize</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">capacity</span>: <span class="c-type">usize</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">size</span> = <span class="c-parameter">capacity</span> * <span class="c-literal">2</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Slot</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Sized</span></span><span class="line">{</span><span class="line">	<span class="c-field">capacity</span>: <span class="c-type">usize</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">u64</span>: <span class="c-keyword">impl</span> <span class="c-trait">Sized</span></span><span class="line"> </span><span class="line"><span class="c-function">make</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Sized</span>]: <span class="c-keyword">fun</span> -&gt; <span class="c-typeparam">T</span> =&gt; <span class="c-typeparam">T</span>(<span class="c-literal">64</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %llu\n"</span>, <span class="c-function">make</span>[<span class="c-type">Buffer</span>]().<span class="c-field">size</span>, <span class="c-function">make</span>[<span class="c-type">Slot</span>]().<span class="c-field">capacity</span>, <span class="c-function">make</span>[<span class="c-type">u64</span>]())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>128 64 64</pre></div>
+<p>Constants are covered in <a href="#trait-constants">Trait constants</a> below.</p>
+<h2 id="default-bodies"><a class="anchor" href="#default-bodies">Default bodies</a></h2>
+<p>A requirement can have a body. Types that implement the trait get it as it is, or replace it with their own. A trait can also have <code>pvt</code> members, helpers with bodies that only the trait's own bodies can use:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-559"></button><textarea hidden id="copy-559">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Greeter: trait
+{
+	name: fun(imm self) -&gt; cstr
+	greet: fun(imm self) =&gt; printf(&quot;hello, %s%s\n&quot;, self.name(), mark())
+	mark: pvt fun -&gt; cstr =&gt; &quot;!&quot;
+}
+
+Dog: rec impl Greeter
+{
+	age: i32
+
+	name: fun(imm self) -&gt; cstr =&gt; &quot;dog&quot;
+}
+
+Robot: rec impl Greeter
+{
+	serial: i32
+
+	name: fun(imm self) -&gt; cstr =&gt; &quot;robot&quot;
+	greet: fun(imm self) =&gt; printf(&quot;GREETINGS, %s %d\n&quot;, self.name(), self.serial)
+}
+
+main: fun
+{
+	Dog(3).greet()
+	Robot(42).greet()
+}</textarea><pre><code><span class="line"><span class="c-trait">Greeter</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span></span><span class="line">	<span class="c-function">greet</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"hello, %s%s\n"</span>, <span class="c-keyword">self</span>.<span class="c-function">name</span>(), <span class="c-function">mark</span>())</span><span class="line">	<span class="c-function">mark</span>: <span class="c-keyword">pvt</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"!"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Dog</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Greeter</span></span><span class="line">{</span><span class="line">	<span class="c-field">age</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"dog"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Robot</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Greeter</span></span><span class="line">{</span><span class="line">	<span class="c-field">serial</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"robot"</span></span><span class="line">	<span class="c-function">greet</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"GREETINGS, %s %d\n"</span>, <span class="c-keyword">self</span>.<span class="c-function">name</span>(), <span class="c-keyword">self</span>.<span class="c-field">serial</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-type">Dog</span>(<span class="c-literal">3</span>).<span class="c-function">greet</span>()</span><span class="line">	<span class="c-type">Robot</span>(<span class="c-literal">42</span>).<span class="c-function">greet</span>()</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>hello, dog!
+GREETINGS, robot 42</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-560"></button><textarea hidden id="copy-560">mod example
+
+Greeter: trait
+{
+	name: fun(imm self) -&gt; cstr
+	mark: pvt fun -&gt; cstr =&gt; &quot;!&quot;
+	loud: pvt fun(imm self) -&gt; cstr =&gt; self.name()
+}
+
+Dog: rec impl Greeter
+{
+	age: i32
+
+	name: fun(imm self) -&gt; cstr =&gt; &quot;dog&quot;
+}
+
+main: fun
+{
+	val d = Dog(3)
+	val m = Greeter(Dog).mark()
+	val l = d.loud()
+}</textarea><pre><code><span class="line"><span class="c-trait">Greeter</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span></span><span class="line">	<span class="c-function">mark</span>: <span class="c-keyword">pvt</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"!"</span></span><span class="line">	<span class="c-function">loud</span>: <span class="c-keyword">pvt</span> <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-keyword">self</span>.<span class="c-function">name</span>()</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Dog</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Greeter</span></span><span class="line">{</span><span class="line">	<span class="c-field">age</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"dog"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> d = <span class="c-type">Dog</span>(<span class="c-literal">3</span>)</span><span class="line">	<span class="c-keyword">val</span> m = <span class="c-trait">Greeter</span>(<span class="c-type">Dog</span>).mark()</span><span class="diagnostic"><span class="squiggle" style="margin-left:25ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:25ch">&#x27;mark&#x27; is private to its trait</span></span><span class="line">	<span class="c-keyword">val</span> l = d.loud()</span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:14ch">&#x27;loud&#x27; is private to its trait</span></span><span class="line">}</span></code></pre></div>
+<p>A <code>pvt</code> member needs a body, and a trait can't hold fields, static fields or destructors.</p>
+<h2 id="implementing-a-trait"><a class="anchor" href="#implementing-a-trait">Implementing a trait</a></h2>
+<p>A type implements a trait in one of two places: in its own declaration, as in <code>Circle: rec impl Shape</code> or <code>Color: enum impl Show</code>, or in a separate <code>impl</code> block, as in <code>Point: impl Show</code>. Several traits are joined with <code>+</code>, as in <code>rec impl Hash + Show</code>. An <code>impl</code> block can name any type, built-in types included:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-561"></button><textarea hidden id="copy-561">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Show: trait
+{
+	show: fun(imm self)
+}
+
+Color: enum impl Show
+{
+	red
+	green
+
+	show: fun(imm self)
+	{
+		match self
+		{
+			red =&gt; printf(&quot;red\n&quot;)
+			green =&gt; printf(&quot;green\n&quot;)
+		}
+	}
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+}
+
+Point: impl Show
+{
+	show: fun(imm self) =&gt; printf(&quot;(%d, %d)\n&quot;, self.x, self.y)
+}
+
+i32: impl Show
+{
+	show: fun(imm self) =&gt; printf(&quot;%d\n&quot;, self)
+}
+
+print[T: Show]: fun(imm value: T) =&gt; value.show()
+
+main: fun
+{
+	print(Color.green)
+	print(Point(1, 2))
+	print(7)
+}</textarea><pre><code><span class="line"><span class="c-trait">Show</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Color</span>: <span class="c-keyword">enum</span> <span class="c-keyword">impl</span> <span class="c-trait">Show</span></span><span class="line">{</span><span class="line">	<span class="c-case">red</span></span><span class="line">	<span class="c-case">green</span></span><span class="line"> </span><span class="line">	<span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">match</span> <span class="c-keyword">self</span></span><span class="line">		{</span><span class="line">			red =&gt; <span class="c-function">printf</span>(<span class="c-literal">"red\n"</span>)</span><span class="line">			green =&gt; <span class="c-function">printf</span>(<span class="c-literal">"green\n"</span>)</span><span class="line">		}</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">impl</span> <span class="c-trait">Show</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"(%d, %d)\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">x</span>, <span class="c-keyword">self</span>.<span class="c-field">y</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span> <span class="c-trait">Show</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-keyword">self</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">print</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Show</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) =&gt; <span class="c-parameter">value</span>.<span class="c-function">show</span>()</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">print</span>(<span class="c-type">Color</span>.<span class="c-case">green</span>)</span><span class="line">	<span class="c-function">print</span>(<span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>))</span><span class="line">	<span class="c-function">print</span>(<span class="c-literal">7</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>green
+(1, 2)
+7</pre></div>
+<p>The trait's members become members of the type, so <code>Point(1, 2).show()</code> works outside generic code too. An <code>impl</code> block holds only the trait's members and <code>pvt</code> helpers, which only that block can use. It can't add fields, static fields, constructors or destructors.</p>
+<p>Members the type already has count toward the requirements, and an <code>impl</code> block only supplies the rest. A member that takes <code>self</code> by copy meets a requirement that takes <code>imm self</code>, when the type can be copied:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-562"></button><textarea hidden id="copy-562">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+	sides: fun(imm self) -&gt; i32
+}
+
+Square: rec
+{
+	side: f64
+
+	area: fun(self) -&gt; f64 =&gt; self.side * self.side
+}
+
+Square: impl Shape
+{
+	sides: fun(imm self) -&gt; i32 =&gt; 4
+}
+
+measure[T: Shape]: fun(imm shape: T) -&gt; f64 =&gt; shape.area() * f64(shape.sides())
+
+main: fun
+{
+	printf(&quot;%.1f\n&quot;, measure(Square(2.0)))
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">sides</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">side</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-keyword">self</span>.<span class="c-field">side</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-function">sides</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">4</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">measure</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Shape</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-parameter">shape</span>.<span class="c-function">area</span>() * <span class="c-type">f64</span>(<span class="c-parameter">shape</span>.<span class="c-function">sides</span>())</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f\n"</span>, <span class="c-function">measure</span>(<span class="c-type">Square</span>(<span class="c-literal">2.0</span>)))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>16.0</pre></div>
+<p>A missing member, a member whose signature differs from the requirement, a trait implemented twice, and a member the trait doesn't have are all errors:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-563"></button><textarea hidden id="copy-563">mod example
+
+Shape: trait
+{
+	area: fun(imm self) -&gt; f64
+	sides: fun(imm self) -&gt; i32
+}
+
+Missing: rec impl Shape
+{
+	x: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.x
+}
+
+Wrong: rec impl Shape
+{
+	x: f64
+
+	area: fun(imm self) -&gt; i32 =&gt; 0
+	sides: fun(imm self) -&gt; i32 =&gt; 0
+}
+
+Twice: rec impl Shape + Shape
+{
+	x: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.x
+	sides: fun(imm self) -&gt; i32 =&gt; 0
+}
+
+Point: rec
+{
+	x: f64
+}
+
+Point: impl Shape
+{
+	area: fun(imm self) -&gt; f64 =&gt; 0.0
+	sides: fun(imm self) -&gt; i32 =&gt; 0
+	extra: fun(imm self) -&gt; i32 =&gt; 1
+	y: f64
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">sides</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Missing</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:18ch">&#x27;Missing&#x27; needs &#x27;Shape.sides&#x27;</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">x</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Wrong</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;area&#x27; doesn&#x27;t match &#x27;Shape.area&#x27;</span></span><span class="line">	<span class="c-function">sides</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Twice</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span> + <span class="c-trait">Shape</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:16ch">&#x27;Twice&#x27; implements &#x27;Shape&#x27; more than once</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:24ch">&#x27;Twice&#x27; implements &#x27;Shape&#x27; more than once</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">x</span></span><span class="line">	<span class="c-function">sides</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-literal">0.0</span></span><span class="line">	<span class="c-function">sides</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="line">	<span class="c-function">extra</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;extra&#x27; isn&#x27;t a member of &#x27;Shape&#x27;</span></span><span class="line">	y: f64</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare fields in impl blocks</span></span><span class="line">}</span></code></pre></div>
+<p>A generic type can implement a trait for every instantiation, as in <code>Box[T]: impl Show</code>, for those that meet extra bounds, as in <code>Box[T: Show]: impl Show</code>, or for one instantiation, as in <code>Box[i32]: impl Show</code>. Two of these that cover the same type, like <code>Box[T]</code> and <code>Box[i32]</code>, implement the trait twice.</p>
+<h3 id="where-an-implementation-can-go"><a class="anchor" href="#where-an-implementation-can-go">Where an implementation can go</a></h3>
+<p>An implementation must be in the project that declares the trait or the project that declares the type. A program can implement its own traits for a library's types and a library's traits for its own types, but not a library's trait for a library's type:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-564"></button><textarea hidden id="copy-564">OutputType = &quot;Executable&quot;
+SystemLinkPreference = &quot;Dynamic&quot;
+
+[[ProjectReferences]]
+Path = &quot;shapes/shapes.celp&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">SystemLinkPreference </span>= <span class="c-literal">"Dynamic"</span></span><span class="line"> </span><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">"shapes/shapes.celp"</span></span></code></pre></div>
+<div class="code toml"><div class="code-title">shapes/shapes.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-565"></button><textarea hidden id="copy-565">OutputType = &quot;SharedLibrary&quot;
+SystemLinkPreference = &quot;Dynamic&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"SharedLibrary"</span></span><span class="line"><span class="c-field">SystemLinkPreference </span>= <span class="c-literal">"Dynamic"</span></span></code></pre></div>
+<div class="code cella error"><div class="code-title">shapes/shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-566"></button><textarea hidden id="copy-566">mod shapes
+
+Shape: pub trait
+{
+	area: fun(imm self) -&gt; f64
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">shapes</span></span><span class="line"> </span><span class="line"><span class="c-trait">Shape</span>: <span class="c-keyword">pub</span> <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span></code></pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-567"></button><textarea hidden id="copy-567">mod example
+
+use shapes.Shape
+
+Square: rec impl Shape
+{
+	side: f64
+
+	area: fun(imm self) -&gt; f64 =&gt; self.side * self.side
+}
+
+f64: impl Shape
+{
+	area: fun(imm self) -&gt; f64 =&gt; self
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-keyword">use</span> <span class="c-module">shapes</span>.<span class="c-trait">Shape</span></span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="line">{</span><span class="line">	<span class="c-field">side</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-keyword">self</span>.<span class="c-field">side</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">f64</span>: <span class="c-keyword">impl</span> <span class="c-trait">Shape</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:10ch">&#x27;Shape&#x27; and &#x27;f64&#x27; are both declared in other projects</span></span><span class="line">{</span><span class="line">	<span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>Library projects are covered in <a href="modules.html">Modules and visibility</a>.</p>
+<h2 id="using-traits-in-generic-code"><a class="anchor" href="#using-traits-in-generic-code">Using traits in generic code</a></h2>
+<p>A bound gives generic code every member of the trait: methods and properties on values, static functions and constants on the type parameter, operators, and constructors as <code>T(...)</code>. Several bounds are joined with <code>+</code>, and they mix with the other <a href="generics.html#constraints">constraints</a>, as in <code>[T: Sum + noref]</code>. Records and enums take bounds on their type parameters too, as in <code>Set[T: Hash + noref]: rec</code>.</p>
+<p>Inside generic code, a type parameter meets a bound only if its own bounds include that trait or a trait that requires it (see <a href="#traits-that-require-other-traits">Traits that require other traits</a>), or a <a href="#blanket-implementations">blanket implementation</a> covers it.</p>
+<h2 id="picking-a-traits-member"><a class="anchor" href="#picking-a-traits-member">Picking a trait's member</a></h2>
+<p>When a type implements two traits with members of the same name, a call by that name is ambiguous. Naming the trait picks its member: <code>Area(s).size()</code> calls <code>Area</code>'s method on <code>s</code>, and <code>Area(Square).unit()</code> calls <code>Area</code>'s static function for <code>Square</code>. Generic code picks the same way:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-568"></button><textarea hidden id="copy-568">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Area: trait
+{
+	size: fun(imm self) -&gt; f64
+	unit: fun -&gt; cstr
+}
+
+Perimeter: trait
+{
+	size: fun(imm self) -&gt; f64
+	unit: fun -&gt; cstr
+}
+
+Square: rec
+{
+	side: f64
+}
+
+Square: impl Area
+{
+	size: fun(imm self) -&gt; f64 =&gt; self.side * self.side
+	unit: fun -&gt; cstr =&gt; &quot;m2&quot;
+}
+
+Square: impl Perimeter
+{
+	size: fun(imm self) -&gt; f64 =&gt; self.side * 4.0
+	unit: fun -&gt; cstr =&gt; &quot;m&quot;
+}
+
+both[T: Area + Perimeter]: fun(imm shape: T) -&gt; f64 =&gt; Area(shape).size() + Perimeter(shape).size()
+
+main: fun
+{
+	val s = Square(3.0)
+	printf(&quot;%.1f %s\n&quot;, Area(s).size(), Area(Square).unit())
+	printf(&quot;%.1f %s\n&quot;, Perimeter(s).size(), Perimeter(Square).unit())
+	printf(&quot;%.1f\n&quot;, both(imm s))
+}</textarea><pre><code><span class="line"><span class="c-trait">Area</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">unit</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">cstr</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Perimeter</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">	<span class="c-function">unit</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">cstr</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">side</span>: <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">impl</span> <span class="c-trait">Area</span></span><span class="line">{</span><span class="line">	<span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-keyword">self</span>.<span class="c-field">side</span></span><span class="line">	<span class="c-function">unit</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"m2"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">impl</span> <span class="c-trait">Perimeter</span></span><span class="line">{</span><span class="line">	<span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-literal">4.0</span></span><span class="line">	<span class="c-function">unit</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"m"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">both</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Area</span> + <span class="c-trait">Perimeter</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">shape</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-trait">Area</span>(<span class="c-parameter">shape</span>).<span class="c-function">size</span>() + <span class="c-trait">Perimeter</span>(<span class="c-parameter">shape</span>).<span class="c-function">size</span>()</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> s = <span class="c-type">Square</span>(<span class="c-literal">3.0</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %s\n"</span>, <span class="c-trait">Area</span>(s).<span class="c-function">size</span>(), <span class="c-trait">Area</span>(<span class="c-type">Square</span>).<span class="c-function">unit</span>())</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %s\n"</span>, <span class="c-trait">Perimeter</span>(s).<span class="c-function">size</span>(), <span class="c-trait">Perimeter</span>(<span class="c-type">Square</span>).<span class="c-function">unit</span>())</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f\n"</span>, <span class="c-function">both</span>(<span class="c-keyword">imm</span> s))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>9.0 m2
+12.0 m
+21.0</pre></div>
+<p>The pick works for properties too: with a property <code>count</code> in both traits, <code>Area(s).count = 5</code> calls <code>Area</code>'s setter. A trait on its own isn't a value:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-569"></button><textarea hidden id="copy-569">mod example
+
+Area: trait
+{
+	size: fun(imm self) -&gt; f64
+}
+
+Perimeter: trait
+{
+	size: fun(imm self) -&gt; f64
+}
+
+Square: rec
+{
+	side: f64
+}
+
+Square: impl Area
+{
+	size: fun(imm self) -&gt; f64 =&gt; self.side * self.side
+}
+
+Square: impl Perimeter
+{
+	size: fun(imm self) -&gt; f64 =&gt; self.side * 4.0
+}
+
+main: fun
+{
+	val s = Square(3.0)
+	val size = s.size()
+	val t = Area
+}</textarea><pre><code><span class="line"><span class="c-trait">Area</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Perimeter</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">side</span>: <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">impl</span> <span class="c-trait">Area</span></span><span class="line">{</span><span class="line">	<span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-keyword">self</span>.<span class="c-field">side</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">impl</span> <span class="c-trait">Perimeter</span></span><span class="line">{</span><span class="line">	<span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">side</span> * <span class="c-literal">4.0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> s = <span class="c-type">Square</span>(<span class="c-literal">3.0</span>)</span><span class="line">	<span class="c-keyword">val</span> size = s.size()</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:15ch">Call to &#x27;size&#x27; is ambiguous<span class="diagnostic-note">Candidate on line 20</span><span class="diagnostic-note">Candidate on line 25</span></span></span><span class="line">	<span class="c-keyword">val</span> t = Area</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use traits as values</span></span><span class="line">}</span></code></pre></div>
+<h2 id="generic-traits"><a class="anchor" href="#generic-traits">Generic traits</a></h2>
+<p>A trait can take type parameters, declared on its name like other generics. An implementation names its arguments, as in <code>impl Iterator[i32]</code>, and a bound does too, as in <code>[I: Iterator[i32]]</code>. A bound can leave an argument to a type parameter, as <code>count</code> does with <code>T</code>; the compiler infers <code>T</code> from the type's implementation:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-570"></button><textarea hidden id="copy-570">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Option[T]: enum
+{
+	none
+	some(value: T)
+}
+
+Iterator[T]: trait
+{
+	next: fun(mut self) -&gt; Option[T]
+}
+
+Countdown: rec impl Iterator[i32]
+{
+	left: i32
+
+	next: fun(mut self) -&gt; Option[i32]
+	{
+		if self.left == 0
+			ret none
+
+		self.left -= 1
+		ret some(self.left + 1)
+	}
+}
+
+Repeat[T: copy]: rec impl Iterator[T]
+{
+	value: T
+	times: i32
+
+	next: fun(mut self) -&gt; Option[T]
+	{
+		if self.times == 0
+			ret none
+
+		self.times -= 1
+		ret some(self.value)
+	}
+}
+
+total[I: Iterator[i32]]: fun(mut items: I) -&gt; i32
+{
+	var sum = 0
+	while items.next() is some(val value)
+		sum += value
+
+	ret sum
+}
+
+count[T, I: Iterator[T]]: fun(mut items: I) -&gt; i32
+{
+	var n = 0
+	while items.next() is some(_)
+		n += 1
+
+	ret n
+}
+
+main: fun
+{
+	var steps = Countdown(4)
+	var more = Countdown(3)
+	var words = Repeat[cstr](&quot;hi&quot;, 5)
+	printf(&quot;%d %d %d\n&quot;, total(mut steps), count(mut more), count(mut words))
+}</textarea><pre><code><span class="line"><span class="c-type">Option</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">some</span>(value: <span class="c-typeparam">T</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Iterator</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">next</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">Option</span>[<span class="c-typeparam">T</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Countdown</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Iterator</span>[<span class="c-type">i32</span>]</span><span class="line">{</span><span class="line">	<span class="c-field">left</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">next</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">Option</span>[<span class="c-type">i32</span>]</span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> <span class="c-keyword">self</span>.<span class="c-field">left</span> == <span class="c-literal">0</span></span><span class="line">			<span class="c-keyword">ret</span> <span class="c-case">none</span></span><span class="line"> </span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">left</span> -= <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-case">some</span>(<span class="c-keyword">self</span>.<span class="c-field">left</span> + <span class="c-literal">1</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Repeat</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">copy</span>]: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Iterator</span>[<span class="c-typeparam">T</span>]</span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-typeparam">T</span></span><span class="line">	<span class="c-field">times</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">next</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">Option</span>[<span class="c-typeparam">T</span>]</span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> <span class="c-keyword">self</span>.<span class="c-field">times</span> == <span class="c-literal">0</span></span><span class="line">			<span class="c-keyword">ret</span> <span class="c-case">none</span></span><span class="line"> </span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">times</span> -= <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-case">some</span>(<span class="c-keyword">self</span>.<span class="c-field">value</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">total</span>[<span class="c-typeparam">I</span>: <span class="c-trait">Iterator</span>[<span class="c-type">i32</span>]]: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">items</span>: <span class="c-typeparam">I</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> sum = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">while</span> <span class="c-parameter">items</span>.<span class="c-function">next</span>() <span class="c-keyword">is</span> some(<span class="c-keyword">val</span> value)</span><span class="line">		sum += value</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> sum</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">count</span>[<span class="c-typeparam">T</span>, <span class="c-typeparam">I</span>: <span class="c-trait">Iterator</span>[<span class="c-typeparam">T</span>]]: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">items</span>: <span class="c-typeparam">I</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> n = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">while</span> <span class="c-parameter">items</span>.<span class="c-function">next</span>() <span class="c-keyword">is</span> some(_)</span><span class="line">		n += <span class="c-literal">1</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> n</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> steps = <span class="c-type">Countdown</span>(<span class="c-literal">4</span>)</span><span class="line">	<span class="c-keyword">var</span> more = <span class="c-type">Countdown</span>(<span class="c-literal">3</span>)</span><span class="line">	<span class="c-keyword">var</span> words = <span class="c-type">Repeat</span>[<span class="c-type">cstr</span>](<span class="c-literal">"hi"</span>, <span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">total</span>(<span class="c-keyword">mut</span> steps), <span class="c-function">count</span>(<span class="c-keyword">mut</span> more), <span class="c-function">count</span>(<span class="c-keyword">mut</span> words))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>10 3 5</pre></div>
+<p>A type can implement several instantiations of one trait, each with its own members:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-571"></button><textarea hidden id="copy-571">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Write[T]: trait
+{
+	write: fun(mut self, imm value: T)
+}
+
+Console: rec impl Write[cstr] + Write[i32]
+{
+	written: i32
+
+	write: fun(mut self, value: cstr)
+	{
+		printf(&quot;%s&quot;, value)
+		self.written += 1
+	}
+
+	write: fun(mut self, value: i32)
+	{
+		printf(&quot;%d&quot;, value)
+		self.written += 1
+	}
+}
+
+report[W: Write[cstr] + Write[i32]]: fun(mut out: W, score: i32)
+{
+	out.write(&quot;score: &quot;)
+	out.write(imm score)
+	out.write(&quot;\n&quot;)
+}
+
+main: fun
+{
+	var console = Console(0)
+	report(mut console, 42)
+	printf(&quot;%d writes\n&quot;, console.written)
+}</textarea><pre><code><span class="line"><span class="c-trait">Write</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">write</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Console</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Write</span>[<span class="c-type">cstr</span>] + <span class="c-trait">Write</span>[<span class="c-type">i32</span>]</span><span class="line">{</span><span class="line">	<span class="c-field">written</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">write</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">value</span>: <span class="c-type">cstr</span>)</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%s"</span>, <span class="c-parameter">value</span>)</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">written</span> += <span class="c-literal">1</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">write</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">value</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d"</span>, <span class="c-parameter">value</span>)</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">written</span> += <span class="c-literal">1</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">report</span>[<span class="c-typeparam">W</span>: <span class="c-trait">Write</span>[<span class="c-type">cstr</span>] + <span class="c-trait">Write</span>[<span class="c-type">i32</span>]]: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">out</span>: <span class="c-typeparam">W</span>, <span class="c-parameter">score</span>: <span class="c-type">i32</span>)</span><span class="line">{</span><span class="line">	<span class="c-parameter">out</span>.<span class="c-function">write</span>(<span class="c-literal">"score: "</span>)</span><span class="line">	<span class="c-parameter">out</span>.<span class="c-function">write</span>(<span class="c-keyword">imm</span> <span class="c-parameter">score</span>)</span><span class="line">	<span class="c-parameter">out</span>.<span class="c-function">write</span>(<span class="c-literal">"\n"</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> console = <span class="c-type">Console</span>(<span class="c-literal">0</span>)</span><span class="line">	<span class="c-function">report</span>(<span class="c-keyword">mut</span> console, <span class="c-literal">42</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d writes\n"</span>, console.<span class="c-field">written</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>score: 42
+3 writes</pre></div>
+<h2 id="traits-that-require-other-traits"><a class="anchor" href="#traits-that-require-other-traits">Traits that require other traits</a></h2>
+<p><code>Ord: trait req Eq</code> says that every type that implements <code>Ord</code> implements <code>Eq</code> as well. <code>Ord</code>'s default bodies can then use <code>Eq</code>'s members, and a bound <code>[T: Ord]</code> gives generic code both traits' members and meets <code>[T: Eq]</code> bounds:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-572"></button><textarea hidden id="copy-572">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Eq: trait
+{
+	==: op(imm a: Self, imm b: Self) -&gt; bool
+}
+
+Ord: trait req Eq
+{
+	&lt;: op(imm a: Self, imm b: Self) -&gt; bool
+	&lt;=: op(imm a: Self, imm b: Self) -&gt; bool =&gt; a &lt; b || a == b
+}
+
+Version: rec impl Ord
+{
+	major: i32
+	minor: i32
+
+	==: op(a: Version, b: Version) -&gt; bool =&gt; a.major == b.major &amp;&amp; a.minor == b.minor
+	&lt;: op(a: Version, b: Version) -&gt; bool =&gt; a.major &lt; b.major || a.major == b.major &amp;&amp; a.minor &lt; b.minor
+}
+
+i32: impl Ord
+
+same[T: Eq]: fun(imm a: T, imm b: T) -&gt; bool =&gt; a == b
+
+within[T: Ord]: fun(imm value: T, imm low: T, imm high: T) -&gt; bool =&gt; low &lt;= value &amp;&amp; value &lt;= high
+
+isEdge[T: Ord]: fun(imm value: T, imm low: T, imm high: T) -&gt; bool =&gt; same(imm value, imm low) || value == high
+
+main: fun
+{
+	val low = Version(1, 0)
+	val high = Version(2, 0)
+	val current = Version(1, 5)
+	printf(&quot;%d %d\n&quot;, within(imm current, imm low, imm high), within(12, 1, 9))
+	printf(&quot;%d %d\n&quot;, isEdge(imm low, imm low, imm high), same(imm current, imm low))
+}</textarea><pre><code><span class="line"><span class="c-trait">Eq</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">==</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-type">bool</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Ord</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-trait">Eq</span></span><span class="line">{</span><span class="line">	<span class="c-function">&lt;</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-type">bool</span></span><span class="line">	<span class="c-function">&lt;=</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">a</span> <span class="c-function">&lt;</span> <span class="c-parameter">b</span> || <span class="c-parameter">a</span> <span class="c-function">==</span> <span class="c-parameter">b</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Version</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Ord</span></span><span class="line">{</span><span class="line">	<span class="c-field">major</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">minor</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">==</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Version</span>, <span class="c-parameter">b</span>: <span class="c-type">Version</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">a</span>.<span class="c-field">major</span> == <span class="c-parameter">b</span>.<span class="c-field">major</span> &amp;&amp; <span class="c-parameter">a</span>.<span class="c-field">minor</span> == <span class="c-parameter">b</span>.<span class="c-field">minor</span></span><span class="line">	<span class="c-function">&lt;</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Version</span>, <span class="c-parameter">b</span>: <span class="c-type">Version</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">a</span>.<span class="c-field">major</span> &lt; <span class="c-parameter">b</span>.<span class="c-field">major</span> || <span class="c-parameter">a</span>.<span class="c-field">major</span> == <span class="c-parameter">b</span>.<span class="c-field">major</span> &amp;&amp; <span class="c-parameter">a</span>.<span class="c-field">minor</span> &lt; <span class="c-parameter">b</span>.<span class="c-field">minor</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span> <span class="c-trait">Ord</span></span><span class="line"> </span><span class="line"><span class="c-function">same</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Eq</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-typeparam">T</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">a</span> <span class="c-function">==</span> <span class="c-parameter">b</span></span><span class="line"> </span><span class="line"><span class="c-function">within</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Ord</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>, <span class="c-keyword">imm</span> <span class="c-parameter">low</span>: <span class="c-typeparam">T</span>, <span class="c-keyword">imm</span> <span class="c-parameter">high</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">low</span> <span class="c-function">&lt;=</span> <span class="c-parameter">value</span> &amp;&amp; <span class="c-parameter">value</span> <span class="c-function">&lt;=</span> <span class="c-parameter">high</span></span><span class="line"> </span><span class="line"><span class="c-function">isEdge</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Ord</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>, <span class="c-keyword">imm</span> <span class="c-parameter">low</span>: <span class="c-typeparam">T</span>, <span class="c-keyword">imm</span> <span class="c-parameter">high</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-function">same</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>, <span class="c-keyword">imm</span> <span class="c-parameter">low</span>) || <span class="c-parameter">value</span> <span class="c-function">==</span> <span class="c-parameter">high</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> low = <span class="c-type">Version</span>(<span class="c-literal">1</span>, <span class="c-literal">0</span>)</span><span class="line">	<span class="c-keyword">val</span> high = <span class="c-type">Version</span>(<span class="c-literal">2</span>, <span class="c-literal">0</span>)</span><span class="line">	<span class="c-keyword">val</span> current = <span class="c-type">Version</span>(<span class="c-literal">1</span>, <span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">within</span>(<span class="c-keyword">imm</span> current, <span class="c-keyword">imm</span> low, <span class="c-keyword">imm</span> high), <span class="c-function">within</span>(<span class="c-literal">12</span>, <span class="c-literal">1</span>, <span class="c-literal">9</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">isEdge</span>(<span class="c-keyword">imm</span> low, <span class="c-keyword">imm</span> low, <span class="c-keyword">imm</span> high), <span class="c-function">same</span>(<span class="c-keyword">imm</span> current, <span class="c-keyword">imm</span> low))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 0
+1 0</pre></div>
+<p>Implementing <code>Ord</code> implements <code>Eq</code> too, when the type doesn't have it yet, so <code>Version: rec impl Ord</code> is enough, and the same declaration or block holds the members of both. Naming <code>Eq</code> as well, as in <code>rec impl Ord + Eq</code>, gets the hint "Redundant 'Eq'". Requirements chain: a trait that requires <code>Ord</code> requires <code>Eq</code> too. A trait can require several, as in <code>req Eq + Hash</code>, and a trait can't require itself, directly or through others:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-573"></button><textarea hidden id="copy-573">mod example
+
+Eq: trait
+{
+	==: op(imm a: Self, imm b: Self) -&gt; bool
+}
+
+Ord: trait req Eq
+{
+	&lt;: op(imm a: Self, imm b: Self) -&gt; bool
+}
+
+Plain: rec impl Ord
+{
+	n: i32
+
+	&lt;: op(a: Plain, b: Plain) -&gt; bool =&gt; a.n &lt; b.n
+}
+
+Even: trait req Odd
+Odd: trait req Even
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Eq</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">==</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-type">bool</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Ord</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-trait">Eq</span></span><span class="line">{</span><span class="line">	<span class="c-function">&lt;</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-type">bool</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Plain</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Ord</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:16ch">&#x27;Plain&#x27; needs &#x27;Eq.==&#x27;</span></span><span class="line">{</span><span class="line">	<span class="c-field">n</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">&lt;</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Plain</span>, <span class="c-parameter">b</span>: <span class="c-type">Plain</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">a</span>.<span class="c-field">n</span> &lt; <span class="c-parameter">b</span>.<span class="c-field">n</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Even</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-trait">Odd</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;Even&#x27; requires itself</span></span><span class="line"><span class="c-trait">Odd</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-trait">Even</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;Odd&#x27; requires itself</span></span></code></pre></div>
+<p>A trait with nothing of its own to require, like <code>Even</code> here, needs no body.</p>
+<h2 id="constraints-on-self"><a class="anchor" href="#constraints-on-self">Constraints on Self</a></h2>
+<p><code>req</code> takes the other <a href="generics.html#constraints">constraints</a> as well, and applies them to every type that implements the trait. <code>Bounded: trait req copy</code> accepts only types that can be copied, so its constants can hold a <code>Self</code> and code with a <code>[T: Bounded]</code> bound can copy a <code>T</code>. <code>Built: trait req new(i32)</code> requires a constructor, which generic code calls as <code>T(7)</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-574"></button><textarea hidden id="copy-574">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Bounded: trait req copy
+{
+	lowest: const Self
+	highest: const Self
+}
+
+u8: impl Bounded
+{
+	lowest: const u8 = 0
+	highest: const u8 = 255
+}
+
+i16: impl Bounded
+{
+	lowest: const i16 = -32768
+	highest: const i16 = 32767
+}
+
+limits[T: Bounded]: fun -&gt; array[T, 2] =&gt; [T.lowest, T.highest]
+
+twice[T: Bounded]: fun(value: T) -&gt; array[T, 2] =&gt; [value, value]
+
+Built: trait req new(i32)
+
+Meters: rec impl Built
+{
+	centimeters: i32
+
+	new: op(value: i32)
+	{
+		self.centimeters = value * 100
+	}
+}
+
+build[T: Built]: fun -&gt; T =&gt; T(7)
+
+main: fun
+{
+	val bytes = limits[u8]()
+	val shorts = limits[i16]()
+	printf(&quot;%d %d %d %d\n&quot;, bytes[0], bytes[1], shorts[0], shorts[1])
+	printf(&quot;%d %d\n&quot;, twice[u8](9)[1], build[Meters]().centimeters)
+}</textarea><pre><code><span class="line"><span class="c-trait">Bounded</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-keyword">copy</span></span><span class="line">{</span><span class="line">	<span class="c-constant">lowest</span>: <span class="c-keyword">const</span> <span class="c-typeparam">Self</span></span><span class="line">	<span class="c-constant">highest</span>: <span class="c-keyword">const</span> <span class="c-typeparam">Self</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">u8</span>: <span class="c-keyword">impl</span> <span class="c-trait">Bounded</span></span><span class="line">{</span><span class="line">	<span class="c-constant">lowest</span>: <span class="c-keyword">const</span> <span class="c-type">u8</span> = <span class="c-literal">0</span></span><span class="line">	<span class="c-constant">highest</span>: <span class="c-keyword">const</span> <span class="c-type">u8</span> = <span class="c-literal">255</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">i16</span>: <span class="c-keyword">impl</span> <span class="c-trait">Bounded</span></span><span class="line">{</span><span class="line">	<span class="c-constant">lowest</span>: <span class="c-keyword">const</span> <span class="c-type">i16</span> = -<span class="c-literal">32768</span></span><span class="line">	<span class="c-constant">highest</span>: <span class="c-keyword">const</span> <span class="c-type">i16</span> = <span class="c-literal">32767</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">limits</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Bounded</span>]: <span class="c-keyword">fun</span> -&gt; <span class="c-type">array</span>[<span class="c-typeparam">T</span>, <span class="c-literal">2</span>] =&gt; [<span class="c-typeparam">T</span>.<span class="c-constant">lowest</span>, <span class="c-typeparam">T</span>.<span class="c-constant">highest</span>]</span><span class="line"> </span><span class="line"><span class="c-function">twice</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Bounded</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">array</span>[<span class="c-typeparam">T</span>, <span class="c-literal">2</span>] =&gt; [<span class="c-parameter">value</span>, <span class="c-parameter">value</span>]</span><span class="line"> </span><span class="line"><span class="c-trait">Built</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-keyword">new</span>(<span class="c-type">i32</span>)</span><span class="line"> </span><span class="line"><span class="c-type">Meters</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Built</span></span><span class="line">{</span><span class="line">	<span class="c-field">centimeters</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">centimeters</span> = <span class="c-parameter">value</span> * <span class="c-literal">100</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">build</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Built</span>]: <span class="c-keyword">fun</span> -&gt; <span class="c-typeparam">T</span> =&gt; <span class="c-typeparam">T</span>(<span class="c-literal">7</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> bytes = <span class="c-function">limits</span>[<span class="c-type">u8</span>]()</span><span class="line">	<span class="c-keyword">val</span> shorts = <span class="c-function">limits</span>[<span class="c-type">i16</span>]()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, bytes[<span class="c-literal">0</span>], bytes[<span class="c-literal">1</span>], shorts[<span class="c-literal">0</span>], shorts[<span class="c-literal">1</span>])</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">twice</span>[<span class="c-type">u8</span>](<span class="c-literal">9</span>)[<span class="c-literal">1</span>], <span class="c-function">build</span>[<span class="c-type">Meters</span>]().<span class="c-field">centimeters</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0 255 -32768 32767
+9 700</pre></div>
+<p>A type that doesn't meet the trait's constraints can't implement it:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-575"></button><textarea hidden id="copy-575">mod example
+
+Bounded: trait req copy
+{
+	highest: const Self
+}
+
+Built: trait req new(i32)
+
+Handle: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Handle: impl Bounded
+
+Point: rec impl Built
+{
+	x: i32
+	y: i32
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Bounded</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-keyword">copy</span></span><span class="line">{</span><span class="line">	<span class="c-constant">highest</span>: <span class="c-keyword">const</span> <span class="c-typeparam">Self</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Built</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-keyword">new</span>(<span class="c-type">i32</span>)</span><span class="line"> </span><span class="line"><span class="c-type">Handle</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Handle</span>: <span class="c-keyword">impl</span> <span class="c-trait">Bounded</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:13ch">&#x27;Handle&#x27; needs &#x27;Bounded.highest&#x27;</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:13ch">&#x27;Bounded&#x27; requires &#x27;Self: copy&#x27;<span class="diagnostic-note">&#x27;Handle&#x27; can&#x27;t be copied</span></span></span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Built</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:16ch">&#x27;Built&#x27; requires &#x27;Self: new(i32)&#x27;<span class="diagnostic-note">&#x27;Point&#x27; has no constructor taking &#x27;i32&#x27;</span></span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span></code></pre></div>
+<p>Constraints and traits mix in one list, as in <code>req copy + Ord</code>. Writing <code>[T: Bounded + copy]</code> repeats what <code>Bounded</code> already requires and gets the hint "Redundant 'copy'".</p>
+<h2 id="blanket-implementations"><a class="anchor" href="#blanket-implementations">Blanket implementations</a></h2>
+<p>A blanket implementation implements a trait for every type at once. It's written with a type parameter and no type name, as <code>[T]: impl Describe</code>, and can be narrowed by constraints, as <code>[T: Eq]: impl Describe</code>. A type's own implementation always wins over a blanket one. Between blankets, the more constrained one wins for the types it covers:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-576"></button><textarea hidden id="copy-576">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Describe: trait
+{
+	describe: fun(imm self) -&gt; cstr
+}
+
+Eq: trait
+{
+	==: op(imm a: Self, imm b: Self) -&gt; bool
+}
+
+[T]: impl Describe
+{
+	describe: fun(imm self) -&gt; cstr =&gt; &quot;something&quot;
+}
+
+[T: Eq]: impl Describe
+{
+	describe: fun(imm self) -&gt; cstr =&gt; &quot;comparable&quot;
+}
+
+i32: impl Eq
+
+Plain: rec
+{
+	value: i32
+}
+
+Named: rec impl Describe
+{
+	value: i32
+
+	describe: fun(imm self) -&gt; cstr =&gt; &quot;named&quot;
+}
+
+show[T]: fun(imm value: T) =&gt; printf(&quot;%s\n&quot;, value.describe())
+
+main: fun
+{
+	val number: i32 = 1
+	val ratio = 2.5
+	show(imm number)
+	show(Plain(2))
+	show(Named(3))
+	printf(&quot;%s\n&quot;, ratio.describe())
+}</textarea><pre><code><span class="line"><span class="c-trait">Describe</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Eq</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">==</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-type">bool</span></span><span class="line">}</span><span class="line"> </span><span class="line">[T]: <span class="c-keyword">impl</span> <span class="c-trait">Describe</span></span><span class="line">{</span><span class="line">	<span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"something"</span></span><span class="line">}</span><span class="line"> </span><span class="line">[T: <span class="c-trait">Eq</span>]: <span class="c-keyword">impl</span> <span class="c-trait">Describe</span></span><span class="line">{</span><span class="line">	<span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"comparable"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span> <span class="c-trait">Eq</span></span><span class="line"> </span><span class="line"><span class="c-type">Plain</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Named</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Describe</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"named"</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%s\n"</span>, <span class="c-parameter">value</span>.<span class="c-function">describe</span>())</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> number: <span class="c-type">i32</span> = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> ratio = <span class="c-literal">2.5</span></span><span class="line">	<span class="c-function">show</span>(<span class="c-keyword">imm</span> number)</span><span class="line">	<span class="c-function">show</span>(<span class="c-type">Plain</span>(<span class="c-literal">2</span>))</span><span class="line">	<span class="c-function">show</span>(<span class="c-type">Named</span>(<span class="c-literal">3</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s\n"</span>, ratio.<span class="c-function">describe</span>())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>comparable
+something
+named
+something</pre></div>
+<p><code>show</code> has no bound at all, yet it can call <code>describe</code>, because <code>[T]: impl Describe</code> covers every <code>T</code>. A type parameter gets a blanket's trait when its bounds meet the blanket's constraints.</p>
+<p>A blanket body is checked once, like any generic body, so it can only use what its constraints allow: the body of a plain <code>[T]: impl</code> can use <code>sizeOf(T)</code> but no members of <code>self</code>. Two blankets that can't be ranked, because neither one's constraints include the other's, are both errors, and a blanket takes exactly one type parameter:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-577"></button><textarea hidden id="copy-577">mod example
+
+Eq: trait
+{
+	==: op(imm a: Self, imm b: Self) -&gt; bool
+}
+
+Show: trait
+{
+	show: fun(imm self) -&gt; cstr
+}
+
+Describe: trait
+{
+	describe: fun(imm self) -&gt; cstr
+}
+
+[T: Eq]: impl Describe
+{
+	describe: fun(imm self) -&gt; cstr =&gt; &quot;comparable&quot;
+}
+
+[T: Show]: impl Describe
+{
+	describe: fun(imm self) -&gt; cstr =&gt; &quot;shown&quot;
+}
+
+[T, U]: impl Show
+{
+	show: fun(imm self) -&gt; cstr =&gt; &quot;two&quot;
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Eq</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">==</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-type">bool</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Show</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Describe</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span></span><span class="line">}</span><span class="line"> </span><span class="line">[T: <span class="c-trait">Eq</span>]: <span class="c-keyword">impl</span> <span class="c-trait">Describe</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:14ch">&#x27;T&#x27; implements &#x27;Describe&#x27; more than once</span></span><span class="line">{</span><span class="line">	<span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"comparable"</span></span><span class="line">}</span><span class="line"> </span><span class="line">[T: <span class="c-trait">Show</span>]: <span class="c-keyword">impl</span> <span class="c-trait">Describe</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:16ch">&#x27;T&#x27; implements &#x27;Describe&#x27; more than once</span></span><span class="line">{</span><span class="line">	<span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"shown"</span></span><span class="line">}</span><span class="line"> </span><span class="line">[T, U]: <span class="c-keyword">impl</span> Show</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">Blanket impls take one type parameter</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-literal">"two"</span></span><span class="line">}</span></code></pre></div>
+<p>Only the project that declares a trait can give it a blanket implementation; anywhere else, <code>[T]: impl Shape</code> is "'Shape' is declared in another project".</p>
+<h2 id="extension-methods"><a class="anchor" href="#extension-methods">Extension methods</a></h2>
+<p>An <code>impl</code> block with no trait adds members to a type declared somewhere else: a built-in type, a type from another module, or every type at once with <code>[T]</code>. These are extension methods. They can be methods, static functions, properties, operators and constants, but not fields, constructors or destructors:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-578"></button><textarea hidden id="copy-578">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+i32: impl
+{
+	clamp: fun(imm self, low: i32, high: i32) -&gt; i32
+	{
+		if self &lt; low
+			ret low
+		else if self &gt; high
+			ret high
+
+		ret self
+	}
+
+	isEven: get(imm self) -&gt; bool =&gt; self % 2 == 0
+	parse: fun(digit: u8) -&gt; i32 =&gt; i32(digit) - 48
+}
+
+[T]: impl
+{
+	byteSize: fun(imm self) -&gt; usize =&gt; sizeOf(T)
+}
+
+main: fun
+{
+	val x: i32 = 50
+	val ratio = 2.5
+	printf(&quot;%d %d %d\n&quot;, x.clamp(0, 10), x.isEven, i32.parse(&#x27;7&#x27;u8))
+	printf(&quot;%zu %zu\n&quot;, x.byteSize(), ratio.byteSize())
+}</textarea><pre><code><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-function">clamp</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>, <span class="c-parameter">low</span>: <span class="c-type">i32</span>, <span class="c-parameter">high</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> <span class="c-keyword">self</span> &lt; <span class="c-parameter">low</span></span><span class="line">			<span class="c-keyword">ret</span> <span class="c-parameter">low</span></span><span class="line">		<span class="c-keyword">else</span> <span class="c-keyword">if</span> <span class="c-keyword">self</span> &gt; <span class="c-parameter">high</span></span><span class="line">			<span class="c-keyword">ret</span> <span class="c-parameter">high</span></span><span class="line"> </span><span class="line">		<span class="c-keyword">ret</span> <span class="c-keyword">self</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	isEven: <span class="c-keyword">get</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-keyword">self</span> % <span class="c-literal">2</span> == <span class="c-literal">0</span></span><span class="line">	<span class="c-function">parse</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">digit</span>: <span class="c-type">u8</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-type">i32</span>(<span class="c-parameter">digit</span>) - <span class="c-literal">48</span></span><span class="line">}</span><span class="line"> </span><span class="line">[T]: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-function">byteSize</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">usize</span> =&gt; <span class="c-keyword">sizeOf</span>(<span class="c-typeparam">T</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x: <span class="c-type">i32</span> = <span class="c-literal">50</span></span><span class="line">	<span class="c-keyword">val</span> ratio = <span class="c-literal">2.5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, x.<span class="c-function">clamp</span>(<span class="c-literal">0</span>, <span class="c-literal">10</span>), x.<span class="c-function">isEven</span>, <span class="c-type">i32</span>.<span class="c-function">parse</span>(<span class="c-literal">'7'u8</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu\n"</span>, x.<span class="c-function">byteSize</span>(), ratio.<span class="c-function">byteSize</span>())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>10 1 7
+4 8</pre></div>
+<p>Extensions apply only in the module that declares them and in files that import that module, with <code>use</code> or the project's <code>Imports</code> list. Here <code>measure</code> extends <code>geometry.Point</code>, and <code>main.ce</code> uses the extension because it says <code>use measure</code>:</p>
+<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-579"></button><textarea hidden id="copy-579">mod geometry
+
+Point: rec
+{
+	x: i32
+	y: i32
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">geometry</span></span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span></code></pre></div>
+<div class="code cella"><div class="code-title">measure.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-580"></button><textarea hidden id="copy-580">mod measure
+
+use geometry.Point
+
+Point: impl
+{
+	lengthSquared: fun(imm self) -&gt; i32 =&gt; self.x * self.x + self.y * self.y
+	+: op(a: Point, b: Point) -&gt; Point =&gt; Point(a.x + b.x, a.y + b.y)
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">measure</span></span><span class="line"> </span><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.<span class="c-type">Point</span></span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-function">lengthSquared</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">x</span> * <span class="c-keyword">self</span>.<span class="c-field">x</span> + <span class="c-keyword">self</span>.<span class="c-field">y</span> * <span class="c-keyword">self</span>.<span class="c-field">y</span></span><span class="line">	<span class="c-function">+</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-type">Point</span>(<span class="c-parameter">a</span>.<span class="c-field">x</span> + <span class="c-parameter">b</span>.<span class="c-field">x</span>, <span class="c-parameter">a</span>.<span class="c-field">y</span> + <span class="c-parameter">b</span>.<span class="c-field">y</span>)</span><span class="line">}</span></code></pre></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-581"></button><textarea hidden id="copy-581">mod example
+
+use geometry.Point
+use measure
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val moved = Point(3, 4) + Point(1, 1)
+	printf(&quot;%d %d\n&quot;, moved.x, moved.lengthSquared())
+}</textarea><pre><code><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.<span class="c-type">Point</span></span><span class="line"><span class="c-keyword">use</span> <span class="c-module">measure</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> moved = <span class="c-type">Point</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>) <span class="c-function">+</span> <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">1</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, moved.<span class="c-field">x</span>, moved.<span class="c-function">lengthSquared</span>())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4 41</pre></div>
+<p>A file that doesn't import the module doesn't see its extensions:</p>
+<div class="code cella error"><div class="code-title">mathx.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-582"></button><textarea hidden id="copy-582">mod mathx
+
+i32: impl
+{
+	doubled: fun(imm self) -&gt; i32 =&gt; self * 2
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">mathx</span></span><span class="line"> </span><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-function">doubled</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span> * <span class="c-literal">2</span></span><span class="line">}</span></code></pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-583"></button><textarea hidden id="copy-583">mod example
+
+twice: fun(x: i32) -&gt; i32 =&gt; x.doubled()
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-function">twice</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span>.doubled()</span><span class="diagnostic"><span class="squiggle" style="margin-left:31ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:31ch">Type &#x27;i32&#x27; has no member &#x27;doubled&#x27;</span></span></code></pre></div>
+<p>Each member follows the visibility rules for top-level declarations: <code>pvt</code> keeps it to its file, <code>mod</code> to its module, no keyword to the project, and <code>pub</code> exports it from a library (see <a href="modules.html">Modules and visibility</a>). A word before <code>impl</code>, as in <code>i32: mod impl { ... }</code>, applies to every member of the block.</p>
+<p>When a type's own member and an extension have the same signature, the type's member is used; extensions with other signatures overload it. Two imported extensions with the same signature make a call ambiguous, so a file can avoid a clash by not importing one of them.</p>
+<p>In the type's own module, an <code>impl</code> block without a trait isn't an extension: it adds members under extra bounds, as <a href="generics.html">Generics</a> describes, and a block that adds no bounds is an error.</p>
+<h2 id="trait-constants"><a class="anchor" href="#trait-constants">Trait constants</a></h2>
+<p>A trait can require constants. <code>bits: const u32</code> is a requirement every implementation must give a value, and <code>bytes: const u32 = bits / 8</code> is a default that an implementation may replace. A constant is read through a type, as in <code>i32.bits</code> or <code>T.bits</code>, or by its bare name inside the trait and its implementations. It folds to a constant for each type, so <code>T.bytes</code> can size an array:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-584"></button><textarea hidden id="copy-584">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Integer: trait
+{
+	bits: const u32
+	bytes: const u32 = bits / 8
+	isSigned: const bool = false
+}
+
+i32: impl Integer
+{
+	bits: const u32 = 32
+	isSigned: const bool = true
+}
+
+u8: impl Integer
+{
+	bits: const u32 = 8
+}
+
+Wide: rec impl Integer
+{
+	low: u64
+	high: u64
+
+	bits: const u32 = 128
+}
+
+describe[T: Integer]: fun =&gt; printf(&quot;%u bits, %u bytes, signed %d\n&quot;, T.bits, T.bytes, T.isSigned)
+
+toBytes[T: Integer]: fun(seed: u8) -&gt; array[u8, T.bytes]
+{
+	var result: array[u8, T.bytes]
+	for i in 0..result.length
+		result[i] = seed + u8(i)
+
+	ret result
+}
+
+main: fun
+{
+	describe[i32]()
+	describe[u8]()
+	describe[Wide]()
+	val four = toBytes[i32](10)
+	printf(&quot;%u %zu %zu\n&quot;, i32.bytes, four.length, toBytes[Wide](0).length)
+}</textarea><pre><code><span class="line"><span class="c-trait">Integer</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-constant">bits</span>: <span class="c-keyword">const</span> <span class="c-type">u32</span></span><span class="line">	<span class="c-constant">bytes</span>: <span class="c-keyword">const</span> <span class="c-type">u32</span> = <span class="c-constant">bits</span> / <span class="c-literal">8</span></span><span class="line">	<span class="c-constant">isSigned</span>: <span class="c-keyword">const</span> <span class="c-type">bool</span> = <span class="c-keyword">false</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span> <span class="c-trait">Integer</span></span><span class="line">{</span><span class="line">	<span class="c-constant">bits</span>: <span class="c-keyword">const</span> <span class="c-type">u32</span> = <span class="c-literal">32</span></span><span class="line">	<span class="c-constant">isSigned</span>: <span class="c-keyword">const</span> <span class="c-type">bool</span> = <span class="c-keyword">true</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">u8</span>: <span class="c-keyword">impl</span> <span class="c-trait">Integer</span></span><span class="line">{</span><span class="line">	<span class="c-constant">bits</span>: <span class="c-keyword">const</span> <span class="c-type">u32</span> = <span class="c-literal">8</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Wide</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Integer</span></span><span class="line">{</span><span class="line">	<span class="c-field">low</span>: <span class="c-type">u64</span></span><span class="line">	<span class="c-field">high</span>: <span class="c-type">u64</span></span><span class="line"> </span><span class="line">	<span class="c-constant">bits</span>: <span class="c-keyword">const</span> <span class="c-type">u32</span> = <span class="c-literal">128</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">describe</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Integer</span>]: <span class="c-keyword">fun</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%u bits, %u bytes, signed %d\n"</span>, <span class="c-typeparam">T</span>.<span class="c-constant">bits</span>, <span class="c-typeparam">T</span>.<span class="c-constant">bytes</span>, <span class="c-typeparam">T</span>.<span class="c-constant">isSigned</span>)</span><span class="line"> </span><span class="line"><span class="c-function">toBytes</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Integer</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">seed</span>: <span class="c-type">u8</span>) -&gt; <span class="c-type">array</span>[<span class="c-type">u8</span>, <span class="c-typeparam">T</span>.bytes]</span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> result: <span class="c-type">array</span>[<span class="c-type">u8</span>, <span class="c-typeparam">T</span>.bytes]</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..result.<span class="c-field">length</span></span><span class="line">		result[i] = <span class="c-parameter">seed</span> + <span class="c-type">u8</span>(i)</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> result</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">describe</span>[<span class="c-type">i32</span>]()</span><span class="line">	<span class="c-function">describe</span>[<span class="c-type">u8</span>]()</span><span class="line">	<span class="c-function">describe</span>[<span class="c-type">Wide</span>]()</span><span class="line">	<span class="c-keyword">val</span> four = <span class="c-function">toBytes</span>[<span class="c-type">i32</span>](<span class="c-literal">10</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%u %zu %zu\n"</span>, <span class="c-type">i32</span>.<span class="c-constant">bytes</span>, four.<span class="c-field">length</span>, <span class="c-function">toBytes</span>[<span class="c-type">Wide</span>](<span class="c-literal">0</span>).<span class="c-field">length</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>32 bits, 4 bytes, signed 1
+8 bits, 1 bytes, signed 0
+128 bits, 16 bytes, signed 0
+4 4 16</pre></div>
+<p>Trait constants are always <code>const</code>, and an implementation's constant must have the requirement's type. In a generic argument, <code>T.bytes</code> must stand alone, like a <a href="generics.html#value-parameters">value parameter</a>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-585"></button><textarea hidden id="copy-585">mod example
+
+Integer: trait
+{
+	bits: const u32
+	bytes: const u32 = bits / 8
+}
+
+Flags: trait
+{
+	value: val u32 = 1
+}
+
+u16: impl Integer
+
+i64: impl Integer
+{
+	bits: const i32 = 64
+}
+
+unbounded[T]: fun -&gt; u32 =&gt; T.bits
+
+doubled[T: Integer]: fun -&gt; array[u8, T.bytes * 2] =&gt; undef
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Integer</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-constant">bits</span>: <span class="c-keyword">const</span> <span class="c-type">u32</span></span><span class="line">	<span class="c-constant">bytes</span>: <span class="c-keyword">const</span> <span class="c-type">u32</span> = <span class="c-constant">bits</span> / <span class="c-literal">8</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Flags</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	value: <span class="c-keyword">val</span> u32 = <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare static fields in traits</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">u16</span>: <span class="c-keyword">impl</span> <span class="c-trait">Integer</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:10ch">&#x27;u16&#x27; needs &#x27;Integer.bits&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-type">i64</span>: <span class="c-keyword">impl</span> <span class="c-trait">Integer</span></span><span class="line">{</span><span class="line">	<span class="c-constant">bits</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">64</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;bits&#x27; doesn&#x27;t match &#x27;Integer.bits&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">unbounded</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">fun</span> -&gt; <span class="c-type">u32</span> =&gt; <span class="c-typeparam">T</span>.bits</span><span class="diagnostic"><span class="squiggle" style="margin-left:30ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:30ch">Type &#x27;T&#x27; has no member &#x27;bits&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-function">doubled</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Integer</span>]: <span class="c-keyword">fun</span> -&gt; <span class="c-type">array</span>[<span class="c-type">u8</span>, <span class="c-typeparam">T</span>.bytes * <span class="c-literal">2</span>] =&gt; <span class="c-keyword">undef</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:38ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:38ch">Cannot use arithmetic on value parameters in generic arguments</span></span></code></pre></div>
+<p>Extension blocks and blanket implementations can declare constants too:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-586"></button><textarea hidden id="copy-586">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+i32: impl
+{
+	digits: const i32 = 10
+	width: const i32 = digits + 1
+}
+
+u8: impl
+{
+	digits: const i32 = 3
+}
+
+[T]: impl
+{
+	size: const usize = sizeOf(T)
+}
+
+Pair: rec
+{
+	a: i64
+	b: i64
+}
+
+columns: const i32 = i32.width * 4
+
+main: fun
+{
+	printf(&quot;%d %d %d %d\n&quot;, i32.digits, i32.width, u8.digits, columns)
+	printf(&quot;%zu %zu\n&quot;, u16.size, Pair.size)
+}</textarea><pre><code><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-constant">digits</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">10</span></span><span class="line">	<span class="c-constant">width</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-constant">digits</span> + <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">u8</span>: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-constant">digits</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line">}</span><span class="line"> </span><span class="line">[T]: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-constant">size</span>: <span class="c-keyword">const</span> <span class="c-type">usize</span> = <span class="c-keyword">sizeOf</span>(<span class="c-typeparam">T</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">a</span>: <span class="c-type">i64</span></span><span class="line">	<span class="c-field">b</span>: <span class="c-type">i64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-constant">columns</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-type">i32</span>.<span class="c-constant">width</span> * <span class="c-literal">4</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, <span class="c-type">i32</span>.<span class="c-constant">digits</span>, <span class="c-type">i32</span>.<span class="c-constant">width</span>, <span class="c-type">u8</span>.<span class="c-constant">digits</span>, <span class="c-constant">columns</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu\n"</span>, <span class="c-type">u16</span>.<span class="c-constant">size</span>, <span class="c-type">Pair</span>.<span class="c-constant">size</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>10 11 3 44
+2 16</pre></div>
+</article>
+<nav class="pager"><a class="previous" href="generics.html"><span>Previous</span>Generics</a><a class="next" href="trait-objects.html"><span>Next</span>Trait objects</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#what-a-trait-is">What a trait is</a></li><li class="level-2"><a href="#requirements">Requirements</a></li><li class="level-3"><a href="#properties-and-static-functions">Properties and static functions</a></li><li class="level-3"><a href="#operators">Operators</a></li><li class="level-3"><a href="#constructors">Constructors</a></li><li class="level-2"><a href="#default-bodies">Default bodies</a></li><li class="level-2"><a href="#implementing-a-trait">Implementing a trait</a></li><li class="level-3"><a href="#where-an-implementation-can-go">Where an implementation can go</a></li><li class="level-2"><a href="#using-traits-in-generic-code">Using traits in generic code</a></li><li class="level-2"><a href="#picking-a-traits-member">Picking a trait&#x27;s member</a></li><li class="level-2"><a href="#generic-traits">Generic traits</a></li><li class="level-2"><a href="#traits-that-require-other-traits">Traits that require other traits</a></li><li class="level-2"><a href="#constraints-on-self">Constraints on Self</a></li><li class="level-2"><a href="#blanket-implementations">Blanket implementations</a></li><li class="level-2"><a href="#extension-methods">Extension methods</a></li><li class="level-2"><a href="#trait-constants">Trait constants</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

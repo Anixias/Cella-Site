@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variables and constants - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html" class="current"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Variables and constants</h1>
+<p>Variables hold values a program works with. This chapter covers the three kinds of declaration, <code>val</code>, <code>var</code> and <code>const</code>, how a variable's type is chosen, variables that start without a value, assignment, scopes, and variables and constants declared at module level.</p>
+<h2 id="val-and-var"><a class="anchor" href="#val-and-var">val and var</a></h2>
+<p><code>val</code> declares a variable that can't be changed after it gets its value. <code>var</code> declares one that can:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-150"></button><textarea hidden id="copy-150">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val width = 4
+	var total = 0
+	total = width * 3
+	total = total + 1
+	printf(&quot;%d %d\n&quot;, width, total)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> width = <span class="c-literal">4</span></span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">0</span></span><span class="line">	total = width * <span class="c-literal">3</span></span><span class="line">	total = total + <span class="c-literal">1</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, width, total)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4 13</pre></div>
+<p>Assigning to a <code>val</code>, or to any part of one such as a field of a record or an element of an array, is an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-151"></button><textarea hidden id="copy-151">mod example
+
+Point: rec
+{
+	x: i32
+	y: i32
+}
+
+main: fun
+{
+	val limit = 5
+	limit = 6
+	val origin = Point(0, 0)
+	origin.x = 1
+	val values = [1, 2, 3]
+	values[0] = 4
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> limit = <span class="c-literal">5</span></span><span class="line">	limit = <span class="c-literal">6</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign values</span></span><span class="line">	<span class="c-keyword">val</span> origin = <span class="c-type">Point</span>(<span class="c-literal">0</span>, <span class="c-literal">0</span>)</span><span class="line">	origin.<span class="c-field">x</span> = <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign values</span></span><span class="line">	<span class="c-keyword">val</span> values = [<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>]</span><span class="line">	values[<span class="c-literal">0</span>] = <span class="c-literal">4</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign values</span></span><span class="line">}</span></code></pre></div>
+<p>Use <code>val</code> unless the variable needs to change. A <code>var</code> that is never changed gets a hint saying so, shown when the build is given <code>--hints</code> (see <a href="projects.html">Projects and building</a>):</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-152"></button><textarea hidden id="copy-152">Hint at main.ce:5:6
+4 │ {
+5 │     var count = 1
+            ╘═══╛ &#x27;count&#x27; is never changed</textarea><pre><code><span class="line">Hint at main.ce:5:6</span><span class="line">4 │ {</span><span class="line">5 │     var count = 1</span><span class="line">            ╘═══╛ 'count' is never changed</span></code></pre></div>
+<h2 id="types"><a class="anchor" href="#types">Types</a></h2>
+<p>A type annotation after the name, separated by a colon, says what type the variable has. The value must convert to it:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-153"></button><textarea hidden id="copy-153">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val small: u8 = 200
+	val wide: i64 = 7
+	val ratio: f32 = 0.25
+	printf(&quot;%d %lld %.2f\n&quot;, small, wide, ratio)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">u8</span> = <span class="c-literal">200</span></span><span class="line">	<span class="c-keyword">val</span> wide: <span class="c-type">i64</span> = <span class="c-literal">7</span></span><span class="line">	<span class="c-keyword">val</span> ratio: <span class="c-type">f32</span> = <span class="c-literal">0.25</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %lld %.2f\n"</span>, small, wide, ratio)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>200 7 0.25</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-154"></button><textarea hidden id="copy-154">mod example
+
+main: fun
+{
+	val ready: bool = 1
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> ready: <span class="c-type">bool</span> = <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot convert type &#x27;integer literal&#x27; to &#x27;bool&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p><a href="numbers.html">Numbers and arithmetic</a> covers the number types and which literals fit in them, and <a href="conversions.html">Conversions</a> covers which values convert to which types.</p>
+<h3 id="inferred-types"><a class="anchor" href="#inferred-types">Inferred types</a></h3>
+<p>Without an annotation, the variable takes the type of its initial value. A value that already has a type, such as the result of a call or another variable, gives it that type.</p>
+<p>A literal on its own, like <code>10</code> or <code>0.5</code>, doesn't have a fixed type yet. A variable that starts from one takes its type from how the variable is used later in the function. When nothing decides it, an integer literal makes an <code>i32</code> and a float literal an <code>f64</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-155"></button><textarea hidden id="copy-155">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+half: fun(value: i64) -&gt; i64 =&gt; value / 2
+
+main: fun
+{
+	val count = 10
+	val ratio = 0.5
+	val total = 7
+	printf(&quot;%lld\n&quot;, half(total))
+	var level = 0
+	val step: u16 = 3
+	level = step
+	printf(&quot;%zu %zu %zu %zu\n&quot;, sizeOf(count), sizeOf(ratio), sizeOf(total), sizeOf(level))
+}</textarea><pre><code><span class="line"><span class="c-function">half</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i64</span>) -&gt; <span class="c-type">i64</span> =&gt; <span class="c-parameter">value</span> / <span class="c-literal">2</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">10</span></span><span class="line">	<span class="c-keyword">val</span> ratio = <span class="c-literal">0.5</span></span><span class="line">	<span class="c-keyword">val</span> total = <span class="c-literal">7</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%lld\n"</span>, <span class="c-function">half</span>(total))</span><span class="line">	<span class="c-keyword">var</span> level = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">val</span> step: <span class="c-type">u16</span> = <span class="c-literal">3</span></span><span class="line">	level = step</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(count), <span class="c-keyword">sizeOf</span>(ratio), <span class="c-keyword">sizeOf</span>(total), <span class="c-keyword">sizeOf</span>(level))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3
+4 8 8 2</pre></div>
+<p><code>count</code> and <code>ratio</code> are only printed, so they keep the default types. <code>total</code> is passed where an <code>i64</code> is expected, so it is an <code>i64</code>. <code>level</code> is given a <code>u16</code>, so it is a <code>u16</code>.</p>
+<p>The rules are:</p>
+<ul><li>Where the variable is read as a certain type, such as an argument or the value of a typed variable, it takes that type. When it's read as several types, it takes the one of them that converts to all the others.</li><li>Values assigned to it must convert to that type.</li><li>A variable that is only assigned to takes the type that all the assigned values convert to.</li></ul>
+<p>When no type works, the declaration is an error that lists the types that disagree:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-156"></button><textarea hidden id="copy-156">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+wide: fun(value: u16) -&gt; i32 =&gt; 0
+signed: fun(value: i16) -&gt; i32 =&gt; 0
+
+main: fun
+{
+	val count = 7
+	wide(count)
+	signed(count)
+}</textarea><pre><code><span class="line"><span class="c-function">wide</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">u16</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="line"><span class="c-function">signed</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i16</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">7</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot infer the type of &#x27;count&#x27; from &#x27;u16&#x27; and &#x27;i16&#x27;</span></span><span class="line">	wide(count)</span><span class="line">	signed(count)</span><span class="line">}</span></code></pre></div>
+<p>A declaration needs a type or a value. With neither, there is nothing to take a type from:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-157"></button><textarea hidden id="copy-157">mod example
+
+main: fun
+{
+	var total
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> total</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot infer the type of &#x27;total&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="variables-without-a-value"><a class="anchor" href="#variables-without-a-value">Variables without a value</a></h2>
+<p>A <code>var</code> declared with a type and no value starts as all zeros, when zeros are a valid value of its type. That holds for numbers, <code>bool</code>, pointers, arrays of such values, and records made of them that don't declare their own constructors:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-158"></button><textarea hidden id="copy-158">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+}
+
+main: fun
+{
+	var count: i32
+	var ready: bool
+	var origin: Point
+	var grid: array[i32, 3]
+	count += 1
+	grid[1] = 5
+	printf(&quot;%d %d %d %d %d %d\n&quot;, count, ready, origin.x, origin.y, grid[0], grid[1])
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count: <span class="c-type">i32</span></span><span class="line">	<span class="c-keyword">var</span> ready: <span class="c-type">bool</span></span><span class="line">	<span class="c-keyword">var</span> origin: <span class="c-type">Point</span></span><span class="line">	<span class="c-keyword">var</span> grid: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">3</span>]</span><span class="line">	count += <span class="c-literal">1</span></span><span class="line">	grid[<span class="c-literal">1</span>] = <span class="c-literal">5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d %d %d\n"</span>, count, ready, origin.<span class="c-field">x</span>, origin.<span class="c-field">y</span>, grid[<span class="c-literal">0</span>], grid[<span class="c-literal">1</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 0 0 0 0 5</pre></div>
+<p>A type whose values are made by its own constructors has no zero value of its own (see <a href="records.html">Records</a>). A variable of that type starts uninitialized, and it must be assigned before it's used:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-159"></button><textarea hidden id="copy-159">mod example
+
+Celsius: rec
+{
+	degrees: f64
+
+	new: op(degrees: f64)
+	{
+		self.degrees = degrees
+	}
+}
+
+main: fun
+{
+	var room: Celsius
+	val reading = room.degrees
+}</textarea><pre><code><span class="line"><span class="c-type">Celsius</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">degrees</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">degrees</span>: <span class="c-type">f64</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">degrees</span> = <span class="c-parameter">degrees</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> room: <span class="c-type">Celsius</span></span><span class="line">	<span class="c-keyword">val</span> reading = room.<span class="c-field">degrees</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:12ch"></span><span class="diagnostic-text" style="margin-left:18ch">Cannot use uninitialized values</span></span><span class="line">}</span></code></pre></div>
+<h3 id="assigning-a-val-later"><a class="anchor" href="#assigning-a-val-later">Assigning a val later</a></h3>
+<p>A <code>val</code> declared without a value gets it from a later assignment. Every path through the function must assign it exactly once before it's read. Here the paths are the two branches of an <code>if</code> (<a href="control-flow.html">Control flow</a> covers <code>if</code>):</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-160"></button><textarea hidden id="copy-160">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+describe: fun(score: i32) -&gt; i32
+{
+	val bonus: i32
+	if score &gt; 50
+		bonus = 10
+	else
+		bonus = 0
+
+	ret score + bonus
+}
+
+main: fun
+{
+	printf(&quot;%d %d\n&quot;, describe(70), describe(20))
+}</textarea><pre><code><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">score</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> bonus: <span class="c-type">i32</span></span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">score</span> &gt; <span class="c-literal">50</span></span><span class="line">		bonus = <span class="c-literal">10</span></span><span class="line">	<span class="c-keyword">else</span></span><span class="line">		bonus = <span class="c-literal">0</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">score</span> + bonus</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">describe</span>(<span class="c-literal">70</span>), <span class="c-function">describe</span>(<span class="c-literal">20</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>80 20</pre></div>
+<p>Reading it before it's assigned, reading it when only some paths assign it, and assigning it twice are errors:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-161"></button><textarea hidden id="copy-161">mod example
+
+early: fun -&gt; i32
+{
+	val x: i32
+	ret x
+}
+
+maybe: fun(flag: bool) -&gt; i32
+{
+	val x: i32
+	if flag
+		x = 1
+
+	ret x
+}
+
+twice: fun -&gt; i32
+{
+	val x: i32
+	x = 1
+	x = 2
+	ret x
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">early</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x: <span class="c-type">i32</span></span><span class="line">	<span class="c-keyword">ret</span> x</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot use uninitialized values</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">maybe</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">flag</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x: <span class="c-type">i32</span></span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">flag</span></span><span class="line">		x = <span class="c-literal">1</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> x</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot use uninitialized values</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">twice</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x: <span class="c-type">i32</span></span><span class="line">	x = <span class="c-literal">1</span></span><span class="line">	x = <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign values<span class="diagnostic-note">Assigned on line 21</span></span></span><span class="line">	<span class="c-keyword">ret</span> x</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>The last error also points at the first assignment, with a note "Assigned on line" and its line number.</p>
+<h3 id="undef"><a class="anchor" href="#undef">undef</a></h3>
+<p><code>undef</code> as the initial value leaves a variable uninitialized on purpose, even when its type has a zero value. It saves the cost of zeroing storage that is about to be filled anyway:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-162"></button><textarea hidden id="copy-162">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var squares: array[i32, 4] = undef
+	for i in 0..4
+		squares[i] = i32(i * i)
+
+	printf(&quot;%d %d\n&quot;, squares[1], squares[3])
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> squares: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">4</span>] = <span class="c-keyword">undef</span></span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">4</span></span><span class="line">		squares[i] = <span class="c-type">i32</span>(i * i)</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, squares[<span class="c-literal">1</span>], squares[<span class="c-literal">3</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 9</pre></div>
+<p>The compiler checks that <code>undef</code> storage is written before it's read:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-163"></button><textarea hidden id="copy-163">mod example
+
+main: fun
+{
+	var count: i32 = undef
+	count += 1
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count: <span class="c-type">i32</span> = <span class="c-keyword">undef</span></span><span class="line">	count += <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot use uninitialized values</span></span><span class="line">}</span></code></pre></div>
+<p><code>var x = undef</code> without a type takes its type from later uses, like a variable that starts from a literal. <code>undef</code> is only allowed as the initial value of a variable:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-164"></button><textarea hidden id="copy-164">mod example
+
+take: fun(value: i32)
+{
+}
+
+main: fun
+{
+	take(undef)
+}</textarea><pre><code><span class="line"><span class="c-function">take</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">take</span>(<span class="c-keyword">undef</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:9ch">Cannot use &#x27;undef&#x27; outside variable initializers</span></span><span class="line">}</span></code></pre></div>
+<p><a href="pointers.html">Pointers and raw memory</a> shows how to fill <code>undef</code> storage through a pointer.</p>
+<h2 id="assignment"><a class="anchor" href="#assignment">Assignment</a></h2>
+<p><code>=</code> stores a new value in a variable, a field or an array element. The compound assignments <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code>, <code>%=</code> and the others combine an operator with assignment: <code>total += 4</code> is <code>total = total + 4</code>, with <code>total</code> evaluated once. <a href="numbers.html">Numbers and arithmetic</a> lists them all.</p>
+<p>An assignment is also an expression. Its value is the variable after the assignment, so assignments can be chained and used as arguments:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-165"></button><textarea hidden id="copy-165">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var x = 0
+	var y = 0
+	x = y = 10
+	var count = 1
+	printf(&quot;%d %d %d\n&quot;, x, y, count += 4)
+	printf(&quot;%d\n&quot;, count)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> x = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">var</span> y = <span class="c-literal">0</span></span><span class="line">	x = y = <span class="c-literal">10</span></span><span class="line">	<span class="c-keyword">var</span> count = <span class="c-literal">1</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, x, y, count += <span class="c-literal">4</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, count)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>10 10 5
+5</pre></div>
+<p>Assignment groups from the right, so <code>x = y = 10</code> assigns <code>10</code> to <code>y</code> and then <code>y</code> to <code>x</code>. Assigning a new value to a variable whose old value has a destructor runs that destructor; <a href="ownership.html">Ownership and destructors</a> covers that.</p>
+<h2 id="constants"><a class="anchor" href="#constants">Constants</a></h2>
+<p><code>const</code> declares a constant: a value computed while compiling. Its initial value must be built from literals, other constants and operators on them:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-166"></button><textarea hidden id="copy-166">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	const rows = 3
+	const cells = rows * 4
+	val grid: array[i32, cells] = undef
+	printf(&quot;%zu\n&quot;, grid.length)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">const</span> <span class="c-constant">rows</span> = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">const</span> <span class="c-constant">cells</span> = <span class="c-constant">rows</span> * <span class="c-literal">4</span></span><span class="line">	<span class="c-keyword">val</span> grid: <span class="c-type">array</span>[<span class="c-type">i32</span>, cells] = <span class="c-keyword">undef</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu\n"</span>, grid.<span class="c-field">length</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>12</pre></div>
+<p>Constants can be used where a value must be known while compiling, such as the length of an array type. A <code>val</code> can't, even when its value is a literal: a <code>val</code> is storage that holds a value at run time, and a constant isn't.</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-167"></button><textarea hidden id="copy-167">mod example
+
+main: fun
+{
+	val rows = 3
+	val grid: array[i32, rows] = undef
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> rows = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> grid: <span class="c-type">array</span>[<span class="c-type">i32</span>, rows] = <span class="c-keyword">undef</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:25ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:25ch">&#x27;rows&#x27; is not a constant</span></span><span class="line">}</span></code></pre></div>
+<p>A constant needs a value, the value must be a constant, and its type can't have a destructor:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-168"></button><textarea hidden id="copy-168">mod example
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+main: fun
+{
+	val n = 2
+	const m = n + 1
+	const later: i32
+	const handle = Buffer(1)
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> n = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">const</span> <span class="c-constant">m</span> = n + <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:14ch">The initial value of &#x27;m&#x27; must be a constant</span></span><span class="line">	<span class="c-keyword">const</span> <span class="c-constant">later</span>: <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot declare constants without values</span></span><span class="line">	<span class="c-keyword">const</span> <span class="c-constant">handle</span> = <span class="c-type">Buffer</span>(<span class="c-literal">1</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot store values with destructors in constants</span></span><span class="line">}</span></code></pre></div>
+<p>A constant has no address, so <code>@</code> can't be applied to it (see <a href="pointers.html">Pointers and raw memory</a>):</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-169"></button><textarea hidden id="copy-169">Cannot take the address of constants</textarea><pre><code><span class="line">Cannot take the address of constants</span></code></pre></div>
+<h2 id="scopes"><a class="anchor" href="#scopes">Scopes</a></h2>
+<p>A variable can be used from its declaration to the end of the block it's declared in. A block is a list of statements in <code>{ }</code>, such as a function body, the body of an <code>if</code> or a loop, or a block written on its own:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-170"></button><textarea hidden id="copy-170">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	{
+		val inner = 1
+		printf(&quot;%d\n&quot;, inner)
+	}
+
+	printf(&quot;%d\n&quot;, inner)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> inner = <span class="c-literal">1</span></span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, inner)</span><span class="line">	}</span><span class="line"> </span><span class="line">	printf(<span class="c-literal">"%d\n"</span>, inner)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:19ch">Symbol &#x27;inner&#x27; not found in this scope</span></span><span class="line">}</span></code></pre></div>
+<p>When a block ends, its variables are dropped, in the reverse order of their declarations. <a href="ownership.html">Ownership and destructors</a> covers what that means for values with destructors.</p>
+<h3 id="shadowing"><a class="anchor" href="#shadowing">Shadowing</a></h3>
+<p>A variable in an inner block may have the same name as one outside it. Inside the block, the name means the inner variable. After the block, it means the outer one again. The inner variable doesn't have to have the same type:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-171"></button><textarea hidden id="copy-171">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+double: fun(value: i32) -&gt; i32
+{
+	val value = value * 2
+	ret value
+}
+
+main: fun
+{
+	val x = 1
+	{
+		val x = &quot;inner&quot;
+		printf(&quot;%s\n&quot;, x)
+	}
+
+	printf(&quot;%d %d\n&quot;, x, double(4))
+}</textarea><pre><code><span class="line"><span class="c-function">double</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> value = <span class="c-parameter">value</span> * <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">ret</span> value</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x = <span class="c-literal">1</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> x = <span class="c-literal">"inner"</span></span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%s\n"</span>, x)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, x, <span class="c-function">double</span>(<span class="c-literal">4</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>inner
+1 8</pre></div>
+<p>A function's body is a block inside its parameters, so a variable in the body can reuse a parameter's name, as <code>double</code> does. The new variable's initial value still sees the old name, since the new one only starts after its declaration.</p>
+<p>Two variables with the same name in the same block are an error, reported at both:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-172"></button><textarea hidden id="copy-172">mod example
+
+main: fun
+{
+	var total = 1
+	var total = 2
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:8ch">&#x27;total&#x27; is declared more than once in this scope</span></span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:8ch">&#x27;total&#x27; is declared more than once in this scope</span></span><span class="line">}</span></code></pre></div>
+<h2 id="module-level-variables-and-constants"><a class="anchor" href="#module-level-variables-and-constants">Module-level variables and constants</a></h2>
+<p>Variables and constants can also be declared at the top of a file, outside any function. They are written like other declarations, with the name first: <code>name: var Type = value</code>, <code>name: val Type = value</code> or <code>name: const Type = value</code>. The type and the value are both required. Every function in the module can use them:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-173"></button><textarea hidden id="copy-173">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+maxPlayers: const i32 = 4
+startingLives: val i32 = 3
+joined: var i32 = 0
+
+join: fun -&gt; i32
+{
+	joined += 1
+	ret joined
+}
+
+main: fun
+{
+	join()
+	join()
+	printf(&quot;%d of %d, %d lives\n&quot;, joined, maxPlayers, startingLives)
+}</textarea><pre><code><span class="line"><span class="c-constant">maxPlayers</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">4</span></span><span class="line"><span class="c-constant">startingLives</span>: <span class="c-keyword">val</span> <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line">joined: <span class="c-keyword">var</span> <span class="c-type">i32</span> = <span class="c-literal">0</span></span><span class="line"> </span><span class="line"><span class="c-function">join</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	joined += <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">ret</span> joined</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">join</span>()</span><span class="line">	<span class="c-function">join</span>()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d of %d, %d lives\n"</span>, joined, <span class="c-constant">maxPlayers</span>, <span class="c-constant">startingLives</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2 of 4, 3 lives</pre></div>
+<ul><li>A <code>const</code> is a constant, as inside a function.</li><li>A <code>val</code> is storage that can't be written.</li><li>A <code>var</code> is storage that any function can change. It lives for the whole run of the program.</li></ul>
+<p>Their initial values are set before the program starts, so each one must be a constant, for a <code>var</code> and a <code>val</code> too:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-174"></button><textarea hidden id="copy-174">mod example
+
+ext
+{
+	rand: fun -&gt; i32
+}
+
+seed: var i32 = rand()
+lives: val i32 = 3
+doubled: val i32 = lives * 2
+
+main: fun
+{
+}</textarea><pre><code><span class="line">seed: <span class="c-keyword">var</span> <span class="c-type">i32</span> = <span class="c-function">rand</span>()</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:16ch">The initial value of &#x27;seed&#x27; must be a constant</span></span><span class="line"><span class="c-constant">lives</span>: <span class="c-keyword">val</span> <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line"><span class="c-constant">doubled</span>: <span class="c-keyword">val</span> <span class="c-type">i32</span> = <span class="c-constant">lives</span> * <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:19ch">The initial value of &#x27;doubled&#x27; must be a constant</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>Declaration order doesn't matter at module level. A constant can use one declared further down, as long as no constant depends on its own value:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-175"></button><textarea hidden id="copy-175">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+doubled: const i32 = base * 2
+base: const i32 = 3
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, doubled)
+}</textarea><pre><code><span class="line"><span class="c-constant">doubled</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-constant">base</span> * <span class="c-literal">2</span></span><span class="line"><span class="c-constant">base</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-constant">doubled</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>6</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-176"></button><textarea hidden id="copy-176">mod example
+
+first: const i32 = second + 1
+second: const i32 = first + 1
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-constant">first</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-constant">second</span> + <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;first&#x27; depends on its own value</span></span><span class="line"><span class="c-constant">second</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-constant">first</span> + <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;second&#x27; depends on its own value</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>A local variable may have the same name as a module-level one. Inside its scope, the name means the local variable.</p>
+<p>Module-level declarations can be made visible to other modules or projects; <a href="modules.html">Modules and visibility</a> covers that. Constants and variables declared inside a type belong to the type; <a href="methods.html">Methods and properties</a> covers them.</p>
+</article>
+<nav class="pager"><a class="previous" href="text.html"><span>Previous</span>Bool, char and strings</a><a class="next" href="functions.html"><span>Next</span>Functions</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#val-and-var">val and var</a></li><li class="level-2"><a href="#types">Types</a></li><li class="level-3"><a href="#inferred-types">Inferred types</a></li><li class="level-2"><a href="#variables-without-a-value">Variables without a value</a></li><li class="level-3"><a href="#assigning-a-val-later">Assigning a val later</a></li><li class="level-3"><a href="#undef">undef</a></li><li class="level-2"><a href="#assignment">Assignment</a></li><li class="level-2"><a href="#constants">Constants</a></li><li class="level-2"><a href="#scopes">Scopes</a></li><li class="level-3"><a href="#shadowing">Shadowing</a></li><li class="level-2"><a href="#module-level-variables-and-constants">Module-level variables and constants</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

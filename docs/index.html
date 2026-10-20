@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html" class="current">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Cella Documentation</h1>
+<p>Cella is a systems programming language. It works at the level of C: raw pointers, no garbage collector and no runtime. On top of that it adds ownership and destructors, borrowed parameters, enums with payloads, generics, traits and modules. The compiler generates code with LLVM and builds executables and libraries for 64-bit Windows and Linux.</p>
+<p>This documentation covers the language itself: its syntax, its types and the rules the compiler checks. The standard library is documented separately.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-1"></button><textarea hidden id="copy-1">mod greeting
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Shape: enum
+{
+	circle(radius: f64)
+	rect(width: f64, height: f64)
+}
+
+area: fun(shape: Shape) -&gt; f64 =&gt; match shape
+{
+	circle(val r) =&gt; 3.14159 * r * r
+	rect(val w, val h) =&gt; w * h
+}
+
+main: fun
+{
+	val shapes = [Shape.circle(1.0), Shape.rect(2.0, 3.0), Shape.rect(0.5, 4.0)]
+	var total = 0.0
+	for shape in shapes
+	{
+		total += area(shape)
+	}
+
+	printf(&quot;total area %.2f\n&quot;, total)
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">greeting</span></span><span class="line"> </span><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">format</span>: <span class="c-type">cstr</span>, ...) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Shape</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">circle</span>(radius: <span class="c-type">f64</span>)</span><span class="line">	<span class="c-case">rect</span>(width: <span class="c-type">f64</span>, height: <span class="c-type">f64</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">shape</span>: <span class="c-type">Shape</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">shape</span></span><span class="line">{</span><span class="line">	circle(<span class="c-keyword">val</span> r) =&gt; <span class="c-literal">3.14159</span> * r * r</span><span class="line">	rect(<span class="c-keyword">val</span> w, <span class="c-keyword">val</span> h) =&gt; w * h</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> shapes = [<span class="c-type">Shape</span>.<span class="c-case">circle</span>(<span class="c-literal">1.0</span>), <span class="c-type">Shape</span>.<span class="c-case">rect</span>(<span class="c-literal">2.0</span>, <span class="c-literal">3.0</span>), <span class="c-type">Shape</span>.<span class="c-case">rect</span>(<span class="c-literal">0.5</span>, <span class="c-literal">4.0</span>)]</span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">0.0</span></span><span class="line">	<span class="c-keyword">for</span> shape <span class="c-keyword">in</span> shapes</span><span class="line">	{</span><span class="line">		total += <span class="c-function">area</span>(shape)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"total area %.2f\n"</span>, total)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>total area 11.14</pre></div>
+<h2 id="how-the-documentation-is-organized"><a class="anchor" href="#how-the-documentation-is-organized">How the documentation is organized</a></h2>
+<p>The chapters build on each other, so reading them in order works best.</p>
+<ul><li><strong>Getting started</strong> installs Cella and builds a first program.</li><li><strong>Basics</strong> covers the pieces every program uses: literals, numbers, strings, variables, functions and control flow.</li><li><strong>Data</strong> covers arrays, records, enums, unions and pattern matching.</li><li><strong>Memory</strong> explains ownership, destructors, parameter modes, borrows and raw pointers.</li><li><strong>Abstraction</strong> covers generics, traits, operators, conversions and closures.</li><li><strong>Programs</strong> covers modules, conditional compilation, calling C, checks and atomics.</li><li><strong>Reference</strong> lists keywords, operators, built-in types and project settings.</li></ul>
+<h2 id="examples"><a class="anchor" href="#examples">Examples</a></h2>
+<p>Every example in this documentation is compiled and run with the current compiler, and the output shown under it is what the program printed. Examples that the compiler rejects show its errors under the lines they point to.</p>
+<p>The examples print through C's <code>printf</code>, declared in an <code>ext</code> block as above. Most examples leave that declaration out to stay short; the copy button on each example copies the whole program, declaration included.</p>
+<div class="note"><p>Cella is still changing and hasn't had a release yet. This documentation follows the compiler as it is today.</p></div>
+</article>
+<nav class="pager"><span></span><a class="next" href="hello-world.html"><span>Next</span>Hello, World</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#how-the-documentation-is-organized">How the documentation is organized</a></li><li class="level-2"><a href="#examples">Examples</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

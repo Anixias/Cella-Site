@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hello, World - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html" class="current"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Hello, World</h1>
+<h2 id="installing-cella"><a class="anchor" href="#installing-cella">Installing Cella</a></h2>
+<p>Cella installs a small launcher named <code>cella</code>, which manages compiler versions and runs the right one for each project. On Windows, run this in PowerShell:</p>
+<div class="code powershell"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-2"></button><textarea hidden id="copy-2">irm https://anixias.github.io/Cella/install.ps1 | iex</textarea><pre><code><span class="line">irm https://anixias.github.io/Cella/install.ps1 | iex</span></code></pre></div>
+<p>On Linux:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-3"></button><textarea hidden id="copy-3">curl -fsSL https://anixias.github.io/Cella/install.sh | sh</textarea><pre><code><span class="line">curl -fsSL https://anixias.github.io/Cella/install.sh | sh</span></code></pre></div>
+<p>The installer puts everything in <code>C:\cella</code> or <code>~/.cella</code>, or in <code>CELLA_HOME</code> if it's set, and adds <code>cella</code> to your path.</p>
+<p>Windows programs link with Visual Studio's C++ build tools and the Windows SDK when they're installed, and with MinGW-w64 otherwise. Linux programs need glibc 2.34 or later.</p>
+<h2 id="a-first-program"><a class="anchor" href="#a-first-program">A first program</a></h2>
+<p><code>cella new</code> creates a project:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-4"></button><textarea hidden id="copy-4">cella new hello</textarea><pre><code><span class="line">cella new hello</span></code></pre></div>
+<p>This makes a <code>hello</code> folder with two files. <code>hello.celp</code> describes the project, and <code>main.ce</code> holds the program:</p>
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-5"></button><textarea hidden id="copy-5">mod hello
+
+ext
+{
+	puts: fun(text: cstr) -&gt; i32
+}
+
+main: fun -&gt; i32
+{
+	puts(&quot;Hello, World!&quot;)
+	ret 0
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">hello</span></span><span class="line"> </span><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">puts</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">cstr</span>) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-function">puts</span>(<span class="c-literal">"Hello, World!"</span>)</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-literal">0</span></span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>Hello, World!</pre></div>
+<p><code>cella run</code> builds the program and runs it:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-6"></button><textarea hidden id="copy-6">cd hello
+cella run</textarea><pre><code><span class="line">cd hello</span><span class="line">cella run</span></code></pre></div>
+<h2 id="what-the-program-says"><a class="anchor" href="#what-the-program-says">What the program says</a></h2>
+<p><code>mod hello</code> names the module this file belongs to. Every source file starts with a <code>mod</code> line, and any number of files can belong to one module.</p>
+<p>The <code>ext</code> block declares <code>puts</code>, a function from the C library. Cella has no built-in way to print; programs call C functions, or a library that wraps them. <code>cstr</code> is a pointer to a zero-terminated string, which is what C expects, and a string literal converts to one.</p>
+<p><code>main: fun -&gt; i32</code> declares the function the program starts in. Every declaration has this shape: a name, a colon, then what the name is. <code>fun</code> makes it a function, and <code>-&gt; i32</code> says it returns a 32-bit integer, which becomes the program's exit code.</p>
+<p>The body is a block of statements, one per line. Calls look as they do in C, and <code>ret</code> returns a value. No semicolons are needed: a new line ends a statement.</p>
+<p><code>main</code> doesn't have to return anything. Without a return type, the program exits with code 0:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-7"></button><textarea hidden id="copy-7">mod hello
+
+ext
+{
+	puts: fun(text: cstr) -&gt; i32
+}
+
+main: fun
+{
+	puts(&quot;Hello again!&quot;)
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">hello</span></span><span class="line"> </span><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">puts</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">cstr</span>) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">puts</span>(<span class="c-literal">"Hello again!"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>Hello again!</pre></div>
+<h2 id="printing-values"><a class="anchor" href="#printing-values">Printing values</a></h2>
+<p><code>printf</code> comes from C too. Its declaration ends in <code>...</code>, so it takes any number of extra arguments after the format string, and they follow C's rules for variadic calls (<a href="variadics.html">Variadic functions</a> covers them). <code>val</code> declares a named value, covered in <a href="variables.html">Variables and constants</a>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-8"></button><textarea hidden id="copy-8">mod hello
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val year = 2026
+	val pi = 3.14159
+	printf(&quot;%d %.2f\n&quot;, year, pi)
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">hello</span></span><span class="line"> </span><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">format</span>: <span class="c-type">cstr</span>, ...) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> year = <span class="c-literal">2026</span></span><span class="line">	<span class="c-keyword">val</span> pi = <span class="c-literal">3.14159</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %.2f\n"</span>, year, pi)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2026 3.14</pre></div>
+<p>The rest of the documentation prints with <code>printf</code>. Examples leave out its <code>ext</code> block to stay short, but the copy button copies it along with the rest of the program.</p>
+</article>
+<nav class="pager"><a class="previous" href="index.html"><span>Previous</span>Introduction</a><a class="next" href="projects.html"><span>Next</span>Projects and building</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#installing-cella">Installing Cella</a></li><li class="level-2"><a href="#a-first-program">A first program</a></li><li class="level-2"><a href="#what-the-program-says">What the program says</a></li><li class="level-2"><a href="#printing-values">Printing values</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

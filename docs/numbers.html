@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Numbers and arithmetic - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html" class="current"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Numbers and arithmetic</h1>
+<p>Cella has signed and unsigned integers from 8 to 128 bits, two pointer-sized integers and two floating-point types. This chapter covers their literals, how a literal gets its type, the operators, and what happens when a result doesn't fit.</p>
+<h2 id="integer-types"><a class="anchor" href="#integer-types">Integer types</a></h2>
+<p>Each integer type is named for its signedness and its width in bits:</p>
+<div class="table-wrap"><table><thead><tr><th>Signed</th><th>Unsigned</th><th>Size in bytes</th></tr></thead><tbody><tr><td><code>i8</code></td><td><code>u8</code></td><td>1</td></tr><tr><td><code>i16</code></td><td><code>u16</code></td><td>2</td></tr><tr><td><code>i32</code></td><td><code>u32</code></td><td>4</td></tr><tr><td><code>i64</code></td><td><code>u64</code></td><td>8</td></tr><tr><td><code>i128</code></td><td><code>u128</code></td><td>16</td></tr><tr><td><code>isize</code></td><td><code>usize</code></td><td>pointer size, 8 on 64-bit targets</td></tr></tbody></table></div>
+<p>Signed types use two's complement, so an <code>i8</code> holds -128 to 127 and a <code>u8</code> holds 0 to 255. <code>usize</code> is the type of sizes, lengths and array indexes, and <code>isize</code> is its signed counterpart, the type of the difference between two pointers. <code>sizeOf</code> gives the size of a type or a value, as a <code>usize</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-72"></button><textarea hidden id="copy-72">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val count: i32 = 10
+	printf(&quot;%zu %zu %zu %zu\n&quot;, sizeOf(i8), sizeOf(u64), sizeOf(i128), sizeOf(usize))
+	printf(&quot;%zu\n&quot;, sizeOf(count))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">i32</span> = <span class="c-literal">10</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">i8</span>), <span class="c-keyword">sizeOf</span>(<span class="c-type">u64</span>), <span class="c-keyword">sizeOf</span>(<span class="c-type">i128</span>), <span class="c-keyword">sizeOf</span>(<span class="c-type">usize</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu\n"</span>, <span class="c-keyword">sizeOf</span>(count))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 8 16 8
+4</pre></div>
+<h2 id="floating-point-types"><a class="anchor" href="#floating-point-types">Floating-point types</a></h2>
+<p><code>f32</code> and <code>f64</code> are IEEE 754 single and double precision numbers, 4 and 8 bytes, like C's <code>float</code> and <code>double</code>. Arithmetic on them follows IEEE 754: dividing by zero gives an infinity, and a NaN compares unequal to everything, itself included.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-73"></button><textarea hidden id="copy-73">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val half: f32 = 0.5
+	val third = 1.0 / 3.0
+	val zero = 0.0
+	val nan = zero / zero
+	printf(&quot;%.2f %.6f %f\n&quot;, half, third, 1.0 / zero)
+	printf(&quot;%d %d\n&quot;, nan == nan, nan != nan)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> half: <span class="c-type">f32</span> = <span class="c-literal">0.5</span></span><span class="line">	<span class="c-keyword">val</span> third = <span class="c-literal">1.0</span> / <span class="c-literal">3.0</span></span><span class="line">	<span class="c-keyword">val</span> zero = <span class="c-literal">0.0</span></span><span class="line">	<span class="c-keyword">val</span> nan = zero / zero</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.2f %.6f %f\n"</span>, half, third, <span class="c-literal">1.0</span> / zero)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, nan == nan, nan != nan)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0.50 0.333333 inf
+0 1</pre></div>
+<p>C's <code>printf</code> takes <code>f32</code> values as <code>double</code>, so <code>%f</code> prints both float types.</p>
+<h2 id="integer-literals"><a class="anchor" href="#integer-literals">Integer literals</a></h2>
+<p>An integer literal is written in decimal, or in hexadecimal, binary or octal with a prefix. Underscores among the digits are ignored, so they can group digits:</p>
+<div class="table-wrap"><table><thead><tr><th>Form</th><th>Example</th><th>Value</th></tr></thead><tbody><tr><td>Decimal</td><td><code>1_000_000</code></td><td>1000000</td></tr><tr><td>Hexadecimal, <code>0x</code> or <code>0X</code></td><td><code>0xFF</code>, <code>0xDEAD_BEEF</code></td><td>255, 3735928559</td></tr><tr><td>Binary, <code>0b</code> or <code>0B</code></td><td><code>0b1010_0101</code></td><td>165</td></tr><tr><td>Octal, <code>0o</code> or <code>0O</code></td><td><code>0o755</code></td><td>493</td></tr></tbody></table></div>
+<p>Leading zeros don't make a literal octal: <code>010</code> is ten. A minus sign is an operator, so <code>-0x10</code> is the negation of <code>0x10</code>.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-74"></button><textarea hidden id="copy-74">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val million = 1_000_000
+	val mask = 0xFF
+	val flags = 0b1010_0101
+	val mode = 0o755
+	printf(&quot;%d %d %d %d %d %d\n&quot;, million, mask, flags, mode, 010, -0x10)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> million = <span class="c-literal">1_000_000</span></span><span class="line">	<span class="c-keyword">val</span> mask = <span class="c-literal">0xFF</span></span><span class="line">	<span class="c-keyword">val</span> flags = <span class="c-literal">0b1010_0101</span></span><span class="line">	<span class="c-keyword">val</span> mode = <span class="c-literal">0o755</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d %d %d\n"</span>, million, mask, flags, mode, <span class="c-literal">010</span>, -<span class="c-literal">0x10</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1000000 255 165 493 10 -16</pre></div>
+<p>A digit that doesn't belong to the literal's base, or a prefix with no digits after it, is an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-75"></button><textarea hidden id="copy-75">mod example
+
+main: fun
+{
+	val a = 0b102
+	val b = 0o78
+	val c = 0x
+	val d = 0xFG
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-literal">0b102</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:12ch">Invalid digit &#x27;2&#x27; in binary literal</span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-literal">0o78</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:12ch">Invalid digit &#x27;8&#x27; in octal literal</span></span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-literal">0</span>x</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:12ch">Expected hex digits</span></span><span class="line">	<span class="c-keyword">val</span> d = <span class="c-literal">0xF</span>G</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:12ch">Invalid suffix &#x27;G&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="float-literals"><a class="anchor" href="#float-literals">Float literals</a></h2>
+<p>A float literal has a decimal point with digits on both sides, an exponent, or both: <code>1.5</code>, <code>1.5e3</code>, <code>2.5E-3</code>, <code>1e10</code>. Underscores separate digits as in integers.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-76"></button><textarea hidden id="copy-76">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val exponent = 1.5e3
+	val tiny = 2.5E-3
+	val grouped = 1_000.000_5
+	val large = 1e10
+	printf(&quot;%.1f %.4f %.4f %.1f\n&quot;, exponent, tiny, grouped, large)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> exponent = <span class="c-literal">1.5e3</span></span><span class="line">	<span class="c-keyword">val</span> tiny = <span class="c-literal">2.5E-3</span></span><span class="line">	<span class="c-keyword">val</span> grouped = <span class="c-literal">1_000.000_5</span></span><span class="line">	<span class="c-keyword">val</span> large = <span class="c-literal">1e10</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %.4f %.4f %.1f\n"</span>, exponent, tiny, grouped, large)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1500.0 0.0025 1000.0005 10000000000.0</pre></div>
+<p><code>1.</code> and <code>.5</code> aren't literals:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-77"></button><textarea hidden id="copy-77">mod example
+
+main: fun
+{
+	val a = 1.
+	val b = .5
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-literal">1</span>.</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:12ch">Expected a digit after &#x27;.&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> b = .<span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:12ch">Expected a digit before &#x27;.&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>A float literal too large for <code>f64</code> is an error, while one too small to represent becomes zero.</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-78"></button><textarea hidden id="copy-78">mod example
+
+main: fun
+{
+	val big = 1e400
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> big = <span class="c-literal">1e400</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:14ch">Float literal too large to fit any type</span></span><span class="line">}</span></code></pre></div>
+<h2 id="type-suffixes"><a class="anchor" href="#type-suffixes">Type suffixes</a></h2>
+<p>A suffix names a literal's type directly: <code>300u16</code>, <code>0xFFu8</code>, <code>1_000_000u64</code>, <code>4usize</code>, <code>-128i8</code>. Integer literals take any integer suffix, and both integer and float literals take <code>f32</code> and <code>f64</code>, as in <code>0.5f32</code> or <code>2f32</code>. The value must fit the type.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-79"></button><textarea hidden id="copy-79">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val mask = 0xF0u8
+	val big = 1_000_000_000_000u64
+	val low = -128i8
+	val size = 4usize
+	val half = 0.5f32
+	printf(&quot;%d %llu %d %zu %.1f\n&quot;, mask, big, low, size, half)
+	printf(&quot;%zu %zu %zu\n&quot;, sizeOf(mask), sizeOf(low), sizeOf(half))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> mask = <span class="c-literal">0xF0u8</span></span><span class="line">	<span class="c-keyword">val</span> big = <span class="c-literal">1_000_000_000_000u64</span></span><span class="line">	<span class="c-keyword">val</span> low = -<span class="c-literal">128i8</span></span><span class="line">	<span class="c-keyword">val</span> size = <span class="c-literal">4usize</span></span><span class="line">	<span class="c-keyword">val</span> half = <span class="c-literal">0.5f32</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %llu %d %zu %.1f\n"</span>, mask, big, low, size, half)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(mask), <span class="c-keyword">sizeOf</span>(low), <span class="c-keyword">sizeOf</span>(half))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>240 1000000000000 -128 4 0.5
+1 1 4</pre></div>
+<p>A bare <code>u</code> suffix makes an unsigned literal without fixing its width. It takes whatever unsigned type it's used as, and on its own it's a <code>u32</code>, or a <code>u64</code> or <code>u128</code> when the value needs one. It can't become a signed or float type.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-80"></button><textarea hidden id="copy-80">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val small = 5u
+	val byte: u8 = 200u
+	val top = 0x8000_0000_0000_0000u
+	printf(&quot;%u %d %llx\n&quot;, small, byte, top)
+	printf(&quot;%zu %zu %zu\n&quot;, sizeOf(small), sizeOf(byte), sizeOf(top))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> small = <span class="c-literal">5u</span></span><span class="line">	<span class="c-keyword">val</span> byte: <span class="c-type">u8</span> = <span class="c-literal">200u</span></span><span class="line">	<span class="c-keyword">val</span> top = <span class="c-literal">0x8000_0000_0000_0000u</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%u %d %llx\n"</span>, small, byte, top)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(small), <span class="c-keyword">sizeOf</span>(byte), <span class="c-keyword">sizeOf</span>(top))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>5 200 8000000000000000
+4 1 8</pre></div>
+<p>These are errors:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-81"></button><textarea hidden id="copy-81">mod example
+
+main: fun
+{
+	val a = 300u8
+	val b = 128i8
+	val c = 1.5i32
+	val d = -1u8
+	val e: i32 = 5u
+	val f = 3q
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-literal">300u8</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:12ch">&#x27;300&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-literal">128i8</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:12ch">&#x27;128&#x27; doesn&#x27;t fit in &#x27;i8&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-literal">1.5i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use &#x27;i32&#x27; on float literals</span></span><span class="line">	<span class="c-keyword">val</span> d = -<span class="c-literal">1u8</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:12ch">Operator &#x27;-&#x27; cannot be applied to &#x27;u8&#x27;<span class="diagnostic-note">&#x27;u8&#x27; can&#x27;t represent negative values</span></span></span><span class="line">	<span class="c-keyword">val</span> e: <span class="c-type">i32</span> = <span class="c-literal">5u</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot convert type &#x27;unsigned integer literal&#x27; to &#x27;i32&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> f = <span class="c-literal">3</span>q</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:12ch">Invalid suffix &#x27;q&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="how-literals-get-their-type"><a class="anchor" href="#how-literals-get-their-type">How literals get their type</a></h2>
+<p>A literal without a suffix has no type of its own until something decides it. Where a type is expected, as in a typed declaration, an argument or a return value, the literal takes that type, and its value must fit:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-82"></button><textarea hidden id="copy-82">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+half: fun(value: u8) -&gt; u8 =&gt; value / 2
+
+main: fun
+{
+	val small: i8 = -100
+	val ratio: f64 = 3
+	printf(&quot;%d %d %.1f\n&quot;, small, half(200), ratio)
+}</textarea><pre><code><span class="line"><span class="c-function">half</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">u8</span>) -&gt; <span class="c-type">u8</span> =&gt; <span class="c-parameter">value</span> / <span class="c-literal">2</span></span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">i8</span> = -<span class="c-literal">100</span></span><span class="line">	<span class="c-keyword">val</span> ratio: <span class="c-type">f64</span> = <span class="c-literal">3</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %.1f\n"</span>, small, <span class="c-function">half</span>(<span class="c-literal">200</span>), ratio)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>-100 100 3.0</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-83"></button><textarea hidden id="copy-83">mod example
+
+main: fun
+{
+	val a: u8 = 300
+	val b: i32 = 3000000000
+	val c: i32 = 0xFFFFFFFF
+	val d: u8 = -1
+	val e: f32 = 16777217
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a: <span class="c-type">u8</span> = <span class="c-literal">300</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:16ch">&#x27;300&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> b: <span class="c-type">i32</span> = <span class="c-literal">3000000000</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;3000000000&#x27; doesn&#x27;t fit in &#x27;i32&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> c: <span class="c-type">i32</span> = <span class="c-literal">0xFFFFFFFF</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;0xFFFFFFFF&#x27; doesn&#x27;t fit in &#x27;i32&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> d: <span class="c-type">u8</span> = -<span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:16ch">&#x27;-1&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> e: <span class="c-type">f32</span> = <span class="c-literal">16777217</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;16777217&#x27; can&#x27;t be represented exactly in &#x27;f32&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>An integer literal that becomes a float type must be exactly representable in it; <code>16777217</code> needs 25 bits of precision and <code>f32</code> has 24. Float literals with a fraction round to the nearest value, as in C, so <code>0.1</code> is fine as an <code>f32</code>.</p>
+<p>Where nothing decides, an integer literal is an <code>i32</code>, or an <code>i64</code> or <code>i128</code> if its value needs one, and a float literal is an <code>f64</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-84"></button><textarea hidden id="copy-84">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val small = 5
+	val big = 3000000000
+	val huge = 10000000000000000000
+	val fraction = 2.5
+	printf(&quot;%zu %zu %zu %zu\n&quot;, sizeOf(small), sizeOf(big), sizeOf(huge), sizeOf(fraction))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> small = <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">val</span> big = <span class="c-literal">3000000000</span></span><span class="line">	<span class="c-keyword">val</span> huge = <span class="c-literal">10000000000000000000</span></span><span class="line">	<span class="c-keyword">val</span> fraction = <span class="c-literal">2.5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(small), <span class="c-keyword">sizeOf</span>(big), <span class="c-keyword">sizeOf</span>(huge), <span class="c-keyword">sizeOf</span>(fraction))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4 8 16 8</pre></div>
+<p>A local declared from a literal without a type, like <code>val small = 5</code>, also takes its type from how the function uses it; <a href="variables.html">Variables</a> explains how. A literal larger than every integer type is an error, "Integer literal too large to fit any type".</p>
+<h2 id="arithmetic"><a class="anchor" href="#arithmetic">Arithmetic</a></h2>
+<p><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> and <code>%</code> work on integers and floats, and <code>-</code> and <code>+</code> also work as prefix operators. Integer division truncates toward zero, and the remainder has the sign of the left operand, as in C. <code>%</code> on floats gives the remainder of a truncating division too.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-85"></button><textarea hidden id="copy-85">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val a = 7
+	val b = -7
+	printf(&quot;%d %d %d %d\n&quot;, a / 2, a % 2, b / 2, b % 2)
+	printf(&quot;%.1f %.1f\n&quot;, 7.5 % 2.0, -7.5 % 2.0)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-literal">7</span></span><span class="line">	<span class="c-keyword">val</span> b = -<span class="c-literal">7</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, a / <span class="c-literal">2</span>, a % <span class="c-literal">2</span>, b / <span class="c-literal">2</span>, b % <span class="c-literal">2</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %.1f\n"</span>, <span class="c-literal">7.5</span> % <span class="c-literal">2.0</span>, -<span class="c-literal">7.5</span> % <span class="c-literal">2.0</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 1 -3 -1
+1.5 -1.5</pre></div>
+<p>Operators bind as in C: prefix operators first, then <code>*</code>, <code>/</code> and <code>%</code>, then <code>+</code> and <code>-</code>, then shifts. One difference is that <code>&amp;</code>, <code>^</code> and <code>|</code> bind tighter than comparisons, so <code>x &amp; 1 == 0</code> means <code>(x &amp; 1) == 0</code>. The <a href="operator-reference.html">operator reference</a> lists every level.</p>
+<p><code>-</code> can't be applied to an unsigned value:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-86"></button><textarea hidden id="copy-86">mod example
+
+main: fun
+{
+	val count: u32 = 5
+	val negative = -count
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">u32</span> = <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">val</span> negative = -count</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:19ch">Operator &#x27;-&#x27; cannot be applied to &#x27;u32&#x27;<span class="diagnostic-note">&#x27;u32&#x27; can&#x27;t represent negative values</span></span></span><span class="line">}</span></code></pre></div>
+<h2 id="how-arithmetic-is-typed"><a class="anchor" href="#how-arithmetic-is-typed">How arithmetic is typed</a></h2>
+<p>The operands of an operator decide which operation runs. The type the result is going to doesn't change it; it only receives the result. With two <code>i32</code>s, <code>a * b</code> multiplies in <code>i32</code> even when it's stored in an <code>i64</code>, and <code>a / b</code> divides as integers even when it's stored in an <code>f64</code>. To compute in a wider type, convert an operand first:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-87"></button><textarea hidden id="copy-87">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val a: i32 = 7
+	val b: i32 = 2
+	val quotient: f64 = a / b
+	val precise: f64 = f64(a) / b
+	val wide: i64 = i64(a) * 1000000000
+	printf(&quot;%.2f %.2f %lld\n&quot;, quotient, precise, wide)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a: <span class="c-type">i32</span> = <span class="c-literal">7</span></span><span class="line">	<span class="c-keyword">val</span> b: <span class="c-type">i32</span> = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">val</span> quotient: <span class="c-type">f64</span> = a / b</span><span class="line">	<span class="c-keyword">val</span> precise: <span class="c-type">f64</span> = <span class="c-type">f64</span>(a) / b</span><span class="line">	<span class="c-keyword">val</span> wide: <span class="c-type">i64</span> = <span class="c-type">i64</span>(a) * <span class="c-literal">1000000000</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.2f %.2f %lld\n"</span>, quotient, precise, wide)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3.00 3.50 7000000000</pre></div>
+<p>When the operands have the same type, the operation happens in that type. When one operand's type converts to the other's without losing anything, the operation happens in the wider type, and otherwise in the narrowest type both convert to. An <code>i32</code> and an <code>i64</code> add as <code>i64</code>s, an <code>i32</code> and an <code>f64</code> as <code>f64</code>s, and an <code>f32</code> and an <code>i32</code> as <code>f64</code>s, since an <code>f32</code> can't hold every <code>i32</code> exactly. Where no type holds both, the operation is an error:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-88"></button><textarea hidden id="copy-88">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val count: i32 = 3
+	val total: i64 = 40
+	val ratio: f64 = 0.5
+	val single: f32 = 1.5
+	val sum = count + total
+	val scaled = count * ratio
+	val mixed = single * count
+	printf(&quot;%lld %.1f %.1f\n&quot;, sum, scaled, mixed)
+	printf(&quot;%zu %zu %zu\n&quot;, sizeOf(sum), sizeOf(scaled), sizeOf(mixed))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> total: <span class="c-type">i64</span> = <span class="c-literal">40</span></span><span class="line">	<span class="c-keyword">val</span> ratio: <span class="c-type">f64</span> = <span class="c-literal">0.5</span></span><span class="line">	<span class="c-keyword">val</span> single: <span class="c-type">f32</span> = <span class="c-literal">1.5</span></span><span class="line">	<span class="c-keyword">val</span> sum = count + total</span><span class="line">	<span class="c-keyword">val</span> scaled = count * ratio</span><span class="line">	<span class="c-keyword">val</span> mixed = single * count</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%lld %.1f %.1f\n"</span>, sum, scaled, mixed)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(sum), <span class="c-keyword">sizeOf</span>(scaled), <span class="c-keyword">sizeOf</span>(mixed))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>43 1.5 4.5
+8 8 8</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-89"></button><textarea hidden id="copy-89">mod example
+
+main: fun
+{
+	val total: i64 = 40
+	val ratio: f64 = 0.5
+	val result = total * ratio
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> total: <span class="c-type">i64</span> = <span class="c-literal">40</span></span><span class="line">	<span class="c-keyword">val</span> ratio: <span class="c-type">f64</span> = <span class="c-literal">0.5</span></span><span class="line">	<span class="c-keyword">val</span> result = total * ratio</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:17ch">No operation defined for &#x27;*&#x27; between &#x27;i64&#x27; and &#x27;f64&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h3 id="literals-take-the-other-operands-type"><a class="anchor" href="#literals-take-the-other-operands-type">Literals take the other operand's type</a></h3>
+<p>A literal next to a typed operand takes that operand's type when it fits, so <code>small + 1</code> with a <code>u8</code> stays a <code>u8</code>, and <code>single / 2.0</code> with an <code>f32</code> stays an <code>f32</code>. A literal that doesn't fit takes its usual type instead, and the rules above apply: <code>small + 300</code> adds as <code>i32</code>s. A float literal next to an integer is an <code>f64</code>, so <code>count / 2.0</code> divides in <code>f64</code>.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-90"></button><textarea hidden id="copy-90">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val small: u8 = 250
+	val single: f32 = 1.5
+	val count: i32 = 7
+	val next = small + 1
+	val far = small + 300
+	val halved = single / 2.0
+	val ratio = count / 2.0
+	printf(&quot;%d %d %.2f %.2f\n&quot;, next, far, halved, ratio)
+	printf(&quot;%zu %zu %zu %zu\n&quot;, sizeOf(next), sizeOf(far), sizeOf(halved), sizeOf(ratio))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">u8</span> = <span class="c-literal">250</span></span><span class="line">	<span class="c-keyword">val</span> single: <span class="c-type">f32</span> = <span class="c-literal">1.5</span></span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">i32</span> = <span class="c-literal">7</span></span><span class="line">	<span class="c-keyword">val</span> next = small + <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> far = small + <span class="c-literal">300</span></span><span class="line">	<span class="c-keyword">val</span> halved = single / <span class="c-literal">2.0</span></span><span class="line">	<span class="c-keyword">val</span> ratio = count / <span class="c-literal">2.0</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %.2f %.2f\n"</span>, next, far, halved, ratio)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(next), <span class="c-keyword">sizeOf</span>(far), <span class="c-keyword">sizeOf</span>(halved), <span class="c-keyword">sizeOf</span>(ratio))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>251 550 0.75 3.50
+1 4 4 8</pre></div>
+<h3 id="expressions-made-only-of-literals"><a class="anchor" href="#expressions-made-only-of-literals">Expressions made only of literals</a></h3>
+<p>An expression made only of integer literals is computed as if each literal had the destination's type, or <code>i32</code> where there is none. So <code>1 &lt;&lt; 31</code> stored in an <code>i32</code> sets the sign bit, <code>~0</code> stored in a <code>u32</code> is all ones, and <code>3 / 5</code> stored in an <code>f64</code> is 0, since <code>3</code> and <code>5</code> are integers.</p>
+<p>When a literal doesn't fit that type, or a step overflows it, the expression is computed exactly instead, and the result takes the smallest of <code>i32</code>, <code>i64</code> and <code>i128</code> that holds it. So <code>300 - 100</code> fits in a <code>u8</code>, and <code>2147483647 + 1</code> without a destination is an <code>i64</code>. Float literals combine in <code>f64</code>.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-91"></button><textarea hidden id="copy-91">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val signBit: i32 = 1 &lt;&lt; 31
+	val allOnes: u32 = ~0
+	val ratio: f64 = 3 / 5
+	val fits: u8 = 300 - 100
+	val grown = 2147483647 + 1
+	val shifted = 1 &lt;&lt; 40
+	printf(&quot;%d %u %.1f %d\n&quot;, signBit, allOnes, ratio, fits)
+	printf(&quot;%lld %zu %lld %zu\n&quot;, grown, sizeOf(grown), shifted, sizeOf(shifted))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> signBit: <span class="c-type">i32</span> = <span class="c-literal">1</span> &lt;&lt; <span class="c-literal">31</span></span><span class="line">	<span class="c-keyword">val</span> allOnes: <span class="c-type">u32</span> = ~<span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">val</span> ratio: <span class="c-type">f64</span> = <span class="c-literal">3</span> / <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">val</span> fits: <span class="c-type">u8</span> = <span class="c-literal">300</span> - <span class="c-literal">100</span></span><span class="line">	<span class="c-keyword">val</span> grown = <span class="c-literal">2147483647</span> + <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> shifted = <span class="c-literal">1</span> &lt;&lt; <span class="c-literal">40</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %u %.1f %d\n"</span>, signBit, allOnes, ratio, fits)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%lld %zu %lld %zu\n"</span>, grown, <span class="c-keyword">sizeOf</span>(grown), shifted, <span class="c-keyword">sizeOf</span>(shifted))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>-2147483648 4294967295 0.0 200
+2147483648 8 1099511627776 8</pre></div>
+<p>An exact result still has to fit the destination:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-92"></button><textarea hidden id="copy-92">mod example
+
+main: fun
+{
+	val sum: u8 = 200 + 100
+	val doubled: i32 = (1 &lt;&lt; 31) * 2
+	val fraction: i32 = 7 / 2.0
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> sum: <span class="c-type">u8</span> = <span class="c-literal">200</span> + <span class="c-literal">100</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:18ch">Cannot convert type &#x27;i32&#x27; to &#x27;u8&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> doubled: <span class="c-type">i32</span> = (<span class="c-literal">1</span> &lt;&lt; <span class="c-literal">31</span>) * <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:23ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:23ch">Cannot convert type &#x27;i64&#x27; to &#x27;i32&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> fraction: <span class="c-type">i32</span> = <span class="c-literal">7</span> / <span class="c-literal">2.0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot convert type &#x27;float literal&#x27; to &#x27;i32&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h3 id="mixed-signs"><a class="anchor" href="#mixed-signs">Mixed signs</a></h3>
+<p>An operation on a signed and an unsigned integer happens in the smallest signed type that holds both, so <code>u8 + i8</code> is an <code>i16</code>, <code>u16 + i8</code> an <code>i32</code> and <code>u32 + i32</code> an <code>i64</code>. <code>u128</code> with a signed operand has nothing wider and is an error, and so are <code>usize</code> and <code>isize</code> with an operand of the other signedness unless every value fits on every target.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-93"></button><textarea hidden id="copy-93">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val small: u8 = 200
+	val negative: i8 = -100
+	val count: u32 = 4000000000
+	val offset: i32 = -2000000000
+	val bytes = small + negative
+	val words = count + offset
+	printf(&quot;%d %zu %lld %zu\n&quot;, bytes, sizeOf(bytes), words, sizeOf(words))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">u8</span> = <span class="c-literal">200</span></span><span class="line">	<span class="c-keyword">val</span> negative: <span class="c-type">i8</span> = -<span class="c-literal">100</span></span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">u32</span> = <span class="c-literal">4000000000</span></span><span class="line">	<span class="c-keyword">val</span> offset: <span class="c-type">i32</span> = -<span class="c-literal">2000000000</span></span><span class="line">	<span class="c-keyword">val</span> bytes = small + negative</span><span class="line">	<span class="c-keyword">val</span> words = count + offset</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %zu %lld %zu\n"</span>, bytes, <span class="c-keyword">sizeOf</span>(bytes), words, <span class="c-keyword">sizeOf</span>(words))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>100 2 2000000000 8</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-94"></button><textarea hidden id="copy-94">mod example
+
+main: fun
+{
+	val signed: i32 = -1
+	val huge: u128 = 1
+	val size: usize = 3
+	val wide: i64 = 2
+	val sum = signed + huge
+	val product = size * wide
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> signed: <span class="c-type">i32</span> = -<span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> huge: <span class="c-type">u128</span> = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> size: <span class="c-type">usize</span> = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> wide: <span class="c-type">i64</span> = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">val</span> sum = signed + huge</span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:14ch">No operation defined for &#x27;+&#x27; between &#x27;i32&#x27; and &#x27;u128&#x27;<span class="diagnostic-note">&#x27;i32&#x27; can&#x27;t represent every &#x27;u128&#x27; value</span></span></span><span class="line">	<span class="c-keyword">val</span> product = size * wide</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:18ch">No operation defined for &#x27;*&#x27; between &#x27;usize&#x27; and &#x27;i64&#x27;<span class="diagnostic-note">&#x27;i64&#x27; can&#x27;t represent every &#x27;usize&#x27; value</span></span></span><span class="line">}</span></code></pre></div>
+<h2 id="overflow"><a class="anchor" href="#overflow">Overflow</a></h2>
+<p>Integer <code>+</code>, <code>-</code>, <code>*</code> and prefix <code>-</code>, and their compound assignments, check for overflow in debug builds. A result that doesn't fit the type stops the program with a panic that names the operation and where it happened:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-95"></button><textarea hidden id="copy-95">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+increment: fun(value: u8) -&gt; u8 =&gt; value + 1
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, increment(254))
+	printf(&quot;%d\n&quot;, increment(255))
+}</textarea><pre><code><span class="line"><span class="c-function">increment</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">u8</span>) -&gt; <span class="c-type">u8</span> =&gt; <span class="c-parameter">value</span> + <span class="c-literal">1</span></span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">increment</span>(<span class="c-literal">254</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">increment</span>(<span class="c-literal">255</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>255
+Panic at main.ce:8:36: addition overflow</pre></div>
+<p>The messages are "addition overflow", "subtraction overflow", "multiplication overflow" and "negation overflow". Release builds don't check, and the result wraps around: <code>255 + 1</code> in a <code>u8</code> is 0. The <code>OverflowChecks</code> project setting turns the checks on or off in every build:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-96"></button><textarea hidden id="copy-96">OutputType = &quot;Executable&quot;
+OverflowChecks = false</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">OverflowChecks </span>= <span class="c-literal">false</span></span></code></pre></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-97"></button><textarea hidden id="copy-97">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+increment: fun(value: u8) -&gt; u8 =&gt; value + 1
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, increment(255))
+}</textarea><pre><code><span class="line"><span class="c-function">increment</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">u8</span>) -&gt; <span class="c-type">u8</span> =&gt; <span class="c-parameter">value</span> + <span class="c-literal">1</span></span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">increment</span>(<span class="c-literal">255</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0</pre></div>
+<p>When every operand is a constant, the compiler computes the result and reports overflow as an error, in every build:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-98"></button><textarea hidden id="copy-98">mod example
+
+limit: const u8 = 200
+
+main: fun
+{
+	val sum = limit + 100
+	val product: i8 = i8(64) * 2
+}</textarea><pre><code><span class="line"><span class="c-constant">limit</span>: <span class="c-keyword">const</span> <span class="c-type">u8</span> = <span class="c-literal">200</span></span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> sum = <span class="c-constant">limit</span> + <span class="c-literal">100</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:14ch">Addition overflows &#x27;u8&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> product: <span class="c-type">i8</span> = <span class="c-type">i8</span>(<span class="c-literal">64</span>) * <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:22ch">Multiplication overflows &#x27;i8&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p><a href="panics.html">Checks and panics</a> covers panics and the project settings that control them.</p>
+<h2 id="wrapping-operators"><a class="anchor" href="#wrapping-operators">Wrapping operators</a></h2>
+<p><code>+%</code>, <code>-%</code> and <code>*%</code> add, subtract and multiply with wraparound in every build, for code like hashes that means to wrap. Their compound forms are <code>+%=</code>, <code>-%=</code> and <code>*%=</code>. They take the same operands as <code>+</code>, <code>-</code> and <code>*</code>, but only integers.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-99"></button><textarea hidden id="copy-99">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val byte: u8 = 255
+	val count: u32 = 1
+	val large: i32 = 2000000000
+	printf(&quot;%d %u %d\n&quot;, byte +% 1, count -% 2, large *% 2)
+
+	var hash: u32 = 2166136261
+	hash *%= 16777619
+	hash +%= 7
+	printf(&quot;%u\n&quot;, hash)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> byte: <span class="c-type">u8</span> = <span class="c-literal">255</span></span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">u32</span> = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> large: <span class="c-type">i32</span> = <span class="c-literal">2000000000</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %u %d\n"</span>, byte +% <span class="c-literal">1</span>, count -% <span class="c-literal">2</span>, large *% <span class="c-literal">2</span>)</span><span class="line"> </span><span class="line">	<span class="c-keyword">var</span> hash: <span class="c-type">u32</span> = <span class="c-literal">2166136261</span></span><span class="line">	hash *%= <span class="c-literal">16777619</span></span><span class="line">	hash +%= <span class="c-literal">7</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%u\n"</span>, hash)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0 4294967295 -294967296
+84696358</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-100"></button><textarea hidden id="copy-100">mod example
+
+main: fun
+{
+	val half = 1.5
+	val sum = half +% 2.0
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> half = <span class="c-literal">1.5</span></span><span class="line">	<span class="c-keyword">val</span> sum = half +% <span class="c-literal">2.0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:14ch">No operation defined for &#x27;+%&#x27; between &#x27;f64&#x27; and &#x27;float literal&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="division-by-zero"><a class="anchor" href="#division-by-zero">Division by zero</a></h2>
+<p>Integer division and remainder by zero stop the program with "division by zero", and dividing the smallest signed value by -1, whose result doesn't fit, stops it with "division overflow". Unlike the overflow checks, these happen in every build. The remainder of the smallest value and -1 is 0.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-101"></button><textarea hidden id="copy-101">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+divide: fun(a: i32, b: i32) -&gt; i32 =&gt; a / b
+remainder: fun(a: i32, b: i32) -&gt; i32 =&gt; a % b
+
+main: fun
+{
+	printf(&quot;%d %d\n&quot;, divide(7, 2), remainder(-2147483648, -1))
+	printf(&quot;%d\n&quot;, divide(1, 0))
+}</textarea><pre><code><span class="line"><span class="c-function">divide</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">a</span> / <span class="c-parameter">b</span></span><span class="line"><span class="c-function">remainder</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">a</span> % <span class="c-parameter">b</span></span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">divide</span>(<span class="c-literal">7</span>, <span class="c-literal">2</span>), <span class="c-function">remainder</span>(-<span class="c-literal">2147483648</span>, -<span class="c-literal">1</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">divide</span>(<span class="c-literal">1</span>, <span class="c-literal">0</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 0
+Panic at main.ce:8:39: division by zero</pre></div>
+<p>A constant zero divisor is a compile error. Float division by zero isn't checked and gives an infinity or a NaN.</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-102"></button><textarea hidden id="copy-102">mod example
+
+main: fun
+{
+	var x = 10
+	x = x / 0
+	x %= 0
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> x = <span class="c-literal">10</span></span><span class="line">	x = x / <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:12ch">Division by zero</span></span><span class="line">	x %= <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:9ch">Division by zero</span></span><span class="line">}</span></code></pre></div>
+<h2 id="bitwise-operators"><a class="anchor" href="#bitwise-operators">Bitwise operators</a></h2>
+<p><code>&amp;</code>, <code>|</code> and <code>^</code> are bitwise and, or and exclusive or, and prefix <code>~</code> flips every bit. They work on integers of any width and follow the same typing rules as arithmetic. Floats have no bitwise operators.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-103"></button><textarea hidden id="copy-103">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val flags: u8 = 0b1100
+	printf(&quot;%d %d %d %d\n&quot;, flags &amp; 0b1010, flags | 0b0001, flags ^ 0b1111, ~flags)
+	val low = flags &amp; 1 == 0
+	printf(&quot;%d\n&quot;, low)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> flags: <span class="c-type">u8</span> = <span class="c-literal">0b1100</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, flags &amp; <span class="c-literal">0b1010</span>, flags | <span class="c-literal">0b0001</span>, flags ^ <span class="c-literal">0b1111</span>, ~flags)</span><span class="line">	<span class="c-keyword">val</span> low = flags &amp; <span class="c-literal">1</span> == <span class="c-literal">0</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, low)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>8 13 3 243
+1</pre></div>
+<h2 id="shifts"><a class="anchor" href="#shifts">Shifts</a></h2>
+<p><code>&lt;&lt;</code> shifts left and <code>&gt;&gt;</code> shifts right. A right shift of a signed value copies the sign bit in, and a right shift of an unsigned value shifts zeros in. The result has the left operand's type, and bits shifted past the top are dropped without an overflow check. The shift amount can be any integer type.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-104"></button><textarea hidden id="copy-104">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val negative = -64
+	val top: u32 = 0x8000_0000
+	val byte: u8 = 0xFF
+	val count: u8 = 3
+	printf(&quot;%d %d %u %d %d\n&quot;, 1 &lt;&lt; 4, negative &gt;&gt; 2, top &gt;&gt; 31, byte &lt;&lt; 4, 1000 &lt;&lt; count)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> negative = -<span class="c-literal">64</span></span><span class="line">	<span class="c-keyword">val</span> top: <span class="c-type">u32</span> = <span class="c-literal">0x8000_0000</span></span><span class="line">	<span class="c-keyword">val</span> byte: <span class="c-type">u8</span> = <span class="c-literal">0xFF</span></span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">u8</span> = <span class="c-literal">3</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %u %d %d\n"</span>, <span class="c-literal">1</span> &lt;&lt; <span class="c-literal">4</span>, negative &gt;&gt; <span class="c-literal">2</span>, top &gt;&gt; <span class="c-literal">31</span>, byte &lt;&lt; <span class="c-literal">4</span>, <span class="c-literal">1000</span> &lt;&lt; count)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>16 -16 1 240 8000</pre></div>
+<p>A constant shift amount must be from 0 to one less than the width of the type. An amount known only at run time that's the width or more, or negative, shifts every bit out: the result is 0, or -1 for a right shift of a negative value.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-105"></button><textarea hidden id="copy-105">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+shiftLeft: fun(value: u32, amount: i32) -&gt; u32 =&gt; value &lt;&lt; amount
+shiftRight: fun(value: i32, amount: i32) -&gt; i32 =&gt; value &gt;&gt; amount
+
+main: fun
+{
+	printf(&quot;%u %u %u\n&quot;, shiftLeft(1, 31), shiftLeft(1, 40), shiftLeft(1, -1))
+	printf(&quot;%d %d\n&quot;, shiftRight(-64, 40), shiftRight(64, 40))
+}</textarea><pre><code><span class="line"><span class="c-function">shiftLeft</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">u32</span>, <span class="c-parameter">amount</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">u32</span> =&gt; <span class="c-parameter">value</span> &lt;&lt; <span class="c-parameter">amount</span></span><span class="line"><span class="c-function">shiftRight</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>, <span class="c-parameter">amount</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">value</span> &gt;&gt; <span class="c-parameter">amount</span></span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%u %u %u\n"</span>, <span class="c-function">shiftLeft</span>(<span class="c-literal">1</span>, <span class="c-literal">31</span>), <span class="c-function">shiftLeft</span>(<span class="c-literal">1</span>, <span class="c-literal">40</span>), <span class="c-function">shiftLeft</span>(<span class="c-literal">1</span>, -<span class="c-literal">1</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">shiftRight</span>(-<span class="c-literal">64</span>, <span class="c-literal">40</span>), <span class="c-function">shiftRight</span>(<span class="c-literal">64</span>, <span class="c-literal">40</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2147483648 0 0
+-1 0</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-106"></button><textarea hidden id="copy-106">mod example
+
+main: fun
+{
+	val count: u32 = 1
+	val a = count &lt;&lt; 32
+	val b = i32(1) &lt;&lt; 40
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">u32</span> = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> a = count &lt;&lt; <span class="c-literal">32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:21ch">Shift amount 32 is out of range for &#x27;u32&#x27;<span class="diagnostic-note">&#x27;u32&#x27; has 32 bits</span></span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-type">i32</span>(<span class="c-literal">1</span>) &lt;&lt; <span class="c-literal">40</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:22ch">Shift amount 40 is out of range for &#x27;i32&#x27;<span class="diagnostic-note">&#x27;i32&#x27; has 32 bits</span></span></span><span class="line">}</span></code></pre></div>
+<h2 id="rotations"><a class="anchor" href="#rotations">Rotations</a></h2>
+<p><code>&lt;&lt;&lt;</code> and <code>&gt;&gt;&gt;</code> rotate: bits shifted out of one end come back in at the other. The amount wraps around the width, so rotating a <code>u8</code> by 9 is the same as rotating it by 1, and a negative amount rotates the other way.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-107"></button><textarea hidden id="copy-107">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val byte: u8 = 0x81
+	val word: u32 = 0x1234_5678
+	printf(&quot;%d %d %d %d\n&quot;, byte &lt;&lt;&lt; 1, byte &gt;&gt;&gt; 1, byte &lt;&lt;&lt; 9, byte &lt;&lt;&lt; -1)
+	printf(&quot;%08x %08x\n&quot;, word &lt;&lt;&lt; 8, word &gt;&gt;&gt; 8)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> byte: <span class="c-type">u8</span> = <span class="c-literal">0x81</span></span><span class="line">	<span class="c-keyword">val</span> word: <span class="c-type">u32</span> = <span class="c-literal">0x1234_5678</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, byte &lt;&lt;&lt; <span class="c-literal">1</span>, byte &gt;&gt;&gt; <span class="c-literal">1</span>, byte &lt;&lt;&lt; <span class="c-literal">9</span>, byte &lt;&lt;&lt; -<span class="c-literal">1</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%08x %08x\n"</span>, word &lt;&lt;&lt; <span class="c-literal">8</span>, word &gt;&gt;&gt; <span class="c-literal">8</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 192 3 192
+34567812 78123456</pre></div>
+<h2 id="comparisons"><a class="anchor" href="#comparisons">Comparisons</a></h2>
+<p><code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>==</code> and <code>!=</code> compare two numbers and give a <code>bool</code>. Any two integer types can be compared, even pairs with no common type for arithmetic such as <code>i128</code> and <code>u128</code>, and the comparison is by value, so a negative signed value is less than any unsigned one. Integers and floats compare where they could be added.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-108"></button><textarea hidden id="copy-108">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val negative: i32 = -1
+	val largest: u32 = 4294967295
+	val wide: i64 = -5
+	val small: u8 = 200
+	printf(&quot;%d %d %d\n&quot;, negative &lt; largest, negative == largest, wide &lt; small)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> negative: <span class="c-type">i32</span> = -<span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> largest: <span class="c-type">u32</span> = <span class="c-literal">4294967295</span></span><span class="line">	<span class="c-keyword">val</span> wide: <span class="c-type">i64</span> = -<span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">u8</span> = <span class="c-literal">200</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, negative &lt; largest, negative == largest, wide &lt; small)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 0 1</pre></div>
+<p>Comparisons chain: <code>a &lt; b &lt; c</code> means <code>a &lt; b &amp;&amp; b &lt; c</code>, with <code>b</code> evaluated once. Any of <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code> and <code>&gt;=</code> can be mixed in a chain, and <code>==</code> and <code>!=</code> chain the same way, so <code>a == b == c</code> means <code>a == b &amp;&amp; b == c</code>. As with <code>&amp;&amp;</code>, a chain stops at the first comparison that fails, and the operands after it aren't evaluated.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-109"></button><textarea hidden id="copy-109">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+trace: fun(value: i32) -&gt; i32
+{
+	printf(&quot;[%d]&quot;, value)
+	ret value
+}
+
+main: fun
+{
+	val small: u8 = 7
+	printf(&quot;%d %d\n&quot;, 0 &lt;= small &lt; 10, 1 &lt; 3 &lt; 2)
+	printf(&quot; %d\n&quot;, trace(1) &lt; trace(2) &lt; trace(3))
+	printf(&quot; %d\n&quot;, trace(1) == trace(2) == trace(3))
+}</textarea><pre><code><span class="line"><span class="c-function">trace</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"[%d]"</span>, <span class="c-parameter">value</span>)</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">value</span></span><span class="line">}</span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">u8</span> = <span class="c-literal">7</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-literal">0</span> &lt;= small &lt; <span class="c-literal">10</span>, <span class="c-literal">1</span> &lt; <span class="c-literal">3</span> &lt; <span class="c-literal">2</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">" %d\n"</span>, <span class="c-function">trace</span>(<span class="c-literal">1</span>) &lt; <span class="c-function">trace</span>(<span class="c-literal">2</span>) &lt; <span class="c-function">trace</span>(<span class="c-literal">3</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">" %d\n"</span>, <span class="c-function">trace</span>(<span class="c-literal">1</span>) == <span class="c-function">trace</span>(<span class="c-literal">2</span>) == <span class="c-function">trace</span>(<span class="c-literal">3</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 0
+[1][2][3] 1
+[1][2] 0</pre></div>
+<h2 id="compound-assignment"><a class="anchor" href="#compound-assignment">Compound assignment</a></h2>
+<p>Every binary arithmetic, bitwise, shift and rotate operator has a compound assignment form: <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code>, <code>%=</code>, <code>+%=</code>, <code>-%=</code>, <code>*%=</code>, <code>&amp;=</code>, <code>|=</code>, <code>^=</code>, <code>&lt;&lt;=</code>, <code>&gt;&gt;=</code>, <code>&lt;&lt;&lt;=</code> and <code>&gt;&gt;&gt;=</code>. <code>x += y</code> works like <code>x = x + y</code> with <code>x</code> evaluated once, and it's checked for overflow and division by zero like the operator. The right side must convert to the left side's type without loss, except for shifts and rotations, whose amount can be any integer type.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-110"></button><textarea hidden id="copy-110">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var value = 100
+	value += 5
+	value -= 10
+	value *= 3
+	value /= 4
+	value %= 50
+
+	var bits: u8 = 0b1100
+	bits &amp;= 0b1010
+	bits |= 0b0001
+	bits &lt;&lt;= 2
+
+	var total: u32 = 0
+	val small: u8 = 200
+	total += small
+	printf(&quot;%d %d %u\n&quot;, value, bits, total)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> value = <span class="c-literal">100</span></span><span class="line">	value += <span class="c-literal">5</span></span><span class="line">	value -= <span class="c-literal">10</span></span><span class="line">	value *= <span class="c-literal">3</span></span><span class="line">	value /= <span class="c-literal">4</span></span><span class="line">	value %= <span class="c-literal">50</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">var</span> bits: <span class="c-type">u8</span> = <span class="c-literal">0b1100</span></span><span class="line">	bits &amp;= <span class="c-literal">0b1010</span></span><span class="line">	bits |= <span class="c-literal">0b0001</span></span><span class="line">	bits &lt;&lt;= <span class="c-literal">2</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">var</span> total: <span class="c-type">u32</span> = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">u8</span> = <span class="c-literal">200</span></span><span class="line">	total += small</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %u\n"</span>, value, bits, total)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>21 36 200</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-111"></button><textarea hidden id="copy-111">mod example
+
+main: fun
+{
+	var byte: u8 = 1
+	val count: i32 = 5
+	byte += count
+	byte += 300
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> byte: <span class="c-type">u8</span> = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">i32</span> = <span class="c-literal">5</span></span><span class="line">	byte += count</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot convert type &#x27;i32&#x27; to &#x27;u8&#x27;</span></span><span class="line">	byte += <span class="c-literal">300</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:12ch">&#x27;300&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="implicit-numeric-conversions"><a class="anchor" href="#implicit-numeric-conversions">Implicit numeric conversions</a></h2>
+<p>A number converts to another numeric type without being written out only when every value of its type fits the other type exactly:</p>
+<ul><li>A signed integer converts to any wider signed integer, and an unsigned integer to any wider integer of either signedness.</li><li><code>i8</code>, <code>i16</code>, <code>i32</code>, <code>u8</code> and <code>u16</code> convert to <code>isize</code>, and <code>u8</code>, <code>u16</code> and <code>u32</code> to <code>usize</code>. <code>isize</code> converts to <code>i64</code> and <code>i128</code>, and <code>usize</code> to <code>u64</code>, <code>u128</code> and <code>i128</code>.</li><li><code>f32</code> converts to <code>f64</code>.</li><li><code>i8</code>, <code>i16</code>, <code>u8</code> and <code>u16</code> convert to <code>f32</code>, and those and <code>i32</code> and <code>u32</code> to <code>f64</code>.</li></ul>
+<p>Everything else is written out. Named constants follow the same rules as variables: a <code>const</code> of type <code>i32</code> doesn't become a <code>usize</code>, even when its value fits. <a href="conversions.html">Conversions</a> covers conversions in general.</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-112"></button><textarea hidden id="copy-112">mod example
+
+main: fun
+{
+	val count: i32 = 3
+	val size: usize = count
+	val wide: i64 = 5
+	val offset: isize = wide
+	val ratio: f64 = 0.5
+	val single: f32 = ratio
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> size: <span class="c-type">usize</span> = count</span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot convert type &#x27;i32&#x27; to &#x27;usize&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> wide: <span class="c-type">i64</span> = <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">val</span> offset: <span class="c-type">isize</span> = wide</span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot convert type &#x27;i64&#x27; to &#x27;isize&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> ratio: <span class="c-type">f64</span> = <span class="c-literal">0.5</span></span><span class="line">	<span class="c-keyword">val</span> single: <span class="c-type">f32</span> = ratio</span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot convert type &#x27;f64&#x27; to &#x27;f32&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="converting-with-tx"><a class="anchor" href="#converting-with-tx">Converting with <code>T(x)</code></a></h2>
+<p>A conversion is written as a call to the type: <code>i64(x)</code>, <code>u8(x)</code>, <code>f32(x)</code>. Every numeric type converts to every other one this way. Converting a float to an integer truncates toward zero. Converting an <code>f64</code> to an <code>f32</code> rounds to the nearest value, and a value too large for <code>f32</code> becomes an infinity. A <code>bool</code> converts to any integer as 0 or 1; nothing converts to <code>bool</code>.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-113"></button><textarea hidden id="copy-113">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val ratio = 2.7
+	val count: i64 = 300
+	val flag = true
+	printf(&quot;%d %d %d\n&quot;, i32(ratio), i32(-ratio), i32(count))
+	printf(&quot;%.1f %d %zu\n&quot;, f64(count), i32(flag), usize(count))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> ratio = <span class="c-literal">2.7</span></span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">i64</span> = <span class="c-literal">300</span></span><span class="line">	<span class="c-keyword">val</span> flag = <span class="c-keyword">true</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-type">i32</span>(ratio), <span class="c-type">i32</span>(-ratio), <span class="c-type">i32</span>(count))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %d %zu\n"</span>, <span class="c-type">f64</span>(count), <span class="c-type">i32</span>(flag), <span class="c-type">usize</span>(count))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2 -2 300
+300.0 1 300</pre></div>
+<h3 id="checked-conversions"><a class="anchor" href="#checked-conversions">Checked conversions</a></h3>
+<p>A conversion that can lose information is checked like arithmetic. A constant that doesn't fit is an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-114"></button><textarea hidden id="copy-114">mod example
+
+main: fun
+{
+	val a = u8(300)
+	val b = u32(-1)
+	val c = i32(3.9e10)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-type">u8</span>(<span class="c-literal">300</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:12ch">&#x27;300&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-type">u32</span>(-<span class="c-literal">1</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:12ch">&#x27;-1&#x27; doesn&#x27;t fit in &#x27;u32&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-type">i32</span>(<span class="c-literal">3.9e10</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:12ch">&#x27;3.9e10&#x27; doesn&#x27;t fit in &#x27;i32&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>A value that doesn't fit at run time stops the program with "conversion overflow" in builds with overflow checks:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-115"></button><textarea hidden id="copy-115">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+narrow: fun(value: i32) -&gt; u8 =&gt; u8(value)
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, narrow(200))
+	printf(&quot;%d\n&quot;, narrow(-1))
+}</textarea><pre><code><span class="line"><span class="c-function">narrow</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">u8</span> =&gt; <span class="c-type">u8</span>(<span class="c-parameter">value</span>)</span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">narrow</span>(<span class="c-literal">200</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">narrow</span>(-<span class="c-literal">1</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>200
+Panic at main.ce:8:34: conversion overflow</pre></div>
+<p>Without the checks, integer conversions keep the low bits, so 300 converted to a <code>u8</code> is 44 and -1 converted to a <code>u32</code> is 4294967295, and float-to-integer conversions saturate at the type's limits, with NaN becoming 0. To keep only the low bits on purpose, mask the value first, so it always fits:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-116"></button><textarea hidden id="copy-116">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+low: fun(value: u32) -&gt; u8 =&gt; u8(value &amp; 0xFF)
+
+main: fun
+{
+	printf(&quot;%d %d\n&quot;, low(300), low(0xFFFF_FFFF))
+}</textarea><pre><code><span class="line"><span class="c-function">low</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">u32</span>) -&gt; <span class="c-type">u8</span> =&gt; <span class="c-type">u8</span>(<span class="c-parameter">value</span> &amp; <span class="c-literal">0xFF</span>)</span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">low</span>(<span class="c-literal">300</span>), <span class="c-function">low</span>(<span class="c-literal">0xFFFF_FFFF</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>44 255</pre></div>
+</article>
+<nav class="pager"><a class="previous" href="lexical-structure.html"><span>Previous</span>Lexical structure</a><a class="next" href="text.html"><span>Next</span>Bool, char and strings</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#integer-types">Integer types</a></li><li class="level-2"><a href="#floating-point-types">Floating-point types</a></li><li class="level-2"><a href="#integer-literals">Integer literals</a></li><li class="level-2"><a href="#float-literals">Float literals</a></li><li class="level-2"><a href="#type-suffixes">Type suffixes</a></li><li class="level-2"><a href="#how-literals-get-their-type">How literals get their type</a></li><li class="level-2"><a href="#arithmetic">Arithmetic</a></li><li class="level-2"><a href="#how-arithmetic-is-typed">How arithmetic is typed</a></li><li class="level-3"><a href="#literals-take-the-other-operands-type">Literals take the other operand&#x27;s type</a></li><li class="level-3"><a href="#expressions-made-only-of-literals">Expressions made only of literals</a></li><li class="level-3"><a href="#mixed-signs">Mixed signs</a></li><li class="level-2"><a href="#overflow">Overflow</a></li><li class="level-2"><a href="#wrapping-operators">Wrapping operators</a></li><li class="level-2"><a href="#division-by-zero">Division by zero</a></li><li class="level-2"><a href="#bitwise-operators">Bitwise operators</a></li><li class="level-2"><a href="#shifts">Shifts</a></li><li class="level-2"><a href="#rotations">Rotations</a></li><li class="level-2"><a href="#comparisons">Comparisons</a></li><li class="level-2"><a href="#compound-assignment">Compound assignment</a></li><li class="level-2"><a href="#implicit-numeric-conversions">Implicit numeric conversions</a></li><li class="level-2"><a href="#converting-with-tx">Converting with T(x)</a></li><li class="level-3"><a href="#checked-conversions">Checked conversions</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

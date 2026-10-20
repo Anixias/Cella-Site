@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>String templates - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html" class="current"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>String templates</h1>
+<p>A template is a string with holes, handed to a function that writes it out. The language doesn't format anything itself. It gives the receiving function the literal pieces of the string, a format spec for each hole, and a borrow of each hole's value, and that function decides how to turn the values into text and where to put it.</p>
+<h2 id="a-first-template"><a class="anchor" href="#a-first-template">A first template</a></h2>
+<p>A parameter of type <code>fstr[K]</code> takes a template. <code>K</code> is a <a href="traits.html">trait</a> that every hole's value must implement, and it's how the receiving code works with values it knows nothing else about:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-730"></button><textarea hidden id="copy-730">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+str: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%.*s&quot;, i32(self.byteLength), self.data)
+}
+
+i32: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%d&quot;, self)
+}
+
+say: fun(text: fstr[Display])
+{
+	for i in 0..text.holes
+	{
+		text.piece(i).print()
+		text.value(i).print()
+	}
+
+	text.piece(text.holes).print()
+}
+
+main: fun
+{
+	val name: str = &quot;Ada&quot;
+	val hp = 30
+	say(&quot;{name} has {hp} hp, {hp * 2} at full health\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-trait">Display</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">print</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">str</span>: <span class="c-keyword">impl</span> <span class="c-trait">Display</span></span><span class="line">{</span><span class="line">	<span class="c-function">print</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%.*s"</span>, <span class="c-type">i32</span>(<span class="c-keyword">self</span>.<span class="c-field">byteLength</span>), <span class="c-keyword">self</span>.<span class="c-field">data</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span> <span class="c-trait">Display</span></span><span class="line">{</span><span class="line">	<span class="c-function">print</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%d"</span>, <span class="c-keyword">self</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">say</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-parameter">text</span>.<span class="c-field">holes</span></span><span class="line">	{</span><span class="line">		<span class="c-parameter">text</span>.piece(i).<span class="c-function">print</span>()</span><span class="line">		<span class="c-parameter">text</span>.value(i).<span class="c-function">print</span>()</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-parameter">text</span>.piece(<span class="c-parameter">text</span>.<span class="c-field">holes</span>).<span class="c-function">print</span>()</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> name: <span class="c-type">str</span> = <span class="c-literal">"Ada"</span></span><span class="line">	<span class="c-keyword">val</span> hp = <span class="c-literal">30</span></span><span class="line">	<span class="c-function">say</span>(<span class="c-literal">"{</span>name<span class="c-literal">} has {</span>hp<span class="c-literal">} hp, {</span>hp * <span class="c-literal">2} at full health\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>Ada has 30 hp, 60 at full health</pre></div>
+<p>The string passed to <code>say</code> has three holes, each an expression in braces. <code>say</code> walks them in order: it prints the literal piece before each hole, then the hole's value, and finally the piece after the last hole. The pieces are <code>str</code> values, so <code>say</code> prints them through <code>Display</code> as well.</p>
+<p><code>str</code> and <code>i32</code> take part because the program implements <code>Display</code> for them. A template only accepts holes whose types implement its trait, built-in types included.</p>
+<h2 id="reading-a-template"><a class="anchor" href="#reading-a-template">Reading a template</a></h2>
+<p>An <code>fstr[K]</code> has four members:</p>
+<div class="table-wrap"><table><thead><tr><th>Member</th><th>Type</th><th>What it gives</th></tr></thead><tbody><tr><td><code>holes</code></td><td><code>usize</code></td><td>the number of holes</td></tr><tr><td><code>piece(i)</code></td><td><code>str</code></td><td>the literal text before hole <code>i</code>; <code>piece(holes)</code> is the text after the last hole</td></tr><tr><td><code>spec(i)</code></td><td><code>str</code></td><td>the format spec of hole <code>i</code>, empty when it has none</td></tr><tr><td><code>value(i)</code></td><td><code>imm[dyn[K]]</code></td><td>a read-only borrow of hole <code>i</code>'s value</td></tr></tbody></table></div>
+<p>There is always one more piece than there are holes, and a piece can be empty. This function prints a template's parts instead of its text:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-731"></button><textarea hidden id="copy-731">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+i32: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%d&quot;, self)
+}
+
+dump: fun(text: fstr[Display])
+{
+	printf(&quot;%zu holes:&quot;, text.holes)
+	for i in 0..=text.holes
+	{
+		val piece = text.piece(i)
+		printf(&quot; &#x27;%.*s&#x27;&quot;, i32(piece.byteLength), piece.data)
+		if i &lt; text.holes
+		{
+			val spec = text.spec(i)
+			printf(&quot; [%.*s]&quot;, i32(spec.byteLength), spec.data)
+		}
+	}
+
+	printf(&quot;\n&quot;)
+}
+
+main: fun
+{
+	dump(&quot;a{1}b{2:x}c{3:&gt;8}d&quot;)
+	dump(&quot;{1}{2}&quot;)
+	dump(&quot;no holes&quot;)
+}</textarea><pre><code><span class="line"><span class="c-function">dump</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu holes:"</span>, <span class="c-parameter">text</span>.<span class="c-field">holes</span>)</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..=<span class="c-parameter">text</span>.<span class="c-field">holes</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> piece = <span class="c-parameter">text</span>.piece(i)</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">" '%.*s'"</span>, <span class="c-type">i32</span>(piece.<span class="c-field">byteLength</span>), piece.<span class="c-field">data</span>)</span><span class="line">		<span class="c-keyword">if</span> i &lt; <span class="c-parameter">text</span>.<span class="c-field">holes</span></span><span class="line">		{</span><span class="line">			<span class="c-keyword">val</span> spec = <span class="c-parameter">text</span>.spec(i)</span><span class="line">			<span class="c-function">printf</span>(<span class="c-literal">" [%.*s]"</span>, <span class="c-type">i32</span>(spec.<span class="c-field">byteLength</span>), spec.<span class="c-field">data</span>)</span><span class="line">		}</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"\n"</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">dump</span>(<span class="c-literal">"a{1}b{2:x}c{3:&gt;8}d"</span>)</span><span class="line">	<span class="c-function">dump</span>(<span class="c-literal">"{1}{2}"</span>)</span><span class="line">	<span class="c-function">dump</span>(<span class="c-literal">"no holes"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 holes: 'a' [] 'b' [x] 'c' [&gt;8] 'd'
+2 holes: '' [] '' [] ''
+0 holes: 'no holes'</pre></div>
+<p>The indexes are <code>usize</code> values, and an index past the end panics like any other bounds check:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-732"></button><textarea hidden id="copy-732">mod example
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+first: fun(text: fstr[Display]) -&gt; usize =&gt; text.spec(0).byteLength
+
+main: fun
+{
+	first(&quot;no holes&quot;)
+}</textarea><pre><code><span class="line"><span class="c-function">first</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>]) -&gt; <span class="c-type">usize</span> =&gt; <span class="c-parameter">text</span>.spec(<span class="c-literal">0</span>).<span class="c-field">byteLength</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">first</span>(<span class="c-literal">"no holes"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>Panic at main.ce:8:45: index out of bounds</pre></div>
+<p>The members can't be assigned to:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-733"></button><textarea hidden id="copy-733">mod example
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+clear: fun(text: fstr[Display])
+{
+	text.holes = 0
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">clear</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="line">{</span><span class="line">	<span class="c-parameter">text</span>.<span class="c-field">holes</span> = <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign read-only properties</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="holes"><a class="anchor" href="#holes">Holes</a></h2>
+<p>A hole holds any expression: a name, arithmetic, a call, a comparison, a string literal or a <code>match</code>. Holes are evaluated left to right when the template is made, before the receiving function runs:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-734"></button><textarea hidden id="copy-734">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+str: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%.*s&quot;, i32(self.byteLength), self.data)
+}
+
+i32: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%d&quot;, self)
+}
+
+say: fun(text: fstr[Display])
+{
+	for i in 0..text.holes
+	{
+		text.piece(i).print()
+		text.value(i).print()
+	}
+
+	text.piece(text.holes).print()
+}
+
+next: fun(mut counter: i32) -&gt; i32
+{
+	counter += 1
+	ret counter
+}
+
+main: fun
+{
+	var counter = 0
+	say(&quot;{next(mut counter)} {next(mut counter)} {counter}\n&quot;)
+	say(&quot;{&quot;quoted&quot;} {match counter { 2 =&gt; 20, else =&gt; 0 }}\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-function">next</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">counter</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-parameter">counter</span> += <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">counter</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> counter = <span class="c-literal">0</span></span><span class="line">	<span class="c-function">say</span>(<span class="c-literal">"{</span><span class="c-function">next</span>(<span class="c-keyword">mut</span> counter)<span class="c-literal">} {</span><span class="c-function">next</span>(<span class="c-keyword">mut</span> counter)<span class="c-literal">} {</span>counter<span class="c-literal">}\n"</span>)</span><span class="line">	<span class="c-function">say</span>(<span class="c-literal">"{"quoted"} {</span><span class="c-keyword">match</span> counter { <span class="c-literal">2</span> =&gt; <span class="c-literal">20</span>, <span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span> }<span class="c-literal">}\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 2 2
+quoted 20</pre></div>
+<p>Every hole's type must implement the template's trait:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-735"></button><textarea hidden id="copy-735">mod example
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+i32: impl Display
+{
+	print: fun(self)
+	{
+	}
+}
+
+Point: rec
+{
+	x: i32
+}
+
+say: fun(text: fstr[Display])
+{
+}
+
+main: fun
+{
+	val p = Point(1)
+	say(&quot;{p} {p.x}&quot;)
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">say</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = <span class="c-type">Point</span>(<span class="c-literal">1</span>)</span><span class="line">	say(<span class="c-literal">"{</span>p<span class="c-literal">} {</span>p.<span class="c-field">x</span><span class="c-literal">}"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:10ch">&#x27;Point&#x27; doesn&#x27;t implement &#x27;Display&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>A hole can't be empty, and its braces must close in the same string. A literal <code>{</code> is written <code>\{</code>, and a <code>}</code> on its own is ordinary text, as in any string (see <a href="text.html#braces-in-strings">Braces in strings</a>).</p>
+<h2 id="format-specs"><a class="anchor" href="#format-specs">Format specs</a></h2>
+<p>A hole may end in a format spec: a <code>:</code> followed by any text up to the closing brace, as in <code>{price:.2}</code>. The spec is passed along as text through <code>spec(i)</code>, and what it means is up to the receiving code. Spaces are kept, and escape sequences work as in the rest of the string, so <code>\}</code> puts a brace in a spec. A hole without a <code>:</code>, or with nothing after it, has an empty spec.</p>
+<p>This <code>Display</code> takes the spec as a parameter, and <code>i32</code> prints in hex when the spec is <code>x</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-736"></button><textarea hidden id="copy-736">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Display: trait
+{
+	print: fun(imm self, spec: str)
+}
+
+str: impl Display
+{
+	print: fun(self, spec: str) =&gt; printf(&quot;%.*s&quot;, i32(self.byteLength), self.data)
+}
+
+i32: impl Display
+{
+	print: fun(self, spec: str)
+	{
+		if spec.byteLength == 1 &amp;&amp; spec[0] == u8(&#x27;x&#x27;)
+			printf(&quot;%x&quot;, self)
+		else
+			printf(&quot;%d&quot;, self)
+	}
+}
+
+say: fun(text: fstr[Display])
+{
+	for i in 0..text.holes
+	{
+		text.piece(i).print(&quot;&quot;)
+		text.value(i).print(text.spec(i))
+	}
+
+	text.piece(text.holes).print(&quot;&quot;)
+}
+
+main: fun
+{
+	val color = 16753920
+	say(&quot;{color} is {color:x} in hex\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-trait">Display</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">print</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>, <span class="c-parameter">spec</span>: <span class="c-type">str</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">str</span>: <span class="c-keyword">impl</span> <span class="c-trait">Display</span></span><span class="line">{</span><span class="line">	<span class="c-function">print</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>, <span class="c-parameter">spec</span>: <span class="c-type">str</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%.*s"</span>, <span class="c-type">i32</span>(<span class="c-keyword">self</span>.<span class="c-field">byteLength</span>), <span class="c-keyword">self</span>.<span class="c-field">data</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">i32</span>: <span class="c-keyword">impl</span> <span class="c-trait">Display</span></span><span class="line">{</span><span class="line">	<span class="c-function">print</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>, <span class="c-parameter">spec</span>: <span class="c-type">str</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> <span class="c-parameter">spec</span>.<span class="c-field">byteLength</span> == <span class="c-literal">1</span> &amp;&amp; <span class="c-parameter">spec</span>[<span class="c-literal">0</span>] == <span class="c-type">u8</span>(<span class="c-literal">'x'</span>)</span><span class="line">			<span class="c-function">printf</span>(<span class="c-literal">"%x"</span>, <span class="c-keyword">self</span>)</span><span class="line">		<span class="c-keyword">else</span></span><span class="line">			<span class="c-function">printf</span>(<span class="c-literal">"%d"</span>, <span class="c-keyword">self</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">say</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-parameter">text</span>.<span class="c-field">holes</span></span><span class="line">	{</span><span class="line">		<span class="c-parameter">text</span>.piece(i).<span class="c-function">print</span>(<span class="c-literal">""</span>)</span><span class="line">		<span class="c-parameter">text</span>.value(i).<span class="c-function">print</span>(<span class="c-parameter">text</span>.spec(i))</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-parameter">text</span>.piece(<span class="c-parameter">text</span>.<span class="c-field">holes</span>).<span class="c-function">print</span>(<span class="c-literal">""</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> color = <span class="c-literal">16753920</span></span><span class="line">	<span class="c-function">say</span>(<span class="c-literal">"{</span>color<span class="c-literal">} is {</span>color<span class="c-literal">:x} in hex\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>16753920 is ffa500 in hex</pre></div>
+<h2 id="strings-without-holes"><a class="anchor" href="#strings-without-holes">Strings without holes</a></h2>
+<p>A template parameter also takes a string literal without holes or a <code>str</code> value. Either becomes a template with no holes and one piece:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-737"></button><textarea hidden id="copy-737">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+str: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%.*s&quot;, i32(self.byteLength), self.data)
+}
+
+say: fun(text: fstr[Display])
+{
+	for i in 0..text.holes
+	{
+		text.piece(i).print()
+		text.value(i).print()
+	}
+
+	text.piece(text.holes).print()
+}
+
+title: fun -&gt; str =&gt; &quot;Cella\n&quot;
+
+main: fun
+{
+	val name: str = &quot;Ada\n&quot;
+	say(&quot;plain\n&quot;)
+	say(name)
+	say(title())
+}</textarea><pre><code><span class="line"><span class="c-function">title</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">str</span> =&gt; <span class="c-literal">"Cella\n"</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> name: <span class="c-type">str</span> = <span class="c-literal">"Ada\n"</span></span><span class="line">	<span class="c-function">say</span>(<span class="c-literal">"plain\n"</span>)</span><span class="line">	<span class="c-function">say</span>(name)</span><span class="line">	<span class="c-function">say</span>(<span class="c-function">title</span>())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>plain
+Ada
+Cella</pre></div>
+<p>Nothing else converts to a template, not even a <code>cstr</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-738"></button><textarea hidden id="copy-738">mod example
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+say: fun(text: fstr[Display])
+{
+}
+
+main: fun
+{
+	val c: cstr = &quot;x&quot;
+	say(c)
+	say(5)
+}</textarea><pre><code><span class="line"><span class="c-function">say</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> c: <span class="c-type">cstr</span> = <span class="c-literal">"x"</span></span><span class="line">	say(c)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot convert type &#x27;cstr&#x27; to &#x27;fstr[Display]&#x27;</span></span><span class="line">	say(<span class="c-literal">5</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot convert type &#x27;integer literal&#x27; to &#x27;fstr[Display]&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>Outside a template, a string with holes is a constant: every hole must be a constant string, and the compiler joins the pieces into one string (see <a href="text.html#interpolated-strings">Interpolated strings</a>).</p>
+<p>When a function is overloaded for <code>str</code> and for a template, a string without holes goes to the <code>str</code> overload, and a string with holes goes to the template, even when its holes are constants:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-739"></button><textarea hidden id="copy-739">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+str: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%.*s&quot;, i32(self.byteLength), self.data)
+}
+
+i32: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%d&quot;, self)
+}
+
+show: fun(text: str) =&gt; printf(&quot;str\n&quot;)
+show: fun(text: fstr[Display]) =&gt; printf(&quot;template, holes: %zu\n&quot;, text.holes)
+
+unit: const str = &quot;items&quot;
+
+main: fun
+{
+	val count = 3
+	show(&quot;plain&quot;)
+	show(&quot;{unit}&quot;)
+	show(&quot;{count} {unit}&quot;)
+}</textarea><pre><code><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">str</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"str\n"</span>)</span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>]) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"template, holes: %zu\n"</span>, <span class="c-parameter">text</span>.<span class="c-field">holes</span>)</span><span class="line"> </span><span class="line"><span class="c-constant">unit</span>: <span class="c-keyword">const</span> <span class="c-type">str</span> = <span class="c-literal">"items"</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">3</span></span><span class="line">	<span class="c-function">show</span>(<span class="c-literal">"plain"</span>)</span><span class="line">	<span class="c-function">show</span>(<span class="c-literal">"{</span><span class="c-constant">unit</span><span class="c-literal">}"</span>)</span><span class="line">	<span class="c-function">show</span>(<span class="c-literal">"{</span>count<span class="c-literal">} {</span><span class="c-constant">unit</span><span class="c-literal">}"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>str
+template, holes: 1
+template, holes: 2</pre></div>
+<h2 id="templates-and-traits"><a class="anchor" href="#templates-and-traits">Templates and traits</a></h2>
+<p><code>value(i)</code> gives each hole as a borrowed <a href="trait-objects.html">trait object</a>, so the receiving code can call the trait's members on it, and the members of the traits it requires. A record takes part by implementing the trait, and its implementation can use a template itself:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-740"></button><textarea hidden id="copy-740">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+str: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%.*s&quot;, i32(self.byteLength), self.data)
+}
+
+i32: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%d&quot;, self)
+}
+
+say: fun(text: fstr[Display])
+{
+	for i in 0..text.holes
+	{
+		text.piece(i).print()
+		text.value(i).print()
+	}
+
+	text.piece(text.holes).print()
+}
+
+Point: rec impl Display
+{
+	x: i32
+	y: i32
+
+	print: fun(self) =&gt; say(&quot;({self.x}, {self.y})&quot;)
+}
+
+log[T: Display]: fun(label: str, imm value: T) =&gt; say(&quot;{label}: {value}\n&quot;)
+
+relay: fun(imm value: dyn[Display]) =&gt; say(&quot;relayed {value}\n&quot;)
+
+main: fun
+{
+	val spot = Point(3, 4)
+	say(&quot;at {spot}\n&quot;)
+	log(&quot;point&quot;, imm spot)
+	log(&quot;number&quot;, 5)
+	relay(imm spot)
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Display</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">print</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) =&gt; <span class="c-function">say</span>(<span class="c-literal">"({</span><span class="c-keyword">self</span>.<span class="c-field">x</span><span class="c-literal">}, {</span><span class="c-keyword">self</span>.<span class="c-field">y</span><span class="c-literal">})"</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">log</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Display</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">label</span>: <span class="c-type">str</span>, <span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) =&gt; <span class="c-function">say</span>(<span class="c-literal">"{</span><span class="c-parameter">label</span><span class="c-literal">}: {</span><span class="c-parameter">value</span><span class="c-literal">}\n"</span>)</span><span class="line"> </span><span class="line"><span class="c-function">relay</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-keyword">dyn</span>[<span class="c-trait">Display</span>]) =&gt; <span class="c-function">say</span>(<span class="c-literal">"relayed {</span><span class="c-parameter">value</span><span class="c-literal">}\n"</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> spot = <span class="c-type">Point</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>)</span><span class="line">	<span class="c-function">say</span>(<span class="c-literal">"at {</span>spot<span class="c-literal">}\n"</span>)</span><span class="line">	<span class="c-function">log</span>(<span class="c-literal">"point"</span>, <span class="c-keyword">imm</span> spot)</span><span class="line">	<span class="c-function">log</span>(<span class="c-literal">"number"</span>, <span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">relay</span>(<span class="c-keyword">imm</span> spot)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>at (3, 4)
+point: (3, 4)
+number: 5
+relayed (3, 4)</pre></div>
+<p>A hole can hold a generic value whose bound is the template's trait, as in <code>log</code>, or a <code>dyn</code> value of that trait, as in <code>relay</code>.</p>
+<p>The argument of <code>fstr</code> must be a trait, exactly one:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-741"></button><textarea hidden id="copy-741">mod example
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+a: fun(text: fstr[i32])
+{
+}
+
+b: fun(text: fstr)
+{
+}
+
+c: fun(text: fstr[Display, Display])
+{
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">a</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-type">i32</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:18ch">&#x27;i32&#x27; is not a trait</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">b</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:13ch">&#x27;fstr&#x27; takes one generic argument</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">c</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[Display, Display])</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:22ch"></span><span class="diagnostic-text" style="margin-left:13ch">&#x27;fstr&#x27; takes one generic argument</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>A generic function can leave the trait open with a <code>K: trait</code> parameter, written out at the call:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-742"></button><textarea hidden id="copy-742">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+i32: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%d&quot;, self)
+}
+
+count[K: trait]: fun(text: fstr[K]) -&gt; usize =&gt; text.holes
+
+main: fun
+{
+	val n = 9
+	printf(&quot;%zu\n&quot;, count[Display](&quot;{n} {n} {n}&quot;))
+}</textarea><pre><code><span class="line"><span class="c-function">count</span>[<span class="c-typeparam">K</span>: <span class="c-keyword">trait</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-typeparam">K</span>]) -&gt; <span class="c-type">usize</span> =&gt; <span class="c-parameter">text</span>.<span class="c-field">holes</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> n = <span class="c-literal">9</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu\n"</span>, <span class="c-function">count</span>[<span class="c-trait">Display</span>](<span class="c-literal">"{</span>n<span class="c-literal">} {</span>n<span class="c-literal">} {</span>n<span class="c-literal">}"</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3</pre></div>
+<h2 id="templates-as-values"><a class="anchor" href="#templates-as-values">Templates as values</a></h2>
+<p><code>fstr[K]</code> is an ordinary type. A template can be made explicitly with <code>fstr[Display](...)</code>, copied, passed on and returned:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-743"></button><textarea hidden id="copy-743">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+str: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%.*s&quot;, i32(self.byteLength), self.data)
+}
+
+i32: impl Display
+{
+	print: fun(self) =&gt; printf(&quot;%d&quot;, self)
+}
+
+say: fun(text: fstr[Display])
+{
+	for i in 0..text.holes
+	{
+		text.piece(i).print()
+		text.value(i).print()
+	}
+
+	text.piece(text.holes).print()
+}
+
+Message: ref rec
+{
+	text: fstr[Display]
+}
+
+pass: fun(text: fstr[Display]) -&gt; fstr[Display] =&gt; text
+
+main: fun
+{
+	val count = 3
+	val template = fstr[Display](&quot;{count} items\n&quot;)
+	val copy = template
+	say(pass(copy))
+
+	val message = Message(&quot;message {count}\n&quot;)
+	say(message.text)
+}</textarea><pre><code><span class="line"><span class="c-type">Message</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">pass</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>]) -&gt; <span class="c-type">fstr</span>[<span class="c-trait">Display</span>] =&gt; <span class="c-parameter">text</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> template = fstr[<span class="c-trait">Display</span>](<span class="c-literal">"{</span>count<span class="c-literal">} items\n"</span>)</span><span class="line">	<span class="c-keyword">val</span> copy = template</span><span class="line">	<span class="c-function">say</span>(<span class="c-function">pass</span>(copy))</span><span class="line"> </span><span class="line">	<span class="c-keyword">val</span> message = <span class="c-type">Message</span>(<span class="c-literal">"message {</span>count<span class="c-literal">}\n"</span>)</span><span class="line">	<span class="c-function">say</span>(message.<span class="c-field">text</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 items
+message 3</pre></div>
+<p>A template borrows its hole values, so it follows the rules for <a href="borrows.html">borrows</a>. It can't outlive the values in its holes, a record that holds one must be a <code>ref rec</code>, and a module variable can't hold one:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-744"></button><textarea hidden id="copy-744">mod example
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+i32: impl Display
+{
+	print: fun(self)
+	{
+	}
+}
+
+Holder: rec
+{
+	text: fstr[Display]
+}
+
+saved: var fstr[Display] = &quot;x&quot;
+
+make: fun -&gt; fstr[Display]
+{
+	val local = 5
+	ret &quot;{local}&quot;
+}
+
+compute: fun -&gt; i32 =&gt; 4
+
+show: fun(text: fstr[Display])
+{
+}
+
+main: fun
+{
+	val later: fstr[Display] = &quot;{compute()}&quot;
+	show(later)
+}</textarea><pre><code><span class="line"><span class="c-type">Holder</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot store borrows in records that aren&#x27;t &#x27;ref&#x27;<span class="diagnostic-note">Did you mean &#x27;Holder: ref rec&#x27;?</span></span></span><span class="line">}</span><span class="line"> </span><span class="line">saved: <span class="c-keyword">var</span> <span class="c-type">fstr</span>[<span class="c-trait">Display</span>] = <span class="c-literal">"x"</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot store borrows in module variables</span></span><span class="line"> </span><span class="line"><span class="c-function">make</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">fstr</span>[<span class="c-trait">Display</span>]</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> local = <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-literal">"{</span>local<span class="c-literal">}"</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot return borrows of local variables</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">compute</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">4</span></span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> later: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>] = <span class="c-literal">"{</span><span class="c-function">compute</span>()<span class="c-literal">}"</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:33ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:33ch">Cannot borrow unstored values</span></span><span class="line">	<span class="c-function">show</span>(later)</span><span class="line">}</span></code></pre></div>
+<p>The last error is about <code>compute()</code>: its result is a temporary that ends with its statement, so a template that keeps it can't be used afterwards.</p>
+<p>Since a template holds borrows of Cella values, it can't appear in an <code>ext</code> signature:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-745"></button><textarea hidden id="copy-745">mod example
+
+Display: trait
+{
+	print: fun(imm self)
+}
+
+ext
+{
+	log: fun(text: fstr[Display])
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">log</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot use &#x27;fstr[Display]&#x27; in &#x27;ext&#x27; signatures</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+</article>
+<nav class="pager"><a class="previous" href="variadics.html"><span>Previous</span>Variadic functions</a><a class="next" href="modules.html"><span>Next</span>Modules and visibility</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#a-first-template">A first template</a></li><li class="level-2"><a href="#reading-a-template">Reading a template</a></li><li class="level-2"><a href="#holes">Holes</a></li><li class="level-2"><a href="#format-specs">Format specs</a></li><li class="level-2"><a href="#strings-without-holes">Strings without holes</a></li><li class="level-2"><a href="#templates-and-traits">Templates and traits</a></li><li class="level-2"><a href="#templates-as-values">Templates as values</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

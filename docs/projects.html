@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projects and building - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html" class="current"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Projects and building</h1>
+<p>A Cella program is built from a project: a folder with a project file and the source files that belong to it. This chapter covers creating projects, what goes in the project file, building and running with <code>cella build</code> and <code>cella run</code>, projects that use other projects, and the launcher that manages Cella versions.</p>
+<h2 id="creating-a-project"><a class="anchor" href="#creating-a-project">Creating a project</a></h2>
+<p><code>cella new</code> creates a project in a new folder:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-9"></button><textarea hidden id="copy-9">cella new game</textarea><pre><code><span class="line">cella new game</span></code></pre></div>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-10"></button><textarea hidden id="copy-10">Created &#x27;game&#x27;</textarea><pre><code><span class="line">Created 'game'</span></code></pre></div>
+<p>The folder holds two files. <code>game.celp</code> is the project file:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-11"></button><textarea hidden id="copy-11">OutputType = &quot;Executable&quot;
+CellaVersion = &quot;0.1.0&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">CellaVersion </span>= <span class="c-literal">"0.1.0"</span></span></code></pre></div>
+<p><code>main.ce</code> is the greeting program from <a href="hello-world.html#a-first-program">Hello, World</a>, starting with <code>mod game</code>.</p>
+<p>The argument can be a path, such as <code>cella new tools/packer</code>; the last part of the path is the project's name. Without an argument, <code>cella new</code> turns the current folder into a project named after the folder.</p>
+<p>The name becomes the project file's name and the name of the module in <code>main.ce</code>, so it must be a valid identifier (see <a href="lexical-structure.html">Lexical structure</a>):</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-12"></button><textarea hidden id="copy-12">cella new my-game</textarea><pre><code><span class="line">cella new my-game</span></code></pre></div>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-13"></button><textarea hidden id="copy-13">&#x27;my-game&#x27; can&#x27;t be a project name</textarea><pre><code><span class="line">'my-game' can't be a project name</span></code></pre></div>
+<p><code>cella new</code> never overwrites anything. A folder that already exists and isn't empty is an error, and so is a folder that already has a project file:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-14"></button><textarea hidden id="copy-14">&#x27;game&#x27; already exists</textarea><pre><code><span class="line">'game' already exists</span></code></pre></div>
+<h3 id="libraries"><a class="anchor" href="#libraries">Libraries</a></h3>
+<p><code>--lib</code> creates a static library instead of a program:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-15"></button><textarea hidden id="copy-15">cella new physics --lib</textarea><pre><code><span class="line">cella new physics --lib</span></code></pre></div>
+<p>Its project file has <code>OutputType = "StaticLibrary"</code> along with the <code>CellaVersion</code> line, and in place of <code>main.ce</code> it has a source file named after the project, with one exported function:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-16"></button><textarea hidden id="copy-16">OutputType = &quot;StaticLibrary&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span></code></pre></div>
+<div class="code cella"><div class="code-title">physics.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-17"></button><textarea hidden id="copy-17">mod physics
+
+add: pub fun(a: i32, b: i32) -&gt; i32 =&gt; a + b</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">physics</span></span><span class="line"> </span><span class="line"><span class="c-function">add</span>: <span class="c-keyword">pub</span> <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">a</span> + <span class="c-parameter">b</span></span></code></pre></div>
+<p>A library has no <code>main</code>. Other projects use it through a <a href="#using-a-library-project">project reference</a>.</p>
+<h3 id="a-gitignore-file"><a class="anchor" href="#a-gitignore-file">A .gitignore file</a></h3>
+<p><code>--gitignore</code> also writes a <code>.gitignore</code> file that leaves the build folders, <code>bin/</code> and <code>obj/</code>, out of Git:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-18"></button><textarea hidden id="copy-18">cella new game --gitignore</textarea><pre><code><span class="line">cella new game --gitignore</span></code></pre></div>
+<h2 id="what-a-project-is"><a class="anchor" href="#what-a-project-is">What a project is</a></h2>
+<p>A project is a <code>.celp</code> file and the folder it's in. Every <code>.ce</code> file in that folder belongs to the project, and so does every <code>.ce</code> file in its subfolders, except in a subfolder that has a <code>.celp</code> file of its own: that subfolder is a separate project.</p>
+<p>Every source file starts with a <code>mod</code> line that names its module. Files don't have to be listed anywhere; adding a <code>.ce</code> file to the folder adds it to the build.</p>
+<h2 id="the-project-file"><a class="anchor" href="#the-project-file">The project file</a></h2>
+<p>The project file is written in TOML. Each line sets one setting:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-19"></button><textarea hidden id="copy-19">OutputType = &quot;Executable&quot;
+CellaVersion = &quot;0.1.0&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">CellaVersion </span>= <span class="c-literal">"0.1.0"</span></span></code></pre></div>
+<p><code>OutputType</code> is the only setting every project needs. It says what the build produces:</p>
+<div class="table-wrap"><table><thead><tr><th>Value</th><th>Produces</th></tr></thead><tbody><tr><td><code>"Executable"</code></td><td>a program that runs in a terminal</td></tr><tr><td><code>"WindowedExecutable"</code></td><td>a program that opens no terminal window on Windows</td></tr><tr><td><code>"StaticLibrary"</code></td><td>a library that is copied into the programs that use it</td></tr><tr><td><code>"SharedLibrary"</code></td><td>a library loaded when a program starts (<code>.dll</code> on Windows, <code>.so</code> on Linux)</td></tr></tbody></table></div>
+<p><code>CellaVersion</code> pins the project to a Cella version. <code>cella new</code> writes the version that created the project. The <a href="#the-launcher">launcher</a> reads the pin to pick which installed compiler builds the project. A project pinned to a newer version than the compiler building it is an error, and one pinned to an older version gets a warning and builds:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-20"></button><textarea hidden id="copy-20">game.celp: Pinned to Cella 0.1.0, older than this compiler</textarea><pre><code><span class="line">game.celp: Pinned to Cella 0.1.0, older than this compiler</span></code></pre></div>
+<p>A misspelled setting or a missing <code>OutputType</code> is an error. Problems in a project file are reported with the file's full path, shortened here:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-21"></button><textarea hidden id="copy-21">game.celp: Unknown setting &#x27;Outputs&#x27;
+game.celp: Missing &#x27;OutputType&#x27;</textarea><pre><code><span class="line">game.celp: Unknown setting 'Outputs'</span><span class="line">game.celp: Missing 'OutputType'</span></code></pre></div>
+<p><a href="project-settings.html">Project settings</a> lists every setting.</p>
+<h2 id="building"><a class="anchor" href="#building">Building</a></h2>
+<p><code>cella build</code> builds the project in the current folder:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-22"></button><textarea hidden id="copy-22">cd game
+cella build</textarea><pre><code><span class="line">cd game</span><span class="line">cella build</span></code></pre></div>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-23"></button><textarea hidden id="copy-23">game -&gt; bin\game.exe</textarea><pre><code><span class="line">game -&gt; bin\game.exe</span></code></pre></div>
+<p>The last line names each project built and the file it produced. <code>cella build</code> also takes a project file or a folder: <code>cella build game.celp</code>, or <code>cella build projects</code>, which builds every project in <code>projects</code> and its subfolders.</p>
+<p>The build writes into two folders beside the project file:</p>
+<ul><li><code>bin</code> holds what the build produces: the program or library, and on Windows its debug information.</li><li><code>obj</code> holds the intermediate files: object files for each module, and the parts of the standard library the project uses.</li></ul>
+<p>The program is named after the project file: <code>game.celp</code> builds <code>game.exe</code> on Windows and <code>game</code> on Linux. Both folders can be deleted at any time; the next build makes them again.</p>
+<p>Errors and warnings print with the line they point to. A build with errors produces nothing and exits with code 1.</p>
+<h2 id="build-options"><a class="anchor" href="#build-options">Build options</a></h2>
+<p><code>cella build</code> takes these options, in any order before or after the path:</p>
+<div class="table-wrap"><table><thead><tr><th>Option</th><th>Effect</th></tr></thead><tbody><tr><td><code>--release</code></td><td>builds with optimizations and without overflow checks</td></tr><tr><td><code>--target &lt;target&gt;</code></td><td>builds for another system</td></tr><tr><td><code>--flag &lt;name&gt;</code></td><td>sets a flag to true; <code>--flag &lt;name&gt;=false</code> sets it to false</td></tr><tr><td><code>--entry &lt;module.function&gt;</code></td><td>builds a program that starts in another function</td></tr><tr><td><code>--hints</code></td><td>also prints hints</td></tr><tr><td><code>--verbose</code></td><td>prints details of each step of the build, including the linker's command lines</td></tr><tr><td><code>--emit-ir</code></td><td>also writes each module's LLVM IR into <code>obj</code>, as <code>.ll</code> files</td></tr><tr><td><code>--emit-asm</code></td><td>also writes each module's assembly into <code>obj</code>, as <code>.s</code> files</td></tr></tbody></table></div>
+<h3 id="release-builds"><a class="anchor" href="#release-builds">Release builds</a></h3>
+<p>Without <code>--release</code>, a build is a debug build: no optimizations, and arithmetic that overflows stops the program with a message. <code>--release</code> turns on optimizations and leaves out the overflow checks. Bounds checks on array indexing stay on in both. Both kinds of build write to the same <code>bin</code> folder. <a href="panics.html">Checks and panics</a> covers the checks and the settings that change them.</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-24"></button><textarea hidden id="copy-24">cella build --release</textarea><pre><code><span class="line">cella build --release</span></code></pre></div>
+<h3 id="targets"><a class="anchor" href="#targets">Targets</a></h3>
+<p><code>--target</code> builds for a system other than the one running the compiler:</p>
+<div class="table-wrap"><table><thead><tr><th>Target</th><th>Builds for</th></tr></thead><tbody><tr><td><code>windows-x64</code></td><td>64-bit Windows, with Visual Studio's C++ build tools when they're installed and MinGW-w64 otherwise</td></tr><tr><td><code>windows-x64-msvc</code></td><td>64-bit Windows, with Visual Studio's C++ build tools</td></tr><tr><td><code>windows-x64-gnu</code></td><td>64-bit Windows, with MinGW-w64</td></tr><tr><td><code>linux-x64</code></td><td>64-bit Linux</td></tr></tbody></table></div>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-25"></button><textarea hidden id="copy-25">cella build --target linux-x64</textarea><pre><code><span class="line">cella build --target linux-x64</span></code></pre></div>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-26"></button><textarea hidden id="copy-26">game -&gt; bin\game</textarea><pre><code><span class="line">game -&gt; bin\game</span></code></pre></div>
+<p>Without <code>--target</code>, the build is for the system it runs on.</p>
+<h3 id="flags"><a class="anchor" href="#flags">Flags</a></h3>
+<p>Flags are names that are true or false at build time. Code can test them in <code>when</code> blocks to leave parts of a program out of some builds. <code>--flag</code> sets one for a build, overriding the project's own setting for it:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-27"></button><textarea hidden id="copy-27">cella build --flag logging
+cella build --flag logging=false</textarea><pre><code><span class="line">cella build --flag logging</span><span class="line">cella build --flag logging=false</span></code></pre></div>
+<p><a href="conditional-compilation.html">Conditional compilation</a> covers flags and <code>when</code>.</p>
+<h3 id="entry-points"><a class="anchor" href="#entry-points">Entry points</a></h3>
+<p><code>--entry</code> builds a program that starts in a function other than <code>main</code>. The function is named with its module, and it must be <code>pub</code> (see <a href="modules.html">Modules and visibility</a>). This makes it possible to keep small extra programs, such as a demo or a benchmark, in the same project:</p>
+<div class="code cella"><div class="code-title">demo.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-28"></button><textarea hidden id="copy-28">mod game
+
+demo: pub fun
+{
+	puts(&quot;demo&quot;)
+}
+
+ext
+{
+	puts: fun(text: cstr) -&gt; i32
+}</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">game</span></span><span class="line"> </span><span class="line"><span class="c-function">demo</span>: <span class="c-keyword">pub</span> <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">puts</span>(<span class="c-literal">"demo"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-29"></button><textarea hidden id="copy-29">cella run --entry game.demo</textarea><pre><code><span class="line">cella run --entry game.demo</span></code></pre></div>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-30"></button><textarea hidden id="copy-30">demo</textarea><pre><code><span class="line">demo</span></code></pre></div>
+<p>A program built with <code>--entry</code> goes into <code>obj/entry/&lt;function&gt;</code> instead of <code>bin</code>, so it never replaces the project's own program. <a href="functions.html">Functions</a> covers what an entry function may look like.</p>
+<h3 id="hints"><a class="anchor" href="#hints">Hints</a></h3>
+<p>Hints point at code that works but could be written better, such as a <code>var</code> whose value never changes. They aren't shown unless the build is given <code>--hints</code>:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-31"></button><textarea hidden id="copy-31">cella build --hints</textarea><pre><code><span class="line">cella build --hints</span></code></pre></div>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-32"></button><textarea hidden id="copy-32">Hint at main.ce:10:6
+ 9 │ {
+10 │     var shown = 1
+             ╘═══╛ &#x27;shown&#x27; is never changed
+
+game -&gt; bin\game.exe</textarea><pre><code><span class="line">Hint at main.ce:10:6</span><span class="line"> 9 │ {</span><span class="line">10 │     var shown = 1</span><span class="line">             ╘═══╛ 'shown' is never changed</span><span class="line"> </span><span class="line">game -&gt; bin\game.exe</span></code></pre></div>
+<h2 id="running"><a class="anchor" href="#running">Running</a></h2>
+<p><code>cella run</code> builds a program and runs it. It takes the same path and options as <code>cella build</code>:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-33"></button><textarea hidden id="copy-33">cella run
+cella run --release</textarea><pre><code><span class="line">cella run</span><span class="line">cella run --release</span></code></pre></div>
+<p>The program runs in the current folder and uses the same terminal. Its output appears as it runs, without the <code>game -&gt; bin\game.exe</code> line, and <code>cella run</code> exits with the program's exit code. A build with errors doesn't start the program.</p>
+<p>Everything after <code>--</code> goes to the program as its command-line arguments:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-34"></button><textarea hidden id="copy-34">cella run -- one two</textarea><pre><code><span class="line">cella run -- one two</span></code></pre></div>
+<p>The program reads them through the parameters of <code>main</code>, as <a href="functions.html#command-line-arguments">Functions</a> shows.</p>
+<p><code>cella run</code> runs only programs built for the system it's on, so <code>--target</code> can only name that system:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-35"></button><textarea hidden id="copy-35">Cannot run &#x27;linux-x64&#x27; programs on this system</textarea><pre><code><span class="line">Cannot run 'linux-x64' programs on this system</span></code></pre></div>
+<p>A library can't be run, and a folder must hold exactly one program:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-36"></button><textarea hidden id="copy-36">&#x27;physics&#x27; is a library
+&#x27;tools&#x27; has several programs: &#x27;packer\packer.celp&#x27;, &#x27;viewer\viewer.celp&#x27;</textarea><pre><code><span class="line">'physics' is a library</span><span class="line">'tools' has several programs: 'packer\packer.celp', 'viewer\viewer.celp'</span></code></pre></div>
+<h2 id="several-files"><a class="anchor" href="#several-files">Several files</a></h2>
+<p>A project can have any number of source files. Files that declare the same module share their declarations, so a function in one file can be called from another without anything else:</p>
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-37"></button><textarea hidden id="copy-37">mod game
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, area(3, 4))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">area</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>))</span><span class="line">}</span></code></pre></div>
+<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-38"></button><textarea hidden id="copy-38">mod game
+
+area: fun(width: i32, height: i32) -&gt; i32 =&gt; width * height</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">game</span></span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">width</span>: <span class="c-type">i32</span>, <span class="c-parameter">height</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">width</span> * <span class="c-parameter">height</span></span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>12</pre></div>
+<p>The order of the files doesn't matter, and neither does the order of declarations in them. Files can also declare other modules; <a href="modules.html">Modules and visibility</a> covers modules, imports and qualified names.</p>
+<p>A C function declared in an <code>ext</code> block belongs to its module like any other function, so a module declares it once, in one of its files. Declaring the same function in two files of one module is an error.</p>
+<h2 id="using-a-library-project"><a class="anchor" href="#using-a-library-project">Using a library project</a></h2>
+<p>A program uses a library project by referencing it in a <code>[[ProjectReferences]]</code> table. <code>Path</code> is the library's project file, relative to the program's:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-39"></button><textarea hidden id="copy-39">OutputType = &quot;Executable&quot;
+
+[[ProjectReferences]]
+Path = &quot;physics/physics.celp&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">"physics/physics.celp"</span></span></code></pre></div>
+<p>The library lives in its own folder with its own project file:</p>
+<div class="code toml"><div class="code-title">physics/physics.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-40"></button><textarea hidden id="copy-40">OutputType = &quot;StaticLibrary&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span></code></pre></div>
+<div class="code cella"><div class="code-title">physics/physics.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-41"></button><textarea hidden id="copy-41">mod physics
+
+add: pub fun(a: i32, b: i32) -&gt; i32 =&gt; a + b</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">physics</span></span><span class="line"> </span><span class="line"><span class="c-function">add</span>: <span class="c-keyword">pub</span> <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">a</span> + <span class="c-parameter">b</span></span></code></pre></div>
+<p>The program calls the library's functions through the library's module:</p>
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-42"></button><textarea hidden id="copy-42">mod game
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, physics.add(2, 3))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-module">physics</span>.<span class="c-function">add</span>(<span class="c-literal">2</span>, <span class="c-literal">3</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>5</pre></div>
+<p>Building the program builds the library first, so <code>cella build</code> and <code>cella run</code> in the program's folder are enough. Each project writes its own <code>bin</code> and <code>obj</code> folders. A static library is copied into the program; a shared library is a separate file the program loads when it starts.</p>
+<p>Only <code>pub</code> declarations can be used from other projects. Declarations without a visibility word belong to their own project. <a href="modules.html">Modules and visibility</a> covers <code>pub</code>, imports with <code>use</code>, and the other visibility levels.</p>
+<p>To reference several projects, repeat the table. <code>Alias</code> puts every module of a reference under an extra name, which keeps two libraries apart when they have modules with the same name:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-43"></button><textarea hidden id="copy-43">[[ProjectReferences]]
+Path = &quot;a/a.celp&quot;
+
+[[ProjectReferences]]
+Path = &quot;b/b.celp&quot;
+Alias = &quot;second&quot;</textarea><pre><code><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">"a/a.celp"</span></span><span class="line"> </span><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">"b/b.celp"</span></span><span class="line"><span class="c-field">Alias </span>= <span class="c-literal">"second"</span></span></code></pre></div>
+<p>With these references, <code>shared.one()</code> calls the <code>shared</code> module from <code>a</code>, and <code>second.shared.one()</code> the one from <code>b</code>.</p>
+<h2 id="the-standard-library"><a class="anchor" href="#the-standard-library">The standard library</a></h2>
+<p>Every project uses the standard library unless its project file says otherwise. The <code>StandardLibrary</code> setting picks how much of it:</p>
+<div class="table-wrap"><table><thead><tr><th>Value</th><th>Uses</th></tr></thead><tbody><tr><td><code>"Full"</code></td><td>all of the standard library (the default)</td></tr><tr><td><code>"Core"</code></td><td>only the parts that don't depend on the operating system</td></tr><tr><td><code>"None"</code></td><td>none of it</td></tr></tbody></table></div>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-44"></button><textarea hidden id="copy-44">OutputType = &quot;Executable&quot;
+StandardLibrary = &quot;Core&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">StandardLibrary </span>= <span class="c-literal">"Core"</span></span></code></pre></div>
+<p>The standard library is built with the project, into the project's <code>obj</code> folder. It is documented separately; this documentation covers only the language.</p>
+<h2 id="the-launcher"><a class="anchor" href="#the-launcher">The launcher</a></h2>
+<p>The <code>cella</code> command is a small launcher. It keeps track of the installed Cella versions, and for every command that builds or creates a project it runs the right compiler:</p>
+<ul><li>For a project with a <code>CellaVersion</code>, it runs that version. When a folder holds several projects, it runs the highest version any of them pins.</li><li>For a project without a pin, and for <code>cella new</code>, it runs the newest installed version.</li></ul>
+<p>A pinned version that isn't installed is an error that names the command to install it:</p>
+<div class="code text"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-45"></button><textarea hidden id="copy-45">Cella 0.1.0 isn&#x27;t installed. Run &#x27;cella install 0.1.0&#x27;.</textarea><pre><code><span class="line">Cella 0.1.0 isn't installed. Run 'cella install 0.1.0'.</span></code></pre></div>
+<p>The launcher has its own commands:</p>
+<div class="table-wrap"><table><thead><tr><th>Command</th><th>Effect</th></tr></thead><tbody><tr><td><code>cella install</code></td><td>installs the latest release</td></tr><tr><td><code>cella install &lt;version&gt;</code></td><td>installs that version</td></tr><tr><td><code>cella uninstall &lt;version&gt;</code></td><td>removes that version</td></tr><tr><td><code>cella list</code></td><td>lists the installed versions and the ones available to install</td></tr><tr><td><code>cella list --installed</code></td><td>lists only the installed versions</td></tr><tr><td><code>cella self update</code></td><td>updates the launcher</td></tr><tr><td><code>cella self uninstall</code></td><td>removes Cella completely</td></tr><tr><td><code>cella lsp</code></td><td>starts the language server for the current folder, for editors</td></tr><tr><td><code>cella --version</code></td><td>prints the compiler's version</td></tr></tbody></table></div>
+<p><code>cella install</code>, <code>cella list</code> (without <code>--installed</code>) and <code>cella self update</code> are the only commands that use the network. Builds never download anything.</p>
+<p>To run one command with another installed version, put <code>+</code> and the version before it. This ignores the project's pin for that command only:</p>
+<div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-46"></button><textarea hidden id="copy-46">cella +0.1.0 build</textarea><pre><code><span class="line">cella +0.1.0 build</span></code></pre></div>
+</article>
+<nav class="pager"><a class="previous" href="hello-world.html"><span>Previous</span>Hello, World</a><a class="next" href="lexical-structure.html"><span>Next</span>Lexical structure</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#creating-a-project">Creating a project</a></li><li class="level-3"><a href="#libraries">Libraries</a></li><li class="level-3"><a href="#a-gitignore-file">A .gitignore file</a></li><li class="level-2"><a href="#what-a-project-is">What a project is</a></li><li class="level-2"><a href="#the-project-file">The project file</a></li><li class="level-2"><a href="#building">Building</a></li><li class="level-2"><a href="#build-options">Build options</a></li><li class="level-3"><a href="#release-builds">Release builds</a></li><li class="level-3"><a href="#targets">Targets</a></li><li class="level-3"><a href="#flags">Flags</a></li><li class="level-3"><a href="#entry-points">Entry points</a></li><li class="level-3"><a href="#hints">Hints</a></li><li class="level-2"><a href="#running">Running</a></li><li class="level-2"><a href="#several-files">Several files</a></li><li class="level-2"><a href="#using-a-library-project">Using a library project</a></li><li class="level-2"><a href="#the-standard-library">The standard library</a></li><li class="level-2"><a href="#the-launcher">The launcher</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

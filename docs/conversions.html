@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conversions - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html" class="current"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Conversions</h1>
+<p>A conversion turns a value of one type into a value of another. Some happen on their own, such as an <code>i32</code> passed where an <code>i64</code> is expected. Others have to be written out as <code>T(x)</code>. The built-in types come with their conversions, and records and enums declare their own as members: <code>as</code> for conversions that happen on their own and <code>new</code> for ones that have to be written.</p>
+<h2 id="writing-a-conversion"><a class="anchor" href="#writing-a-conversion">Writing a conversion</a></h2>
+<p><code>T(x)</code> converts <code>x</code> to the type <code>T</code>. It's written like a call to a constructor of <code>T</code>, and a constructor that takes one value is a conversion into <code>T</code>.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-645"></button><textarea hidden id="copy-645">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Color: enum
+{
+	red
+	green
+	blue
+}
+
+main: fun
+{
+	val count = 7
+	val wide: i64 = 300
+	val flag = true
+	val letter = &#x27;a&#x27;
+	printf(&quot;%.2f %d %d\n&quot;, f64(count) / 2.0, i32(u8(wide &amp; 0xFF)), i32(flag))
+	printf(&quot;%u %c %d\n&quot;, u32(letter), i32(char(98)), i32(Color.blue))
+	val color = Color(1)
+	printf(&quot;%d\n&quot;, i32(color == green))
+}</textarea><pre><code><span class="line"><span class="c-type">Color</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">red</span></span><span class="line">	<span class="c-case">green</span></span><span class="line">	<span class="c-case">blue</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">7</span></span><span class="line">	<span class="c-keyword">val</span> wide: <span class="c-type">i64</span> = <span class="c-literal">300</span></span><span class="line">	<span class="c-keyword">val</span> flag = <span class="c-keyword">true</span></span><span class="line">	<span class="c-keyword">val</span> letter = <span class="c-literal">'a'</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.2f %d %d\n"</span>, <span class="c-type">f64</span>(count) / <span class="c-literal">2.0</span>, <span class="c-type">i32</span>(<span class="c-type">u8</span>(wide &amp; <span class="c-literal">0xFF</span>)), <span class="c-type">i32</span>(flag))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%u %c %d\n"</span>, <span class="c-type">u32</span>(letter), <span class="c-type">i32</span>(<span class="c-type">char</span>(<span class="c-literal">98</span>)), <span class="c-type">i32</span>(<span class="c-type">Color</span>.<span class="c-case">blue</span>))</span><span class="line">	<span class="c-keyword">val</span> color = <span class="c-type">Color</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-type">i32</span>(color == <span class="c-case">green</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3.50 44 1
+97 b 2
+1</pre></div>
+<p>The built-in conversions cover:</p>
+<ul><li>numbers to other number types, in every direction, as described in <a href="numbers.html">Numbers and arithmetic</a>;</li><li><code>bool</code> to any integer type, giving 0 or 1;</li><li><code>char</code> to and from integer types;</li><li>enums without payloads to and from integer types (see <a href="enums.html">Enums</a>);</li><li>pointers to other pointer types, <code>cstr</code> to and from <code>ptr</code> (see <a href="pointers.html">Pointers and raw memory</a>);</li><li>values to trait objects, as in <code>dyn[Shape](circle)</code> (see <a href="trait-objects.html">Trait objects</a>).</li></ul>
+<p>A conversion that can lose information, like <code>u8(x)</code> for an <code>i32</code> <code>x</code>, is checked. A constant that doesn't fit is a compile error, and other values are checked when the program runs; <a href="numbers.html">Numbers and arithmetic</a> and <a href="panics.html">Checks and panics</a> cover both.</p>
+<h2 id="implicit-conversions"><a class="anchor" href="#implicit-conversions">Implicit conversions</a></h2>
+<p>A conversion happens on its own wherever a value of one type is used as another: a declaration with a type, an assignment, an argument, a returned value or an operand.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-646"></button><textarea hidden id="copy-646">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+average: fun(total: f64, count: f64) -&gt; f64 =&gt; total / count
+
+main: fun
+{
+	val total: i32 = 17
+	val count: u8 = 4
+	val wide: i64 = total
+	printf(&quot;%lld %.2f\n&quot;, wide, average(total, count))
+}</textarea><pre><code><span class="line"><span class="c-function">average</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">total</span>: <span class="c-type">f64</span>, <span class="c-parameter">count</span>: <span class="c-type">f64</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-parameter">total</span> / <span class="c-parameter">count</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> total: <span class="c-type">i32</span> = <span class="c-literal">17</span></span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">u8</span> = <span class="c-literal">4</span></span><span class="line">	<span class="c-keyword">val</span> wide: <span class="c-type">i64</span> = total</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%lld %.2f\n"</span>, wide, <span class="c-function">average</span>(total, count))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>17 4.25</pre></div>
+<p>Only conversions that can't lose anything happen on their own. Among the built-in types, those are:</p>
+<ul><li>a number to a numeric type that holds every value of its type exactly, like <code>i32</code> to <code>i64</code>, <code>u8</code> to <code>i16</code>, <code>i32</code> to <code>f64</code> or <code>f32</code> to <code>f64</code> (<a href="numbers.html#implicit-numeric-conversions">Numbers and arithmetic</a> lists them all);</li><li><code>cstr</code> and any <code>ptr[T]</code> to <code>ptr</code>, and <code>null</code> to any pointer.</li></ul>
+<p>Everything else has to be written as <code>T(x)</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-647"></button><textarea hidden id="copy-647">mod example
+
+main: fun
+{
+	val total: i32 = 17
+	val big: i64 = 1
+	val small: u8 = total
+	val ratio: f64 = big
+	val number: i32 = true
+	val code: u32 = &#x27;a&#x27;
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> total: <span class="c-type">i32</span> = <span class="c-literal">17</span></span><span class="line">	<span class="c-keyword">val</span> big: <span class="c-type">i64</span> = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">u8</span> = total</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot convert type &#x27;i32&#x27; to &#x27;u8&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> ratio: <span class="c-type">f64</span> = big</span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:21ch">Cannot convert type &#x27;i64&#x27; to &#x27;f64&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> number: <span class="c-type">i32</span> = <span class="c-keyword">true</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot convert type &#x27;bool&#x27; to &#x27;i32&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> code: <span class="c-type">u32</span> = <span class="c-literal">'a'</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot convert type &#x27;char&#x27; to &#x27;u32&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p><code>i64</code> to <code>f64</code> isn't implicit because an <code>f64</code> can't hold every <code>i64</code> exactly.</p>
+<h3 id="types-decide-not-values"><a class="anchor" href="#types-decide-not-values">Types decide, not values</a></h3>
+<p>Whether a value converts on its own depends only on its type, never on the value it happens to hold. A constant is no exception: <code>limit</code> below is an <code>i32</code>, and an <code>i32</code> doesn't convert to <code>usize</code> on its own, even though 3 would fit.</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-648"></button><textarea hidden id="copy-648">mod example
+
+limit: const i32 = 3
+half: const f64 = 0.5
+
+reserve: fun(count: usize)
+{
+}
+
+scale: fun(factor: f32)
+{
+}
+
+main: fun
+{
+	reserve(limit)
+	scale(half)
+}</textarea><pre><code><span class="line"><span class="c-constant">limit</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line"><span class="c-constant">half</span>: <span class="c-keyword">const</span> <span class="c-type">f64</span> = <span class="c-literal">0.5</span></span><span class="line"> </span><span class="line"><span class="c-function">reserve</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">count</span>: <span class="c-type">usize</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">factor</span>: <span class="c-type">f32</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	reserve(<span class="c-constant">limit</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot convert type &#x27;i32&#x27; to &#x27;usize&#x27;</span></span><span class="line">	scale(<span class="c-constant">half</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot convert type &#x27;f64&#x27; to &#x27;f32&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>Literals are the one case where the value matters. A literal has no type until it's used, so it takes the type that's expected, as long as its value fits:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-649"></button><textarea hidden id="copy-649">mod example
+
+reserve: fun(count: u8)
+{
+}
+
+main: fun
+{
+	reserve(200)
+	reserve(300)
+	reserve(-1)
+	val whole: i32 = 2.0
+}</textarea><pre><code><span class="line"><span class="c-function">reserve</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">count</span>: <span class="c-type">u8</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">reserve</span>(<span class="c-literal">200</span>)</span><span class="line">	reserve(<span class="c-literal">300</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:12ch">&#x27;300&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line">	reserve(-<span class="c-literal">1</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:12ch">&#x27;-1&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> whole: <span class="c-type">i32</span> = <span class="c-literal">2.0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:21ch">Cannot convert type &#x27;float literal&#x27; to &#x27;i32&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="declaring-conversions"><a class="anchor" href="#declaring-conversions">Declaring conversions</a></h2>
+<p>Records and enums declare conversions as members. There are four forms, one for each direction and kind:</p>
+<div class="table-wrap"><table><thead><tr><th>Form</th><th>Direction</th><th>Happens</th></tr></thead><tbody><tr><td><code>as: op(self) -&gt; T</code></td><td>out of the type, to <code>T</code></td><td>on its own, or as <code>T(x)</code></td></tr><tr><td><code>as: op(value: T) -&gt; Type</code></td><td>into the type, from <code>T</code></td><td>on its own, or as <code>Type(x)</code></td></tr><tr><td><code>new: op(self) -&gt; T</code></td><td>out of the type, to <code>T</code></td><td>only as <code>T(x)</code></td></tr><tr><td><code>new: op(value: T)</code></td><td>into the type, from <code>T</code></td><td>only as <code>Type(x)</code></td></tr></tbody></table></div>
+<p><code>Type</code> stands for the declaring type. The last form is an ordinary constructor (see <a href="records.html">Records</a>).</p>
+<h3 id="as-out-of-a-type"><a class="anchor" href="#as-out-of-a-type"><code>as</code> out of a type</a></h3>
+<p><code>as</code> with a receiver converts the type to another one wherever that other type is expected:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-650"></button><textarea hidden id="copy-650">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Id: rec
+{
+	value: i32
+
+	as: op(self) -&gt; i32 =&gt; self.value
+}
+
+Ready: rec
+{
+	done: bool
+
+	as: op(self) -&gt; bool =&gt; self.done
+}
+
+show: fun(value: i32) =&gt; printf(&quot;%d\n&quot;, value)
+
+main: fun
+{
+	val id = Id(4)
+	show(id)
+	val plain: i32 = id
+	printf(&quot;%d %d\n&quot;, plain, id + 1)
+	if Ready(true)
+		printf(&quot;ready\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-type">Id</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Ready</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">done</span>: <span class="c-type">bool</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">done</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-parameter">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> id = <span class="c-type">Id</span>(<span class="c-literal">4</span>)</span><span class="line">	<span class="c-function">show</span>(id)</span><span class="line">	<span class="c-keyword">val</span> plain: <span class="c-type">i32</span> = id</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, plain, id + <span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">if</span> <span class="c-type">Ready</span>(<span class="c-keyword">true</span>)</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"ready\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4
+4 5
+ready</pre></div>
+<p><code>id + 1</code> converts <code>id</code> to <code>i32</code> because <code>+</code> has no other way to take an <code>Id</code>.</p>
+<h3 id="as-into-a-type"><a class="anchor" href="#as-into-a-type"><code>as</code> into a type</a></h3>
+<p>A static <code>as</code>, with one parameter and no receiver, converts the parameter's type into the declaring type. It lets a function take several kinds of values through one parameter:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-651"></button><textarea hidden id="copy-651">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Arg: enum
+{
+	int(value: i64)
+	flag(value: bool)
+
+	as: op(value: i64) -&gt; Arg =&gt; int(value)
+	as: op(value: bool) -&gt; Arg =&gt; flag(value)
+}
+
+log: fun(arg: Arg)
+{
+	match arg
+	{
+		int(val value) =&gt; printf(&quot;int %lld\n&quot;, value)
+		flag(val value) =&gt; printf(&quot;flag %d\n&quot;, i32(value))
+	}
+}
+
+main: fun
+{
+	log(5)
+	log(true)
+	val big: i64 = 7
+	log(big)
+	var arg: Arg = 8
+	arg = false
+	log(arg)
+}</textarea><pre><code><span class="line"><span class="c-type">Arg</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">int</span>(value: <span class="c-type">i64</span>)</span><span class="line">	<span class="c-case">flag</span>(value: <span class="c-type">bool</span>)</span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">i64</span>) -&gt; <span class="c-type">Arg</span> =&gt; <span class="c-case">int</span>(<span class="c-parameter">value</span>)</span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">Arg</span> =&gt; <span class="c-case">flag</span>(<span class="c-parameter">value</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">log</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">arg</span>: <span class="c-type">Arg</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">match</span> <span class="c-parameter">arg</span></span><span class="line">	{</span><span class="line">		int(<span class="c-keyword">val</span> value) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"int %lld\n"</span>, value)</span><span class="line">		flag(<span class="c-keyword">val</span> value) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"flag %d\n"</span>, <span class="c-type">i32</span>(value))</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">log</span>(<span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">log</span>(<span class="c-keyword">true</span>)</span><span class="line">	<span class="c-keyword">val</span> big: <span class="c-type">i64</span> = <span class="c-literal">7</span></span><span class="line">	<span class="c-function">log</span>(big)</span><span class="line">	<span class="c-keyword">var</span> arg: <span class="c-type">Arg</span> = <span class="c-literal">8</span></span><span class="line">	arg = <span class="c-keyword">false</span></span><span class="line">	<span class="c-function">log</span>(arg)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>int 5
+flag 1
+int 7
+flag 0</pre></div>
+<h3 id="new-out-of-a-type"><a class="anchor" href="#new-out-of-a-type"><code>new</code> out of a type</a></h3>
+<p>A conversion that shouldn't happen on its own, because it loses information or does real work, is <code>new</code> with a receiver. It only runs when written as <code>T(x)</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-652"></button><textarea hidden id="copy-652">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Fixed: rec
+{
+	raw: i32
+
+	new: op(self) -&gt; i32 =&gt; self.raw &gt;&gt; 16
+	new: op(self) -&gt; f64 =&gt; f64(self.raw) / 65536.0
+}
+
+main: fun
+{
+	val value = Fixed(0x28000)
+	printf(&quot;%d %.2f\n&quot;, i32(value), f64(value))
+}</textarea><pre><code><span class="line"><span class="c-type">Fixed</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">raw</span> &gt;&gt; <span class="c-literal">16</span></span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-type">f64</span>(<span class="c-keyword">self</span>.<span class="c-field">raw</span>) / <span class="c-literal">65536.0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> value = <span class="c-type">Fixed</span>(<span class="c-literal">0x28000</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %.2f\n"</span>, <span class="c-type">i32</span>(value), <span class="c-type">f64</span>(value))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2 2.50</pre></div>
+<p><code>Fixed(0x28000)</code> is the field-by-field constructor, which sets <code>raw</code>.</p>
+<p>Using it where an <code>i32</code> is expected without writing <code>i32(...)</code> is an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-653"></button><textarea hidden id="copy-653">mod example
+
+Fixed: rec
+{
+	raw: i32
+
+	new: op(self) -&gt; i32 =&gt; self.raw &gt;&gt; 16
+}
+
+show: fun(value: i32)
+{
+}
+
+main: fun
+{
+	val fixed = Fixed(1 &lt;&lt; 16)
+	val whole: i32 = fixed
+	show(fixed)
+}</textarea><pre><code><span class="line"><span class="c-type">Fixed</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">raw</span> &gt;&gt; <span class="c-literal">16</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> fixed = <span class="c-type">Fixed</span>(<span class="c-literal">1</span> &lt;&lt; <span class="c-literal">16</span>)</span><span class="line">	<span class="c-keyword">val</span> whole: <span class="c-type">i32</span> = fixed</span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:21ch">Cannot convert type &#x27;Fixed&#x27; to &#x27;i32&#x27;</span></span><span class="line">	show(fixed)</span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:9ch">Cannot convert type &#x27;Fixed&#x27; to &#x27;i32&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="receivers"><a class="anchor" href="#receivers">Receivers</a></h2>
+<p>The receiver of an outward conversion says how the value is taken, as for any method:</p>
+<ul><li><code>self</code> copies the value and returns a new one.</li><li><code>imm self</code> borrows the value. It can return a borrow of part of it, <code>imm[T]</code>, or a type that borrows, such as <code>str</code>.</li><li><code>mut self</code> borrows the value writably and returns <code>mut[T]</code>.</li><li><code>own self</code> takes the value over and returns a new one.</li></ul>
+<p>A type can give out a borrow of something it holds this way. <code>Slot</code> below converts to a <code>Sprite</code> by lending its own: a read-only borrow where a <code>Sprite</code> is read, a writable one where it's passed as <code>mut</code>.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-654"></button><textarea hidden id="copy-654">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Sprite: rec
+{
+	hp: i32
+}
+
+Slot: rec
+{
+	sprite: Sprite
+
+	as: op(imm self) -&gt; imm[Sprite] =&gt; imm self.sprite
+	as: op(mut self) -&gt; mut[Sprite] =&gt; mut self.sprite
+}
+
+draw: fun(sprite: Sprite) =&gt; printf(&quot;draw %d\n&quot;, sprite.hp)
+
+heal: fun(mut sprite: Sprite) =&gt; sprite.hp += 10
+
+main: fun
+{
+	var hero = Slot(Sprite(5))
+	draw(hero)
+	heal(mut hero)
+	draw(hero)
+}</textarea><pre><code><span class="line"><span class="c-type">Sprite</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">hp</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Slot</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">sprite</span>: <span class="c-type">Sprite</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">Sprite</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">sprite</span></span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">Sprite</span>] =&gt; <span class="c-keyword">mut</span> <span class="c-keyword">self</span>.<span class="c-field">sprite</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">draw</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">sprite</span>: <span class="c-type">Sprite</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"draw %d\n"</span>, <span class="c-parameter">sprite</span>.<span class="c-field">hp</span>)</span><span class="line"> </span><span class="line"><span class="c-function">heal</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">sprite</span>: <span class="c-type">Sprite</span>) =&gt; <span class="c-parameter">sprite</span>.<span class="c-field">hp</span> += <span class="c-literal">10</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> hero = <span class="c-type">Slot</span>(<span class="c-type">Sprite</span>(<span class="c-literal">5</span>))</span><span class="line">	<span class="c-function">draw</span>(hero)</span><span class="line">	<span class="c-function">heal</span>(<span class="c-keyword">mut</span> hero)</span><span class="line">	<span class="c-function">draw</span>(hero)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>draw 5
+draw 15</pre></div>
+<p>A string type is a common case. It owns its bytes and lends them as a <code>str</code>, so it can go wherever a <code>str</code> is expected:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-655"></button><textarea hidden id="copy-655">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+	malloc: fun(size: usize) -&gt; ptr[u8]
+	free: fun(memory: ptr[u8])
+	memcpy: fun(target: ptr[u8], source: ptr[u8], size: usize) -&gt; ptr[u8]
+}
+
+String: rec
+{
+	data: pvt ptr[u8]
+	length: pvt usize
+
+	new: op(text: str)
+	{
+		self.data = malloc(text.byteLength)
+		self.length = text.byteLength
+		memcpy(self.data, text.data, text.byteLength)
+	}
+
+	as: op(imm self) -&gt; str =&gt; str(self.data, self.length)
+
+	drop: op
+	{
+		free(self.data)
+	}
+}
+
+show: fun(text: str) =&gt; printf(&quot;[%.*s]\n&quot;, i32(text.byteLength), text.data)
+
+main: fun
+{
+	val name = String(&quot;Ada&quot;)
+	show(name)
+	val view: str = name
+	show(view)
+	show(String(&quot;temporary&quot;))
+}</textarea><pre><code><span class="line"><span class="c-type">String</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">data</span>: <span class="c-keyword">pvt</span> <span class="c-type">ptr</span>[<span class="c-type">u8</span>]</span><span class="line">	<span class="c-field">length</span>: <span class="c-keyword">pvt</span> <span class="c-type">usize</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">text</span>: <span class="c-type">str</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">data</span> = <span class="c-function">malloc</span>(<span class="c-parameter">text</span>.<span class="c-field">byteLength</span>)</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">length</span> = <span class="c-parameter">text</span>.<span class="c-field">byteLength</span></span><span class="line">		<span class="c-function">memcpy</span>(<span class="c-keyword">self</span>.<span class="c-field">data</span>, <span class="c-parameter">text</span>.<span class="c-field">data</span>, <span class="c-parameter">text</span>.<span class="c-field">byteLength</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">str</span> =&gt; <span class="c-type">str</span>(<span class="c-keyword">self</span>.<span class="c-field">data</span>, <span class="c-keyword">self</span>.<span class="c-field">length</span>)</span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">free</span>(<span class="c-keyword">self</span>.<span class="c-field">data</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">str</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"[%.*s]\n"</span>, <span class="c-type">i32</span>(<span class="c-parameter">text</span>.<span class="c-field">byteLength</span>), <span class="c-parameter">text</span>.<span class="c-field">data</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> name = <span class="c-type">String</span>(<span class="c-literal">"Ada"</span>)</span><span class="line">	<span class="c-function">show</span>(name)</span><span class="line">	<span class="c-keyword">val</span> view: <span class="c-type">str</span> = name</span><span class="line">	<span class="c-function">show</span>(view)</span><span class="line">	<span class="c-function">show</span>(<span class="c-type">String</span>(<span class="c-literal">"temporary"</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>[Ada]
+[Ada]
+[temporary]</pre></div>
+<p>The <code>str</code> borrows from <code>name</code>, so it follows the rules for borrows (see <a href="borrows.html">Borrows</a>): it can't outlive <code>name</code>, and it can't be kept from a temporary that's dropped at the end of its statement:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-656"></button><textarea hidden id="copy-656">mod example
+
+ext
+{
+	malloc: fun(size: usize) -&gt; ptr[u8]
+	free: fun(memory: ptr[u8])
+}
+
+String: rec
+{
+	data: pvt ptr[u8]
+	length: pvt usize
+
+	new: op(text: str)
+	{
+		self.data = malloc(text.byteLength)
+		self.length = text.byteLength
+	}
+
+	as: op(imm self) -&gt; str =&gt; str(self.data, self.length)
+
+	drop: op
+	{
+		free(self.data)
+	}
+}
+
+local: fun -&gt; str
+{
+	val name = String(&quot;local&quot;)
+	ret name
+}
+
+main: fun
+{
+	val view: str = String(&quot;temporary&quot;)
+	val length = view.byteLength
+}</textarea><pre><code><span class="line"><span class="c-function">local</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">str</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> name = <span class="c-type">String</span>(<span class="c-literal">"local"</span>)</span><span class="line">	<span class="c-keyword">ret</span> name</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot return borrows of local variables</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> view: <span class="c-type">str</span> = <span class="c-type">String</span>(<span class="c-literal">"temporary"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:19ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot borrow unstored values</span></span><span class="line">	<span class="c-keyword">val</span> length = view.<span class="c-field">byteLength</span></span><span class="line">}</span></code></pre></div>
+<p>An <code>own self</code> conversion consumes the value. A named variable then has to be passed with <code>own</code>, as for any move (see <a href="ownership.html">Ownership and destructors</a>):</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-657"></button><textarea hidden id="copy-657">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Buffer: rec
+{
+	size: i32
+
+	drop: op
+	{
+		printf(&quot;drop buffer %d\n&quot;, self.size)
+	}
+}
+
+Text: rec
+{
+	size: i32
+
+	as: op(own self) -&gt; Buffer =&gt; Buffer(self.size)
+
+	drop: op
+	{
+		printf(&quot;drop text %d\n&quot;, self.size)
+	}
+}
+
+send: fun(own buffer: Buffer) =&gt; printf(&quot;send %d\n&quot;, buffer.size)
+
+main: fun
+{
+	val text = Text(1)
+	send(own text)
+	send(Text(2))
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">size</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"drop buffer %d\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">size</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Text</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">size</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">own</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">Buffer</span> =&gt; <span class="c-type">Buffer</span>(<span class="c-keyword">self</span>.<span class="c-field">size</span>)</span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"drop text %d\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">size</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">send</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">buffer</span>: <span class="c-type">Buffer</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"send %d\n"</span>, <span class="c-parameter">buffer</span>.<span class="c-field">size</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> text = <span class="c-type">Text</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-function">send</span>(<span class="c-keyword">own</span> text)</span><span class="line">	<span class="c-function">send</span>(<span class="c-type">Text</span>(<span class="c-literal">2</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>drop text 1
+send 1
+drop buffer 1
+drop text 2
+send 2
+drop buffer 2</pre></div>
+<p>The receiver and the result have to agree:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-658"></button><textarea hidden id="copy-658">mod example
+
+Text: rec
+{
+	value: i32
+
+	as: op(mut self) -&gt; i32 =&gt; 1
+	as: op(self) -&gt; mut[i32] =&gt; mut self.value
+	as: op(own self) -&gt; imm[i32] =&gt; imm self.value
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Text</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot return &#x27;i32&#x27; from &#x27;as&#x27; with &#x27;mut self&#x27;</span></span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">mut</span> <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot return &#x27;mut[i32]&#x27; from &#x27;as&#x27; with &#x27;self&#x27;</span></span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">own</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot return &#x27;imm[i32]&#x27; from &#x27;as&#x27; with &#x27;own self&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="how-conversions-are-used"><a class="anchor" href="#how-conversions-are-used">How conversions are used</a></h2>
+<h3 id="exact-matches-come-first"><a class="anchor" href="#exact-matches-come-first">Exact matches come first</a></h3>
+<p>When a call has overloads, one that takes the argument's own type wins over one that needs a conversion. A generic type parameter is inferred from the argument's own type, never from what it converts to:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-659"></button><textarea hidden id="copy-659">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Id: rec
+{
+	value: i32
+
+	as: op(self) -&gt; i32 =&gt; self.value
+}
+
+pick: fun(value: i32) =&gt; printf(&quot;i32 %d\n&quot;, value)
+
+pick: fun(value: Id) =&gt; printf(&quot;Id %d\n&quot;, value.value)
+
+only: fun(value: i32) =&gt; printf(&quot;only %d\n&quot;, value)
+
+same[T: copy]: fun(value: T) -&gt; T =&gt; value
+
+main: fun
+{
+	val id = Id(4)
+	pick(id)
+	only(id)
+	printf(&quot;same %d\n&quot;, same(id).value)
+}</textarea><pre><code><span class="line"><span class="c-type">Id</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">pick</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"i32 %d\n"</span>, <span class="c-parameter">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">pick</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">Id</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"Id %d\n"</span>, <span class="c-parameter">value</span>.<span class="c-field">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">only</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"only %d\n"</span>, <span class="c-parameter">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">same</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">copy</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-typeparam">T</span> =&gt; <span class="c-parameter">value</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> id = <span class="c-type">Id</span>(<span class="c-literal">4</span>)</span><span class="line">	<span class="c-function">pick</span>(id)</span><span class="line">	<span class="c-function">only</span>(id)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"same %d\n"</span>, <span class="c-function">same</span>(id).<span class="c-field">value</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>Id 4
+only 4
+same 4</pre></div>
+<h3 id="doesnt-look-through-as"><a class="anchor" href="#doesnt-look-through-as"><code>.</code> doesn't look through <code>as</code></a></h3>
+<p><code>.</code> only reaches a type's own members, never the members of what it converts to. A conversion is also not a member that can be called by name:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-660"></button><textarea hidden id="copy-660">mod example
+
+Sprite: rec
+{
+	hp: i32
+}
+
+Slot: rec
+{
+	sprite: Sprite
+
+	as: op(imm self) -&gt; imm[Sprite] =&gt; imm self.sprite
+}
+
+Id: rec
+{
+	value: i32
+
+	as: op(self) -&gt; i32 =&gt; self.value
+}
+
+main: fun
+{
+	val slot = Slot(Sprite(5))
+	val hp = slot.hp
+	val number = Id(1).as()
+}</textarea><pre><code><span class="line"><span class="c-type">Sprite</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">hp</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Slot</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">sprite</span>: <span class="c-type">Sprite</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">Sprite</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">sprite</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Id</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> slot = <span class="c-type">Slot</span>(<span class="c-type">Sprite</span>(<span class="c-literal">5</span>))</span><span class="line">	<span class="c-keyword">val</span> hp = slot.hp</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:18ch">Type &#x27;Slot&#x27; has no member &#x27;hp&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> number = <span class="c-type">Id</span>(<span class="c-literal">1</span>).as()</span><span class="diagnostic"><span class="squiggle" style="margin-left:23ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:23ch">Type &#x27;Id&#x27; has no member &#x27;as&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>Write <code>Sprite(slot).hp</code> or <code>i32(id)</code> instead.</p>
+<h2 id="a-types-own-constructor-comes-first"><a class="anchor" href="#a-types-own-constructor-comes-first">A type's own constructor comes first</a></h2>
+<p>A type can declare both a constructor and an <code>as</code> from the same type. <code>T(x)</code> then calls the constructor, and the <code>as</code> runs only where the conversion happens on its own:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-661"></button><textarea hidden id="copy-661">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Meters: rec
+{
+	value: f64
+
+	new: op(value: f64)
+	{
+		printf(&quot;constructor\n&quot;)
+		self.value = value
+	}
+
+	as: op(value: f64) -&gt; Meters
+	{
+		printf(&quot;as\n&quot;)
+		ret Meters(value)
+	}
+}
+
+show: fun(length: Meters) =&gt; printf(&quot;%.1f\n&quot;, length.value)
+
+main: fun
+{
+	val a = Meters(2.0)
+	show(3.0)
+}</textarea><pre><code><span class="line"><span class="c-type">Meters</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">f64</span>)</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"constructor\n"</span>)</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">value</span> = <span class="c-parameter">value</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">f64</span>) -&gt; <span class="c-type">Meters</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"as\n"</span>)</span><span class="line">		<span class="c-keyword">ret</span> <span class="c-type">Meters</span>(<span class="c-parameter">value</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">length</span>: <span class="c-type">Meters</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%.1f\n"</span>, <span class="c-parameter">length</span>.<span class="c-field">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-type">Meters</span>(<span class="c-literal">2.0</span>)</span><span class="line">	<span class="c-function">show</span>(<span class="c-literal">3.0</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>constructor
+as
+constructor
+3.0</pre></div>
+<p><code>Meters(value)</code> inside the <code>as</code> calls the constructor too, so the <code>as</code> doesn't call itself. The same holds for a record's field-by-field constructor, which is why a short <code>as</code> can build its result directly:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-662"></button><textarea hidden id="copy-662">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Meters: rec
+{
+	value: f64
+
+	as: op(value: f64) -&gt; Meters =&gt; Meters(value)
+}
+
+main: fun
+{
+	val length: Meters = 4.5
+	printf(&quot;%.1f\n&quot;, length.value)
+}</textarea><pre><code><span class="line"><span class="c-type">Meters</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">f64</span>) -&gt; <span class="c-type">Meters</span> =&gt; <span class="c-type">Meters</span>(<span class="c-parameter">value</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> length: <span class="c-type">Meters</span> = <span class="c-literal">4.5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f\n"</span>, length.<span class="c-field">value</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4.5</pre></div>
+<h2 id="conversions-dont-chain"><a class="anchor" href="#conversions-dont-chain">Conversions don't chain</a></h2>
+<p>A value converts at most once. When no single conversion leads from its type to the one expected, there is no conversion, even if two in a row would get there. Below, an <code>i32</code> would have to widen to <code>i64</code> and then go through <code>Arg</code>'s <code>as</code>, and an <code>Id</code> would have to become an <code>i32</code> and then widen to <code>i64</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-663"></button><textarea hidden id="copy-663">mod example
+
+Arg: enum
+{
+	int(value: i64)
+
+	as: op(value: i64) -&gt; Arg =&gt; int(value)
+}
+
+Id: rec
+{
+	value: i32
+
+	as: op(self) -&gt; i32 =&gt; self.value
+}
+
+log: fun(arg: Arg)
+{
+}
+
+main: fun
+{
+	val count: i32 = 5
+	log(count)
+	val wide: i64 = Id(4)
+}</textarea><pre><code><span class="line"><span class="c-type">Arg</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">int</span>(value: <span class="c-type">i64</span>)</span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">i64</span>) -&gt; <span class="c-type">Arg</span> =&gt; <span class="c-case">int</span>(<span class="c-parameter">value</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Id</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">log</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">arg</span>: <span class="c-type">Arg</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">i32</span> = <span class="c-literal">5</span></span><span class="line">	log(count)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot convert type &#x27;i32&#x27; to &#x27;Arg&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> wide: <span class="c-type">i64</span> = <span class="c-type">Id</span>(<span class="c-literal">4</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot convert type &#x27;Id&#x27; to &#x27;i64&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p><code>log(5)</code> works, since the literal <code>5</code> becomes an <code>i64</code> directly, and <code>log(i64(count))</code> converts in two written steps.</p>
+<h2 id="ambiguous-conversions"><a class="anchor" href="#ambiguous-conversions">Ambiguous conversions</a></h2>
+<p>Both types can declare a conversion between them: the source with <code>as</code> out, and the target with <code>as</code> in or a constructor. Neither wins, so every use is an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-664"></button><textarea hidden id="copy-664">mod example
+
+Source: rec
+{
+	id: i32
+
+	as: op(self) -&gt; Name =&gt; Name(self.id)
+	new: op(self) -&gt; Label =&gt; Label(self.id)
+}
+
+Name: rec
+{
+	id: i32
+
+	as: op(value: Source) -&gt; Name =&gt; Name(value.id)
+}
+
+Label: rec
+{
+	id: i32
+
+	new: op(id: i32)
+	{
+		self.id = id
+	}
+
+	new: op(value: Source)
+	{
+		self.id = value.id
+	}
+}
+
+main: fun
+{
+	val source = Source(1)
+	val name: Name = source
+	val label = Label(source)
+}</textarea><pre><code><span class="line"><span class="c-type">Source</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">Name</span> =&gt; <span class="c-type">Name</span>(<span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">Label</span> =&gt; <span class="c-type">Label</span>(<span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Name</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">Source</span>) -&gt; <span class="c-type">Name</span> =&gt; <span class="c-type">Name</span>(<span class="c-parameter">value</span>.<span class="c-field">id</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Label</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">id</span> = <span class="c-parameter">id</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">Source</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">id</span> = <span class="c-parameter">value</span>.<span class="c-field">id</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> source = <span class="c-type">Source</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> name: <span class="c-type">Name</span> = source</span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:21ch">Conversion from &#x27;Source&#x27; to &#x27;Name&#x27; is ambiguous</span></span><span class="line">	<span class="c-keyword">val</span> label = <span class="c-type">Label</span>(source)</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:16ch">Conversion to &#x27;Label&#x27; is ambiguous</span></span><span class="line">}</span></code></pre></div>
+<p>A value with several <code>as</code> conversions can also leave an operator with more than one way to go:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-665"></button><textarea hidden id="copy-665">mod example
+
+Wide: rec
+{
+	value: i32
+
+	as: op(self) -&gt; i32 =&gt; self.value
+	as: op(self) -&gt; i64 =&gt; i64(self.value)
+}
+
+main: fun
+{
+	val negated = -Wide(1)
+}</textarea><pre><code><span class="line"><span class="c-type">Wide</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i64</span> =&gt; <span class="c-type">i64</span>(<span class="c-keyword">self</span>.<span class="c-field">value</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> negated = -<span class="c-type">Wide</span>(<span class="c-literal">1</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:18ch">Operation &#x27;-&#x27; on &#x27;Wide&#x27; is ambiguous</span></span><span class="line">}</span></code></pre></div>
+<h2 id="declaration-rules"><a class="anchor" href="#declaration-rules">Declaration rules</a></h2>
+<p>An outward conversion takes only its receiver, and an inward one exactly one parameter. A type can't convert to itself, can't declare two conversions for the same pair of types, and can't declare both an <code>as</code> and a <code>new</code> to the same target:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-666"></button><textarea hidden id="copy-666">mod example
+
+Text: rec
+{
+	value: i32
+
+	as: op(self, extra: i32) -&gt; i32 =&gt; extra
+	as: op(self) -&gt; Text =&gt; self
+	as: op(a: i32, b: i32) -&gt; Text =&gt; Text(a)
+	as: op(self) -&gt; u16 =&gt; 1
+	as: op(self) -&gt; u16 =&gt; 2
+	as: op(self) -&gt; u32 =&gt; 1
+	new: op(self) -&gt; u32 =&gt; 1
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Text</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>, <span class="c-parameter">extra</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">extra</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot take parameters in &#x27;as&#x27; operators with &#x27;self&#x27;</span></span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">Text</span> =&gt; <span class="c-keyword">self</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot convert &#x27;Text&#x27; to itself</span></span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Text</span> =&gt; <span class="c-type">Text</span>(<span class="c-parameter">a</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;as&#x27; operators need &#x27;self&#x27; or one parameter</span></span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">u16</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">Conversion to &#x27;u16&#x27; with &#x27;self&#x27; is declared more than once in &#x27;Text&#x27;</span></span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">u16</span> =&gt; <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">Conversion to &#x27;u16&#x27; with &#x27;self&#x27; is declared more than once in &#x27;Text&#x27;</span></span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">u32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare both &#x27;as&#x27; and &#x27;new&#x27; conversions to &#x27;u32&#x27;</span></span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">u32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare both &#x27;as&#x27; and &#x27;new&#x27; conversions to &#x27;u32&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>An inward <code>as</code> must return the declaring type, so it can't be used to add a conversion between two other types:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-667"></button><textarea hidden id="copy-667">mod example
+
+Text: rec
+{
+	value: i32
+
+	as: op(value: i64) -&gt; i32 =&gt; 1
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Text</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">i64</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:26ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:26ch">Cannot return &#x27;i32&#x27; from &#x27;as&#x27; operators without &#x27;self&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="built-in-conversions-cant-be-redeclared"><a class="anchor" href="#built-in-conversions-cant-be-redeclared">Built-in conversions can't be redeclared</a></h2>
+<p>Where the language already converts between two types, a type can't declare its own conversion between them. An enum without payloads converts to and from every integer type, so it can't declare one:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-668"></button><textarea hidden id="copy-668">mod example
+
+Color: enum
+{
+	red
+	green
+
+	as: op(self) -&gt; i32 =&gt; 100
+	new: op(self) -&gt; u16 =&gt; 99
+	as: op(value: i32) -&gt; Color =&gt; green
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Color</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">red</span></span><span class="line">	<span class="c-case">green</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">100</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:20ch">Conversion to &#x27;i32&#x27; is built in</span></span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">u16</span> =&gt; <span class="c-literal">99</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:21ch">Conversion to &#x27;u16&#x27; is built in</span></span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Color</span> =&gt; <span class="c-case">green</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:11ch">Conversion from &#x27;i32&#x27; is built in</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>A case's number is set with a case value instead (see <a href="enums.html">Enums</a>).</p>
+<h2 id="conversions-in-generic-code"><a class="anchor" href="#conversions-in-generic-code">Conversions in generic code</a></h2>
+<p>A constraint like <code>[T: new(Source)]</code> asks for a way to write <code>T(source)</code>. Constructors, a record's field-by-field constructor and <code>new</code> conversions meet it; <code>as</code> conversions don't:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-669"></button><textarea hidden id="copy-669">mod example
+
+Source: rec
+{
+	id: i32
+
+	as: op(self) -&gt; ViaAs =&gt; ViaAs(self.id)
+	new: op(self) -&gt; ViaNew =&gt; ViaNew(self.id)
+}
+
+ViaAs: rec
+{
+	id: i32
+}
+
+ViaNew: rec
+{
+	id: i32
+}
+
+convert[T: new(Source)]: fun(value: Source) -&gt; T =&gt; T(value)
+
+main: fun
+{
+	val source = Source(1)
+	val viaNew: ViaNew = convert(source)
+	val viaAs: ViaAs = convert(source)
+}</textarea><pre><code><span class="line"><span class="c-type">Source</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">as</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">ViaAs</span> =&gt; <span class="c-type">ViaAs</span>(<span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">ViaNew</span> =&gt; <span class="c-type">ViaNew</span>(<span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">ViaAs</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">ViaNew</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">convert</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">new</span>(<span class="c-type">Source</span>)]: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">Source</span>) -&gt; <span class="c-typeparam">T</span> =&gt; <span class="c-typeparam">T</span>(<span class="c-parameter">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> source = <span class="c-type">Source</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> viaNew: <span class="c-type">ViaNew</span> = <span class="c-function">convert</span>(source)</span><span class="line">	<span class="c-keyword">val</span> viaAs: <span class="c-type">ViaAs</span> = convert(source)</span><span class="diagnostic"><span class="squiggle" style="margin-left:23ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:23ch">&#x27;convert&#x27; requires &#x27;T: new(Source)&#x27;<span class="diagnostic-note">&#x27;ViaAs&#x27; has no constructor taking &#x27;Source&#x27;</span></span></span><span class="line">}</span></code></pre></div>
+<p>Traits can require <code>as</code> and <code>new</code> conversions too, and each requirement is met only by its own kind. Constraints are covered in <a href="generics.html">Generics</a> and requirements in <a href="traits.html">Traits</a>.</p>
+</article>
+<nav class="pager"><a class="previous" href="operators.html"><span>Previous</span>Operators</a><a class="next" href="closures.html"><span>Next</span>Function values and closures</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#writing-a-conversion">Writing a conversion</a></li><li class="level-2"><a href="#implicit-conversions">Implicit conversions</a></li><li class="level-3"><a href="#types-decide-not-values">Types decide, not values</a></li><li class="level-2"><a href="#declaring-conversions">Declaring conversions</a></li><li class="level-3"><a href="#as-out-of-a-type">as out of a type</a></li><li class="level-3"><a href="#as-into-a-type">as into a type</a></li><li class="level-3"><a href="#new-out-of-a-type">new out of a type</a></li><li class="level-2"><a href="#receivers">Receivers</a></li><li class="level-2"><a href="#how-conversions-are-used">How conversions are used</a></li><li class="level-3"><a href="#exact-matches-come-first">Exact matches come first</a></li><li class="level-3"><a href="#doesnt-look-through-as">. doesn&#x27;t look through as</a></li><li class="level-2"><a href="#a-types-own-constructor-comes-first">A type&#x27;s own constructor comes first</a></li><li class="level-2"><a href="#conversions-dont-chain">Conversions don&#x27;t chain</a></li><li class="level-2"><a href="#ambiguous-conversions">Ambiguous conversions</a></li><li class="level-2"><a href="#declaration-rules">Declaration rules</a></li><li class="level-2"><a href="#built-in-conversions-cant-be-redeclared">Built-in conversions can&#x27;t be redeclared</a></li><li class="level-2"><a href="#conversions-in-generic-code">Conversions in generic code</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

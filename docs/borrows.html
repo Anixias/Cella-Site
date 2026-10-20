@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borrows - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html" class="current"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Borrows</h1>
+<p>A borrow refers to a value that is stored somewhere else. <a href="parameter-modes.html">Parameter modes</a> showed borrows that last for one call: an <code>imm</code> or <code>mut</code> parameter borrows the caller's variable until the function returns. This chapter covers borrows as values of their own, kept in local variables, returned from functions and stored in records. The compiler checks one rule for all of them: a borrow can't be used after the value it borrows is gone.</p>
+<h2 id="what-a-borrow-is"><a class="anchor" href="#what-a-borrow-is">What a borrow is</a></h2>
+<p>In C, a function that wants to change a caller's variable takes its address, and code that wants a second name for a variable keeps a pointer to it:</p>
+<div class="code c"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-466"></button><textarea hidden id="copy-466">int score = 10;
+int *points = &amp;score;
+*points += 5;</textarea><pre><code><span class="line">int score = 10;</span><span class="line">int *points = &amp;score;</span><span class="line">*points += 5;</span></code></pre></div>
+<p>A Cella borrow does the same job. <code>mut score</code> borrows <code>score</code>, and the borrow can be kept in a variable:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-467"></button><textarea hidden id="copy-467">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var score = 10
+	val points = mut score
+	points += 5
+	printf(&quot;%d\n&quot;, score)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> score = <span class="c-literal">10</span></span><span class="line">	<span class="c-keyword">val</span> points = <span class="c-keyword">mut</span> score</span><span class="line">	points += <span class="c-literal">5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, score)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>15</pre></div>
+<p>Underneath, a borrow is an address, the same size as a pointer. It differs from a C pointer in three ways:</p>
+<ul><li>A borrow always refers to a value. There is no null borrow.</li><li>A borrow is used as if it were the value. <code>points += 5</code> changes <code>score</code>, with no <code>*</code> to write.</li><li>The compiler knows which variable each borrow came from, and rejects any use of the borrow after that variable's value is moved or destroyed.</li></ul>
+<p>A borrow never owns what it refers to. When a borrow goes out of scope, nothing happens to the value it borrowed.</p>
+<h2 id="making-a-borrow"><a class="anchor" href="#making-a-borrow">Making a borrow</a></h2>
+<p><code>imm place</code> makes a read-only borrow and <code>mut place</code> a writable one. The place can be a local variable, a parameter, a field, an array element, a module variable or a value behind a pointer:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-468"></button><textarea hidden id="copy-468">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+}
+
+main: fun
+{
+	var point = Point(1, 2)
+	var scores = [10, 20, 30]
+	val x = mut point.x
+	val last = mut scores[2]
+	val view = imm point
+	x = 7
+	last += 1
+	printf(&quot;%d %d %d\n&quot;, view.x, view.y, scores[2])
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> point = <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">var</span> scores = [<span class="c-literal">10</span>, <span class="c-literal">20</span>, <span class="c-literal">30</span>]</span><span class="line">	<span class="c-keyword">val</span> x = <span class="c-keyword">mut</span> point.<span class="c-field">x</span></span><span class="line">	<span class="c-keyword">val</span> last = <span class="c-keyword">mut</span> scores[<span class="c-literal">2</span>]</span><span class="line">	<span class="c-keyword">val</span> view = <span class="c-keyword">imm</span> point</span><span class="line">	x = <span class="c-literal">7</span></span><span class="line">	last += <span class="c-literal">1</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, view.<span class="c-field">x</span>, view.<span class="c-field">y</span>, scores[<span class="c-literal">2</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>7 2 31</pre></div>
+<p><code>view</code> borrows all of <code>point</code>, so it sees the change made through <code>x</code>.</p>
+<p>A read-only borrow can't be written through, and can't be turned into a writable one. A <code>val</code> can't be borrowed with <code>mut</code>, and only a stored value can be borrowed: a call's result or a literal has no place to refer to.</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-469"></button><textarea hidden id="copy-469">mod example
+
+Point: rec
+{
+	x: i32
+}
+
+make: fun -&gt; i32 =&gt; 4
+
+main: fun
+{
+	var point = Point(1)
+	val view = imm point
+	view.x = 5
+	val inner = mut view.x
+	val fixed = 3
+	val changed = mut fixed
+	val result = imm make()
+	val literal = imm 5
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">make</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">4</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> point = <span class="c-type">Point</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> view = <span class="c-keyword">imm</span> point</span><span class="line">	view.<span class="c-field">x</span> = <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot write through read-only borrows</span></span><span class="line">	<span class="c-keyword">val</span> inner = <span class="c-keyword">mut</span> view.<span class="c-field">x</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot mutably borrow through read-only borrows</span></span><span class="line">	<span class="c-keyword">val</span> fixed = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> changed = <span class="c-keyword">mut</span> fixed</span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot mutably borrow values</span></span><span class="line">	<span class="c-keyword">val</span> result = <span class="c-keyword">imm</span> <span class="c-function">make</span>()</span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:21ch">Cannot borrow unstored values</span></span><span class="line">	<span class="c-keyword">val</span> literal = <span class="c-keyword">imm</span> <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot borrow unstored values</span></span><span class="line">}</span></code></pre></div>
+<h2 id="using-a-borrow"><a class="anchor" href="#using-a-borrow">Using a borrow</a></h2>
+<p>A borrow reads as the value it refers to. Arithmetic, comparisons and <code>.</code> work on it directly, and passing it to a parameter with no mode passes a copy of the value. To lend it on to a <code>mut</code> or <code>imm</code> parameter, write the mode at the call, as for a variable:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-470"></button><textarea hidden id="copy-470">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+bump: fun(mut n: i32) =&gt; n += 1
+
+twice: fun(n: i32) -&gt; i32 =&gt; n * 2
+
+main: fun
+{
+	var count = 1
+	val counter = mut count
+	bump(mut counter)
+	val before = counter
+	counter += 10
+	printf(&quot;%d %d %d\n&quot;, count, before, twice(counter))
+}</textarea><pre><code><span class="line"><span class="c-function">bump</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">n</span>: <span class="c-type">i32</span>) =&gt; <span class="c-parameter">n</span> += <span class="c-literal">1</span></span><span class="line"> </span><span class="line"><span class="c-function">twice</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">n</span> * <span class="c-literal">2</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> counter = <span class="c-keyword">mut</span> count</span><span class="line">	<span class="c-function">bump</span>(<span class="c-keyword">mut</span> counter)</span><span class="line">	<span class="c-keyword">val</span> before = counter</span><span class="line">	counter += <span class="c-literal">10</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, count, before, <span class="c-function">twice</span>(counter))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>12 2 24</pre></div>
+<p><code>val before = counter</code> doesn't borrow again. <code>i32</code> is plain data, so the declaration copies the value <code>counter</code> refers to at that moment, and the later <code>+= 10</code> doesn't change it. To make a second borrow of the same place, write <code>imm counter</code> or <code>mut counter</code>.</p>
+<h2 id="borrow-types"><a class="anchor" href="#borrow-types">Borrow types</a></h2>
+<p>The type of <code>imm x</code> is <code>imm[T]</code> and the type of <code>mut x</code> is <code>mut[T]</code>, where <code>T</code> is the type of <code>x</code>. They can be written in declarations, results, fields, arrays and type arguments. In a declaration with an <code>imm[T]</code> type, the <code>imm</code> on the value can be left out; a <code>mut[T]</code> declaration needs its <code>mut</code> written:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-471"></button><textarea hidden id="copy-471">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var a = 1
+	val b = 2
+	val writer: mut[i32] = mut a
+	val reader: imm[i32] = a
+	val both: array[imm[i32], 2] = [a, b]
+	writer += 5
+	printf(&quot;%d %d %d\n&quot;, reader, both[0], both[1])
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> a = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">val</span> writer: <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] = <span class="c-keyword">mut</span> a</span><span class="line">	<span class="c-keyword">val</span> reader: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] = a</span><span class="line">	<span class="c-keyword">val</span> both: <span class="c-type">array</span>[<span class="c-keyword">imm</span>[<span class="c-type">i32</span>], <span class="c-literal">2</span>] = [a, b]</span><span class="line">	writer += <span class="c-literal">5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, reader, both[<span class="c-literal">0</span>], both[<span class="c-literal">1</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>6 6 2</pre></div>
+<p>A <code>mut[T]</code> converts to an <code>imm[T]</code>, never the other way around. A borrow doesn't convert to its value's type either: <code>val n: i32 = imm a</code> is an error, while <code>val n: i32 = reader</code> copies the value.</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-472"></button><textarea hidden id="copy-472">mod example
+
+main: fun
+{
+	var a = 1
+	val reader = imm a
+	val writer: mut[i32] = reader
+	val number: i32 = imm a
+	val implicit: mut[i32] = a
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> a = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> reader = <span class="c-keyword">imm</span> a</span><span class="line">	<span class="c-keyword">val</span> writer: <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] = reader</span><span class="diagnostic"><span class="squiggle" style="margin-left:27ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:27ch">Cannot convert type &#x27;imm[i32]&#x27; to &#x27;mut[i32]&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> number: <span class="c-type">i32</span> = <span class="c-keyword">imm</span> a</span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot convert type &#x27;imm[i32]&#x27; to &#x27;i32&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> implicit: <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] = a</span><span class="diagnostic"><span class="squiggle" style="margin-left:29ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:29ch">Cannot mutably borrow values implicitly</span></span><span class="line">}</span></code></pre></div>
+<p>Parameters never have borrow types. A parameter borrows through its mode instead, and the compiler suggests the mode to write:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-473"></button><textarea hidden id="copy-473">mod example
+
+inc: fun(counter: mut[i32])
+{
+	counter += 1
+}
+
+look: fun(value: imm[i32]) -&gt; i32 =&gt; value
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">inc</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">counter</span>: <span class="c-keyword">mut</span>[<span class="c-type">i32</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:18ch">Cannot use borrow types for parameters<span class="diagnostic-note">Did you mean &#x27;mut counter: i32&#x27;?</span></span></span><span class="line">{</span><span class="line">	<span class="c-parameter">counter</span> += <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">look</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>]) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">value</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot use borrow types for parameters<span class="diagnostic-note">&#x27;value: i32&#x27; is already a read-only borrow</span></span></span></code></pre></div>
+<p>The first error has the hint "Did you mean 'mut counter: i32'?"; the second says "'value: i32' is already a read-only borrow".</p>
+<p>A borrow has no default, since it can't be null. A borrow variable declared without a value must be assigned before it's used, and a record with a borrow field has no <code>T()</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-474"></button><textarea hidden id="copy-474">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var r: imm[i32]
+	printf(&quot;%d\n&quot;, r)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> r: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>]</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, r)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot use uninitialized values</span></span><span class="line">}</span></code></pre></div>
+<h2 id="assigning-to-a-borrow"><a class="anchor" href="#assigning-to-a-borrow">Assigning to a borrow</a></h2>
+<p>What an assignment does to a borrow depends on what is assigned. Assigning a borrow repoints the variable at a new place. Assigning a value to a <code>mut</code> borrow writes through it, as any other use does:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-475"></button><textarea hidden id="copy-475">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var a = 1
+	var b = 2
+	var target = mut a
+	target = 10
+	target = mut b
+	target = 20
+	printf(&quot;%d %d\n&quot;, a, b)
+	var reader: imm[i32] = a
+	printf(&quot;%d &quot;, reader)
+	reader = b
+	printf(&quot;%d\n&quot;, reader)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> a = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">var</span> b = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">var</span> target = <span class="c-keyword">mut</span> a</span><span class="line">	target = <span class="c-literal">10</span></span><span class="line">	target = <span class="c-keyword">mut</span> b</span><span class="line">	target = <span class="c-literal">20</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, a, b)</span><span class="line">	<span class="c-keyword">var</span> reader: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] = a</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d "</span>, reader)</span><span class="line">	reader = b</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, reader)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>10 20
+10 20</pre></div>
+<p>A read-only borrow can't be written through, so assigning a place to an <code>imm[T]</code> variable always repoints it, and <code>reader = b</code> borrows <code>b</code>. Assigning it something that isn't stored, like <code>reader = 5</code>, is "Cannot borrow unstored values". A borrow declared with <code>val</code> can't be repointed:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-476"></button><textarea hidden id="copy-476">mod example
+
+main: fun
+{
+	var a = 1
+	var b = 2
+	val fixed = mut a
+	fixed = mut b
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> a = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">var</span> b = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">val</span> fixed = <span class="c-keyword">mut</span> a</span><span class="line">	fixed = <span class="c-keyword">mut</span> b</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign values</span></span><span class="line">}</span></code></pre></div>
+<h2 id="borrowing-declarations"><a class="anchor" href="#borrowing-declarations">Borrowing declarations</a></h2>
+<p>Plain data copies, so <code>val b = a</code> makes a copy when <code>a</code> is an <code>i32</code> or a record of numbers. A value whose type moves instead, such as a record with a destructor, can't be copied (see <a href="ownership.html#copying-and-moving">Ownership and destructors</a>). For these, a declaration without <code>own</code> borrows instead: <code>val b = a</code> makes <code>b</code> an <code>imm</code> borrow of <code>a</code>, and <code>val b = own a</code> moves <code>a</code> into <code>b</code>.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-477"></button><textarea hidden id="copy-477">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Texture: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;free %d\n&quot;, self.id)
+	}
+}
+
+main: fun
+{
+	val texture = Texture(1)
+	val same = texture
+	printf(&quot;borrowed %d\n&quot;, same.id)
+	val moved = own texture
+	printf(&quot;moved %d\n&quot;, moved.id)
+}</textarea><pre><code><span class="line"><span class="c-type">Texture</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"free %d\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> texture = <span class="c-type">Texture</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> same = texture</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"borrowed %d\n"</span>, same.<span class="c-field">id</span>)</span><span class="line">	<span class="c-keyword">val</span> moved = <span class="c-keyword">own</span> texture</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"moved %d\n"</span>, moved.<span class="c-field">id</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>borrowed 1
+moved 1
+free 1</pre></div>
+<p>The texture is freed once, when <code>moved</code> goes out of scope. <code>same</code> never owned it.</p>
+<p>Writing <code>imm</code> in such a declaration changes nothing, and the compiler gives the hint "Redundant 'imm'". The same rule applies wherever a value is bound without <code>own</code>: elements in <code>for</code> loops (see <a href="arrays.html">Arrays</a>), <code>val</code> bindings in patterns (see <a href="pattern-matching.html">Pattern matching</a>), and values reached through <code>*</code> and <code>[]</code> operators (see <a href="operators.html">Operators</a>).</p>
+<p>A borrowing declaration is a read-only borrow, so it can't be moved out of or written through, even when it's declared with <code>var</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-478"></button><textarea hidden id="copy-478">mod example
+
+Texture: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+take: fun(own texture: Texture)
+{
+}
+
+main: fun
+{
+	var texture = Texture(1)
+	var same = texture
+	same.id = 5
+	take(own same)
+	val copy: Texture = same
+}</textarea><pre><code><span class="line"><span class="c-type">Texture</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">take</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">texture</span>: <span class="c-type">Texture</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> texture = <span class="c-type">Texture</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">var</span> same = texture</span><span class="line">	same.<span class="c-field">id</span> = <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot write through read-only borrows</span></span><span class="line">	<span class="c-function">take</span>(<span class="c-keyword">own</span> same)</span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:9ch">Cannot move borrowed values</span></span><span class="line">	<span class="c-keyword">val</span> copy: <span class="c-type">Texture</span> = same</span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot move borrowed values</span></span><span class="line">}</span></code></pre></div>
+<p><code>var</code> on a borrow only allows repointing it.</p>
+<h2 id="a-borrow-cant-outlive-its-value"><a class="anchor" href="#a-borrow-cant-outlive-its-value">A borrow can't outlive its value</a></h2>
+<p>The compiler follows every borrow from where it's made to each place it's used. A use is an error when, on some path to it, the value the borrow came from has been:</p>
+<ul><li>moved, with <code>own</code> or by passing it to an <code>own</code> parameter;</li><li>dropped at the end of its scope, including a scope inside a loop that ended in an earlier pass;</li><li>reassigned, when its type has a destructor, since that drops the old value.</li></ul>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-479"></button><textarea hidden id="copy-479">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+moved: fun
+{
+	val buffer = Buffer(1)
+	val view = buffer
+	val taken = own buffer
+	printf(&quot;%d\n&quot;, view.id)
+}
+
+dropped: fun
+{
+	var x = 0
+	var longest: imm[i32] = x
+	{
+		val temp = 5
+		longest = temp
+	}
+
+	printf(&quot;%d\n&quot;, longest)
+}
+
+reassigned: fun
+{
+	var buffer = Buffer(1)
+	val first = buffer
+	buffer = Buffer(2)
+	printf(&quot;%d\n&quot;, first.id)
+}
+
+looped: fun
+{
+	val x = 0
+	var last: imm[i32] = x
+	for i in 0..3
+	{
+		printf(&quot;%d\n&quot;, last)
+		val local = i
+		last = local
+	}
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">moved</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> buffer = <span class="c-type">Buffer</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> view = buffer</span><span class="line">	<span class="c-keyword">val</span> taken = <span class="c-keyword">own</span> buffer</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, view.<span class="c-field">id</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot use borrows of moved values<span class="diagnostic-note">Moved on line 21</span></span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">dropped</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> x = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">var</span> longest: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] = x</span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> temp = <span class="c-literal">5</span></span><span class="line">		longest = temp</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, longest)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot use borrows of dropped values<span class="diagnostic-note">Dropped on line 32</span></span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">reassigned</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> buffer = <span class="c-type">Buffer</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> first = buffer</span><span class="line">	buffer = <span class="c-type">Buffer</span>(<span class="c-literal">2</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, first.<span class="c-field">id</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot use borrows of reassigned values<span class="diagnostic-note">Reassigned on line 41</span></span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">looped</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">var</span> last: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] = x</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">3</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, last)</span><span class="diagnostic"><span class="squiggle" style="margin-left:23ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:23ch">Cannot use borrows of dropped values<span class="diagnostic-note">Dropped on line 54 in an earlier iteration</span></span></span><span class="line">		<span class="c-keyword">val</span> local = i</span><span class="line">		last = local</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<p>Each error has a note with the line where the value was moved, dropped or reassigned. In the loop, the note says the value was dropped "in an earlier iteration".</p>
+<p>Only uses are checked. A borrow whose value is gone is fine as long as nothing reads it again, and repointing it at a live value makes it usable again:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-480"></button><textarea hidden id="copy-480">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val start = 10
+	var current: imm[i32] = start
+	for i in 0..3
+	{
+		val doubled = i * 2
+		current = doubled
+		printf(&quot;%d &quot;, current)
+	}
+
+	current = start
+	printf(&quot;%d\n&quot;, current)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> start = <span class="c-literal">10</span></span><span class="line">	<span class="c-keyword">var</span> current: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] = start</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">3</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> doubled = i * <span class="c-literal">2</span></span><span class="line">		current = doubled</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d "</span>, current)</span><span class="line">	}</span><span class="line"> </span><span class="line">	current = start</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, current)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0 2 4 10</pre></div>
+<p>The check follows fields and elements separately. A borrow of one field stays valid when another field is moved out:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-481"></button><textarea hidden id="copy-481">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;drop %d\n&quot;, self.id)
+	}
+}
+
+Pair: rec
+{
+	first: Buffer
+	second: Buffer
+}
+
+main: fun
+{
+	val pair = Pair(Buffer(1), Buffer(2))
+	val first = pair.first
+	val second = own pair.second
+	printf(&quot;%d %d\n&quot;, first.id, second.id)
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"drop %d\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">first</span>: <span class="c-type">Buffer</span></span><span class="line">	<span class="c-field">second</span>: <span class="c-type">Buffer</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> pair = <span class="c-type">Pair</span>(<span class="c-type">Buffer</span>(<span class="c-literal">1</span>), <span class="c-type">Buffer</span>(<span class="c-literal">2</span>))</span><span class="line">	<span class="c-keyword">val</span> first = pair.<span class="c-field">first</span></span><span class="line">	<span class="c-keyword">val</span> second = <span class="c-keyword">own</span> pair.<span class="c-field">second</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, first.<span class="c-field">id</span>, second.<span class="c-field">id</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 2
+drop 2
+drop 1</pre></div>
+<p>Assigning a new value to plain data runs no destructor, so it doesn't end borrows of it. The borrow sees whatever the variable holds when it's read:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-482"></button><textarea hidden id="copy-482">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+}
+
+main: fun
+{
+	var point = Point(1, 2)
+	val view = imm point
+	point = Point(3, 4)
+	printf(&quot;%d %d\n&quot;, view.x, view.y)
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> point = <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">val</span> view = <span class="c-keyword">imm</span> point</span><span class="line">	point = <span class="c-type">Point</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, view.<span class="c-field">x</span>, view.<span class="c-field">y</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 4</pre></div>
+<h2 id="returning-borrows"><a class="anchor" href="#returning-borrows">Returning borrows</a></h2>
+<p>A function can return a borrow. The returned borrow must come from one of these:</p>
+<ul><li>an <code>imm</code> or <code>mut</code> parameter, directly or through a call the parameter was lent to;</li><li>a borrow that a parameter holds, such as a field of a <code>ref rec</code> parameter;</li><li>a module variable or value.</li></ul>
+<p>The caller then treats the result as a borrow of the arguments it lent:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-483"></button><textarea hidden id="copy-483">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Enemy: rec
+{
+	hp: i32
+	kills: i32
+}
+
+stronger: fun(imm a: Enemy, imm b: Enemy) -&gt; imm[Enemy]
+{
+	if a.hp &gt;= b.hp
+		ret imm a
+	ret imm b
+}
+
+kills: fun(mut enemy: Enemy) -&gt; mut[i32] =&gt; mut enemy.kills
+
+main: fun
+{
+	var bat = Enemy(3, 0)
+	val rat = Enemy(5, 0)
+	val best = stronger(imm bat, imm rat)
+	kills(mut bat) += 2
+	val count = mut kills(mut bat)
+	count += 1
+	printf(&quot;%d %d\n&quot;, best.hp, bat.kills)
+}</textarea><pre><code><span class="line"><span class="c-type">Enemy</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">hp</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">kills</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">stronger</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-type">Enemy</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-type">Enemy</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">Enemy</span>]</span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">a</span>.<span class="c-field">hp</span> &gt;= <span class="c-parameter">b</span>.<span class="c-field">hp</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-keyword">imm</span> <span class="c-parameter">a</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-keyword">imm</span> <span class="c-parameter">b</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">kills</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">enemy</span>: <span class="c-type">Enemy</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">mut</span> <span class="c-parameter">enemy</span>.<span class="c-field">kills</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> bat = <span class="c-type">Enemy</span>(<span class="c-literal">3</span>, <span class="c-literal">0</span>)</span><span class="line">	<span class="c-keyword">val</span> rat = <span class="c-type">Enemy</span>(<span class="c-literal">5</span>, <span class="c-literal">0</span>)</span><span class="line">	<span class="c-keyword">val</span> best = <span class="c-function">stronger</span>(<span class="c-keyword">imm</span> bat, <span class="c-keyword">imm</span> rat)</span><span class="line">	<span class="c-function">kills</span>(<span class="c-keyword">mut</span> bat) += <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-keyword">mut</span> <span class="c-function">kills</span>(<span class="c-keyword">mut</span> bat)</span><span class="line">	count += <span class="c-literal">1</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, best.<span class="c-field">hp</span>, bat.<span class="c-field">kills</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>5 3</pre></div>
+<p>A call that returns a <code>mut[T]</code> is a place: it can be assigned to, as in <code>kills(mut bat) += 2</code>, or borrowed again with <code>mut</code>.</p>
+<p>Every other source is an error, since the value would be gone once the function returns. A parameter with no mode is the function's own copy, and an <code>own</code> parameter is the function's to destroy, so neither outlives the call:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-484"></button><textarea hidden id="copy-484">mod example
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Holder: ref rec
+{
+	buffer: imm[Buffer]
+}
+
+make: fun(id: i32) -&gt; Buffer =&gt; Buffer(id)
+
+local: fun -&gt; imm[i32]
+{
+	val x = 5
+	ret imm x
+}
+
+owned: fun(own buffer: Buffer) -&gt; imm[Buffer] =&gt; imm buffer
+
+copied: fun(a: i32) -&gt; imm[i32] =&gt; imm a
+
+temporary: fun -&gt; Holder =&gt; Holder(make(3))
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Holder</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">buffer</span>: <span class="c-keyword">imm</span>[<span class="c-type">Buffer</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">make</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Buffer</span> =&gt; <span class="c-type">Buffer</span>(<span class="c-parameter">id</span>)</span><span class="line"> </span><span class="line"><span class="c-function">local</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>]</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x = <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-keyword">imm</span> x</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot return borrows of local variables</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">owned</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">buffer</span>: <span class="c-type">Buffer</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">Buffer</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-parameter">buffer</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:49ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:49ch">Cannot return borrows of &#x27;own&#x27; parameters</span></span><span class="line"> </span><span class="line"><span class="c-function">copied</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-parameter">a</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:35ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:35ch">Cannot return borrows of copied parameters</span></span><span class="line"> </span><span class="line"><span class="c-function">temporary</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">Holder</span> =&gt; <span class="c-type">Holder</span>(<span class="c-function">make</span>(<span class="c-literal">3</span>))</span><span class="diagnostic"><span class="squiggle" style="margin-left:28ch;width:15ch"></span><span class="diagnostic-text" style="margin-left:28ch">Cannot return borrows of unstored values</span></span></code></pre></div>
+<p>In a method, a returned borrow may come only from <code>self</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-485"></button><textarea hidden id="copy-485">mod example
+
+Enemy: rec
+{
+	hp: i32
+}
+
+Referee: rec
+{
+	best: Enemy
+
+	leader: fun(imm self) -&gt; imm[Enemy] =&gt; imm self.best
+
+	pick: fun(imm self, imm a: Enemy, imm b: Enemy) -&gt; imm[Enemy]
+	{
+		if a.hp &gt;= b.hp
+			ret imm a
+		ret imm b
+	}
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Enemy</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">hp</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Referee</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">best</span>: <span class="c-type">Enemy</span></span><span class="line"> </span><span class="line">	<span class="c-function">leader</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">Enemy</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">best</span></span><span class="line"> </span><span class="line">	<span class="c-function">pick</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-type">Enemy</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-type">Enemy</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">Enemy</span>]</span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> <span class="c-parameter">a</span>.<span class="c-field">hp</span> &gt;= <span class="c-parameter">b</span>.<span class="c-field">hp</span></span><span class="line">			<span class="c-keyword">ret</span> <span class="c-keyword">imm</span> <span class="c-parameter">a</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot return borrows of parameters other than &#x27;self&#x27;</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-keyword">imm</span> <span class="c-parameter">b</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot return borrows of parameters other than &#x27;self&#x27;</span></span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<p>The caller's side follows the same rules as any other borrow. Here <code>leader</code> borrows <code>referee</code>, so replacing <code>referee</code> ends it:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-486"></button><textarea hidden id="copy-486">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Referee: rec
+{
+	best: Name
+
+	leader: fun(imm self) -&gt; imm[Name] =&gt; imm self.best
+}
+
+main: fun
+{
+	var referee = Referee(Name(1))
+	val leader = referee.leader()
+	referee = Referee(Name(2))
+	printf(&quot;%d\n&quot;, leader.id)
+}</textarea><pre><code><span class="line"><span class="c-type">Name</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Referee</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">best</span>: <span class="c-type">Name</span></span><span class="line"> </span><span class="line">	<span class="c-function">leader</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">Name</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">best</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> referee = <span class="c-type">Referee</span>(<span class="c-type">Name</span>(<span class="c-literal">1</span>))</span><span class="line">	<span class="c-keyword">val</span> leader = referee.<span class="c-function">leader</span>()</span><span class="line">	referee = <span class="c-type">Referee</span>(<span class="c-type">Name</span>(<span class="c-literal">2</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, leader.<span class="c-field">id</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot use borrows of reassigned values<span class="diagnostic-note">Reassigned on line 28</span></span></span><span class="line">}</span></code></pre></div>
+<p>Module values live for the whole program, so a function can return a borrow of one:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-487"></button><textarea hidden id="copy-487">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+limit: val i32 = 3
+
+maxLevel: fun -&gt; imm[i32] =&gt; imm limit
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, maxLevel())
+}</textarea><pre><code><span class="line"><span class="c-constant">limit</span>: <span class="c-keyword">val</span> <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line"> </span><span class="line"><span class="c-function">maxLevel</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-constant">limit</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">maxLevel</span>())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3</pre></div>
+<h2 id="records-that-hold-borrows"><a class="anchor" href="#records-that-hold-borrows">Records that hold borrows</a></h2>
+<p>A record with a field that holds a borrow is declared <code>ref rec</code>, and an enum with such a payload <code>ref enum</code>. Types that hold borrows are the borrow types, <code>str</code> (it borrows its bytes; see <a href="text.html">Bool, char and strings</a>), <code>ref</code> records and enums, arrays of any of these, and closures kept as <code>ref fun</code> (see <a href="closures.html">Function values and closures</a>).</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-488"></button><textarea hidden id="copy-488">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Tally: ref rec
+{
+	count: mut[i32]
+	step: i32
+}
+
+Target: ref enum
+{
+	none
+	unit(health: imm[i32])
+}
+
+bump: fun(mut tally: Tally) =&gt; tally.count += tally.step
+
+describe: fun(target: Target) -&gt; i32 =&gt; match target
+{
+	unit(val health) =&gt; health
+	none =&gt; -1
+}
+
+main: fun
+{
+	var kills = 2
+	var tally = Tally(mut kills, 5)
+	bump(mut tally)
+	bump(mut tally)
+	val hp = 40
+	printf(&quot;%d %d %d\n&quot;, kills, describe(Target.unit(hp)), describe(Target.none))
+}</textarea><pre><code><span class="line"><span class="c-type">Tally</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">count</span>: <span class="c-keyword">mut</span>[<span class="c-type">i32</span>]</span><span class="line">	<span class="c-field">step</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Target</span>: <span class="c-keyword">ref</span> <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">unit</span>(health: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>])</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">bump</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">tally</span>: <span class="c-type">Tally</span>) =&gt; <span class="c-parameter">tally</span>.<span class="c-field">count</span> += <span class="c-parameter">tally</span>.<span class="c-field">step</span></span><span class="line"> </span><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">target</span>: <span class="c-type">Target</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">target</span></span><span class="line">{</span><span class="line">	unit(<span class="c-keyword">val</span> health) =&gt; health</span><span class="line">	none =&gt; -<span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> kills = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">var</span> tally = <span class="c-type">Tally</span>(<span class="c-keyword">mut</span> kills, <span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">bump</span>(<span class="c-keyword">mut</span> tally)</span><span class="line">	<span class="c-function">bump</span>(<span class="c-keyword">mut</span> tally)</span><span class="line">	<span class="c-keyword">val</span> hp = <span class="c-literal">40</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, kills, <span class="c-function">describe</span>(<span class="c-type">Target</span>.<span class="c-case">unit</span>(hp)), <span class="c-function">describe</span>(<span class="c-type">Target</span>.<span class="c-case">none</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>12 40 -1</pre></div>
+<p>A <code>mut</code> field takes its argument with <code>mut</code>, as <code>Tally(mut kills, 5)</code> does. An <code>imm</code> field takes a place with or without <code>imm</code>. A plain <code>rec</code> or <code>enum</code> can't hold borrows, and the compiler suggests the fix. Unions can't hold borrows at all.</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-489"></button><textarea hidden id="copy-489">mod example
+
+Label: rec
+{
+	text: str
+}
+
+Target: enum
+{
+	none
+	unit(health: imm[i32])
+}
+
+Raw: union
+{
+	whole: imm[i32]
+	bits: u64
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Label</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">text</span>: <span class="c-type">str</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot store borrows in records that aren&#x27;t &#x27;ref&#x27;<span class="diagnostic-note">Did you mean &#x27;Label: ref rec&#x27;?</span></span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Target</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">unit</span>(health: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot store borrows in enums that aren&#x27;t &#x27;ref&#x27;<span class="diagnostic-note">Did you mean &#x27;Target: ref enum&#x27;?</span></span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Raw</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">whole</span>: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot store borrows in unions</span></span><span class="line">	<span class="c-field">bits</span>: <span class="c-type">u64</span></span><span class="line">}</span></code></pre></div>
+<p>The hints read "Did you mean 'Label: ref rec'?" and "Did you mean 'Target: ref enum'?".</p>
+<p>A <code>ref</code> value borrows whatever its fields borrow, so it follows the rule of the previous sections: it can't be used after those values are gone. A <code>ref rec</code> can have a destructor, and the destructor can use the borrows. This makes a guard that undoes something when its scope ends:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-490"></button><textarea hidden id="copy-490">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Scope: ref rec
+{
+	depth: mut[i32]
+
+	new: op(mut depth: i32)
+	{
+		depth += 1
+		self.depth = mut depth
+	}
+
+	drop: op
+	{
+		self.depth -= 1
+	}
+}
+
+main: fun
+{
+	var depth = 0
+	{
+		val outer = Scope(mut depth)
+		printf(&quot;%d &quot;, depth)
+		{
+			val inner = Scope(mut depth)
+			printf(&quot;%d &quot;, depth)
+		}
+
+		printf(&quot;%d &quot;, depth)
+	}
+
+	printf(&quot;%d\n&quot;, depth)
+}</textarea><pre><code><span class="line"><span class="c-type">Scope</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">depth</span>: <span class="c-keyword">mut</span>[<span class="c-type">i32</span>]</span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-parameter">depth</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-parameter">depth</span> += <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">depth</span> = <span class="c-keyword">mut</span> <span class="c-parameter">depth</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">depth</span> -= <span class="c-literal">1</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> depth = <span class="c-literal">0</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> outer = <span class="c-type">Scope</span>(<span class="c-keyword">mut</span> depth)</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d "</span>, depth)</span><span class="line">		{</span><span class="line">			<span class="c-keyword">val</span> inner = <span class="c-type">Scope</span>(<span class="c-keyword">mut</span> depth)</span><span class="line">			<span class="c-function">printf</span>(<span class="c-literal">"%d "</span>, depth)</span><span class="line">		}</span><span class="line"> </span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d "</span>, depth)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, depth)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 2 1 0</pre></div>
+<p>The destructor counts as a use, so moving <code>depth</code> away while a <code>Scope</code> still borrows it is an error where the scope's destructor runs. Building a <code>ref</code> value from a temporary is an error too, since the temporary is gone at the end of the statement:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-491"></button><textarea hidden id="copy-491">mod example
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Holder: ref rec
+{
+	buffer: imm[Buffer]
+}
+
+Scope: ref rec
+{
+	depth: mut[i32]
+
+	new: op(mut depth: i32)
+	{
+		self.depth = mut depth
+	}
+
+	drop: op
+	{
+		self.depth -= 1
+	}
+}
+
+make: fun(id: i32) -&gt; Buffer =&gt; Buffer(id)
+
+early: fun
+{
+	var depth = 0
+	val scope = Scope(mut depth)
+	val moved = own depth
+}
+
+temporary: fun -&gt; i32
+{
+	val holder = Holder(make(3))
+	ret holder.buffer.id
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Holder</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">buffer</span>: <span class="c-keyword">imm</span>[<span class="c-type">Buffer</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Scope</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">depth</span>: <span class="c-keyword">mut</span>[<span class="c-type">i32</span>]</span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-parameter">depth</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">depth</span> = <span class="c-keyword">mut</span> <span class="c-parameter">depth</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">depth</span> -= <span class="c-literal">1</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">make</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Buffer</span> =&gt; <span class="c-type">Buffer</span>(<span class="c-parameter">id</span>)</span><span class="line"> </span><span class="line"><span class="c-function">early</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> depth = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">val</span> scope = <span class="c-type">Scope</span>(<span class="c-keyword">mut</span> depth)</span><span class="line">	<span class="c-keyword">val</span> moved = <span class="c-keyword">own</span> depth</span><span class="line">}</span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:0ch">Cannot use borrows of moved values<span class="diagnostic-note">&#x27;scope&#x27; is dropped here</span><span class="diagnostic-note">Moved on line 38</span></span></span><span class="line"> </span><span class="line"><span class="c-function">temporary</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> holder = <span class="c-type">Holder</span>(<span class="c-function">make</span>(<span class="c-literal">3</span>))</span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot borrow unstored values</span></span><span class="line">	<span class="c-keyword">ret</span> holder.<span class="c-field">buffer</span>.<span class="c-field">id</span></span><span class="line">}</span></code></pre></div>
+<p>The first error points at the closing brace of <code>early</code>, with the notes "'scope' is dropped here" and the line where <code>depth</code> was moved.</p>
+<h2 id="view-records"><a class="anchor" href="#view-records">View records</a></h2>
+<p>A <code>ref rec</code> or <code>ref enum</code> whose fields can all be copied is a view record. A view record is a window onto something else: borrowing from it means borrowing what it borrows, not the record. The difference shows in a method that hands out borrows. This lexer borrows an array, and each token it returns borrows an element of that array:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-492"></button><textarea hidden id="copy-492">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Token: ref rec
+{
+	value: imm[i32]
+	index: usize
+}
+
+Lexer: ref rec
+{
+	items: imm[array[i32, 6]]
+	offset: usize
+
+	next: fun(mut self) -&gt; Token
+	{
+		val token = Token(imm self.items[self.offset], self.offset)
+		self.offset += 1
+		ret token
+	}
+}
+
+main: fun
+{
+	val items = [10, 20, 30, 40, 50, 60]
+	var first = Lexer(items, 0)
+	val a = first.next()
+	var kept = first.next()
+	{
+		var inner = Lexer(items, 4)
+		kept = inner.next()
+	}
+
+	printf(&quot;%d %d\n&quot;, a.value, kept.value)
+}</textarea><pre><code><span class="line"><span class="c-type">Token</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>]</span><span class="line">	<span class="c-field">index</span>: <span class="c-type">usize</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Lexer</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">items</span>: <span class="c-keyword">imm</span>[<span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">6</span>]]</span><span class="line">	<span class="c-field">offset</span>: <span class="c-type">usize</span></span><span class="line"> </span><span class="line">	<span class="c-function">next</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">Token</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> token = <span class="c-type">Token</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">items</span>[<span class="c-keyword">self</span>.<span class="c-field">offset</span>], <span class="c-keyword">self</span>.<span class="c-field">offset</span>)</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">offset</span> += <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">ret</span> token</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> items = [<span class="c-literal">10</span>, <span class="c-literal">20</span>, <span class="c-literal">30</span>, <span class="c-literal">40</span>, <span class="c-literal">50</span>, <span class="c-literal">60</span>]</span><span class="line">	<span class="c-keyword">var</span> first = <span class="c-type">Lexer</span>(items, <span class="c-literal">0</span>)</span><span class="line">	<span class="c-keyword">val</span> a = first.<span class="c-function">next</span>()</span><span class="line">	<span class="c-keyword">var</span> kept = first.<span class="c-function">next</span>()</span><span class="line">	{</span><span class="line">		<span class="c-keyword">var</span> inner = <span class="c-type">Lexer</span>(items, <span class="c-literal">4</span>)</span><span class="line">		kept = inner.<span class="c-function">next</span>()</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, a.<span class="c-field">value</span>, kept.<span class="c-field">value</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>10 50</pre></div>
+<p><code>next</code> takes <code>mut self</code>, so its token could have borrowed the lexer. Since <code>Lexer</code> is a view record, the token borrows <code>items</code> instead, and <code>kept</code> stays valid after <code>inner</code> is gone. Several tokens can be held at once, and a view record can be copied freely; every copy borrows the same values.</p>
+<p>The same rule lets a function return a borrow that a view record parameter holds, even when the parameter is a copy:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-493"></button><textarea hidden id="copy-493">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Tally: ref rec
+{
+	count: mut[i32]
+}
+
+counter: fun(tally: Tally) -&gt; mut[i32] =&gt; tally.count
+
+main: fun
+{
+	var kills = 1
+	val tally = Tally(mut kills)
+	counter(tally) += 4
+	printf(&quot;%d\n&quot;, kills)
+}</textarea><pre><code><span class="line"><span class="c-type">Tally</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">count</span>: <span class="c-keyword">mut</span>[<span class="c-type">i32</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">counter</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">tally</span>: <span class="c-type">Tally</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] =&gt; <span class="c-parameter">tally</span>.<span class="c-field">count</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> kills = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> tally = <span class="c-type">Tally</span>(<span class="c-keyword">mut</span> kills)</span><span class="line">	<span class="c-function">counter</span>(tally) += <span class="c-literal">4</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, kills)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>5</pre></div>
+<p>The other side of this rule is that a view record can't lend out its own fields. A method returning a borrow of <code>self</code> or of one of its fields is an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-494"></button><textarea hidden id="copy-494">mod example
+
+Lexer: ref rec
+{
+	items: imm[array[i32, 6]]
+	offset: usize
+
+	offsetRef: fun(mut self) -&gt; mut[usize] =&gt; mut self.offset
+
+	itself: fun(mut self) -&gt; mut[Lexer] =&gt; mut self
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Lexer</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">items</span>: <span class="c-keyword">imm</span>[<span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">6</span>]]</span><span class="line">	<span class="c-field">offset</span>: <span class="c-type">usize</span></span><span class="line"> </span><span class="line">	<span class="c-function">offsetRef</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">usize</span>] =&gt; <span class="c-keyword">mut</span> <span class="c-keyword">self</span>.<span class="c-field">offset</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:46ch;width:15ch"></span><span class="diagnostic-text" style="margin-left:46ch">Cannot return borrows of view records</span></span><span class="line"> </span><span class="line">	<span class="c-function">itself</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">Lexer</span>] =&gt; <span class="c-keyword">mut</span> <span class="c-keyword">self</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:43ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:43ch">Cannot return borrows of view records</span></span><span class="line">}</span></code></pre></div>
+<p>A <code>ref rec</code> with a field that can't be copied, such as a field whose type has a destructor, isn't a view record. Borrows taken from it borrow the record itself, so its methods can return borrows of its fields:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-495"></button><textarea hidden id="copy-495">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Guard: rec
+{
+	drop: op
+	{
+		printf(&quot;released\n&quot;)
+	}
+}
+
+Counter: ref rec
+{
+	items: imm[array[i32, 3]]
+	count: i32
+	guard: Guard
+
+	countRef: fun(mut self) -&gt; mut[i32] =&gt; mut self.count
+}
+
+main: fun
+{
+	val items = [1, 2, 3]
+	var counter = Counter(items, 7, Guard())
+	val count = mut counter.countRef()
+	count += 1
+	printf(&quot;%d\n&quot;, counter.count)
+}</textarea><pre><code><span class="line"><span class="c-type">Guard</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"released\n"</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Counter</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">items</span>: <span class="c-keyword">imm</span>[<span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">3</span>]]</span><span class="line">	<span class="c-field">count</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">guard</span>: <span class="c-type">Guard</span></span><span class="line"> </span><span class="line">	<span class="c-function">countRef</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">mut</span> <span class="c-keyword">self</span>.<span class="c-field">count</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> items = [<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>]</span><span class="line">	<span class="c-keyword">var</span> counter = <span class="c-type">Counter</span>(items, <span class="c-literal">7</span>, <span class="c-type">Guard</span>())</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-keyword">mut</span> counter.<span class="c-function">countRef</span>()</span><span class="line">	count += <span class="c-literal">1</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, counter.<span class="c-field">count</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>8
+released</pre></div>
+<h2 id="storing-borrows"><a class="anchor" href="#storing-borrows">Storing borrows</a></h2>
+<p>A local variable can hold any borrow, under the rules above. Storing a borrow where the caller can see it, in a <code>mut</code> parameter or a constructor's <code>self</code>, is limited, so that the caller's borrows stay valid after the call.</p>
+<p>A <code>mut</code> parameter can receive only borrows that came from that same parameter. A function can rearrange what its argument borrows, but can't make it borrow something new:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-496"></button><textarea hidden id="copy-496">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Token: ref rec
+{
+	text: str
+	rest: str
+}
+
+swap: fun(mut token: Token)
+{
+	val text = token.text
+	token.text = token.rest
+	token.rest = text
+}
+
+show: fun(text: str)
+{
+	printf(&quot;%.*s\n&quot;, i32(text.byteLength), text.data)
+}
+
+main: fun
+{
+	var token = Token(&quot;first&quot;, &quot;second&quot;)
+	swap(mut token)
+	show(token.text)
+}</textarea><pre><code><span class="line"><span class="c-type">Token</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">text</span>: <span class="c-type">str</span></span><span class="line">	<span class="c-field">rest</span>: <span class="c-type">str</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">swap</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">token</span>: <span class="c-type">Token</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> text = <span class="c-parameter">token</span>.<span class="c-field">text</span></span><span class="line">	<span class="c-parameter">token</span>.<span class="c-field">text</span> = <span class="c-parameter">token</span>.<span class="c-field">rest</span></span><span class="line">	<span class="c-parameter">token</span>.<span class="c-field">rest</span> = text</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">str</span>)</span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.*s\n"</span>, <span class="c-type">i32</span>(<span class="c-parameter">text</span>.<span class="c-field">byteLength</span>), <span class="c-parameter">text</span>.<span class="c-field">data</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> token = <span class="c-type">Token</span>(<span class="c-literal">"first"</span>, <span class="c-literal">"second"</span>)</span><span class="line">	<span class="c-function">swap</span>(<span class="c-keyword">mut</span> token)</span><span class="line">	<span class="c-function">show</span>(token.<span class="c-field">text</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>second</pre></div>
+<p>Storing a borrow from anywhere else, including another parameter, is an error, and so is storing through a borrow that a parameter holds:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-497"></button><textarea hidden id="copy-497">mod example
+
+Token: ref rec
+{
+	text: str
+	rest: str
+}
+
+Pair: ref rec
+{
+	token: mut[Token]
+}
+
+Tally: ref rec
+{
+	count: mut[i32]
+}
+
+retarget: fun(mut token: Token, other: str)
+{
+	token.text = other
+}
+
+repoint: fun(mut tally: Tally)
+{
+	var local = 1
+	tally.count = mut local
+}
+
+retargetHeld: fun(pair: Pair, other: str)
+{
+	pair.token.text = other
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Token</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">text</span>: <span class="c-type">str</span></span><span class="line">	<span class="c-field">rest</span>: <span class="c-type">str</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">token</span>: <span class="c-keyword">mut</span>[<span class="c-type">Token</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Tally</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">count</span>: <span class="c-keyword">mut</span>[<span class="c-type">i32</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">retarget</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">token</span>: <span class="c-type">Token</span>, <span class="c-parameter">other</span>: <span class="c-type">str</span>)</span><span class="line">{</span><span class="line">	<span class="c-parameter">token</span>.<span class="c-field">text</span> = <span class="c-parameter">other</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot store new borrows in &#x27;mut&#x27; parameters</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">repoint</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">tally</span>: <span class="c-type">Tally</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> local = <span class="c-literal">1</span></span><span class="line">	<span class="c-parameter">tally</span>.<span class="c-field">count</span> = <span class="c-keyword">mut</span> local</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:18ch">Cannot store new borrows in &#x27;mut&#x27; parameters</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">retargetHeld</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">pair</span>: <span class="c-type">Pair</span>, <span class="c-parameter">other</span>: <span class="c-type">str</span>)</span><span class="line">{</span><span class="line">	<span class="c-parameter">pair</span>.<span class="c-field">token</span>.<span class="c-field">text</span> = <span class="c-parameter">other</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot store borrows through borrows from parameters</span></span><span class="line">}</span></code></pre></div>
+<p>A constructor's <code>self</code> is checked like a result. It can store borrows of <code>imm</code> and <code>mut</code> parameters, and borrows that its parameters hold, like a <code>str</code> parameter's bytes. Borrows of locals, copied parameters and <code>own</code> parameters would end when the constructor returns:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-498"></button><textarea hidden id="copy-498">mod example
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Counter: ref rec
+{
+	count: imm[i32]
+
+	new: op
+	{
+		val local = 1
+		self.count = imm local
+	}
+}
+
+Gauge: ref rec
+{
+	level: imm[i32]
+
+	new: op(level: i32)
+	{
+		self.level = imm level
+	}
+}
+
+Viewer: ref rec
+{
+	view: imm[Buffer]
+
+	new: op(own buffer: Buffer)
+	{
+		self.view = imm buffer
+	}
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Counter</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">count</span>: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>]</span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> local = <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">count</span> = <span class="c-keyword">imm</span> local</span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:21ch">Cannot store borrows of local variables in &#x27;self&#x27;</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Gauge</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">level</span>: <span class="c-keyword">imm</span>[<span class="c-type">i32</span>]</span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">level</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">level</span> = <span class="c-keyword">imm</span> <span class="c-parameter">level</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:21ch">Cannot store borrows of copied parameters in &#x27;self&#x27;</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Viewer</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">view</span>: <span class="c-keyword">imm</span>[<span class="c-type">Buffer</span>]</span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-keyword">own</span> <span class="c-parameter">buffer</span>: <span class="c-type">Buffer</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">view</span> = <span class="c-keyword">imm</span> <span class="c-parameter">buffer</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot store borrows of &#x27;own&#x27; parameters in &#x27;self&#x27;</span></span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<p>A destructor can't store new borrows in <code>self</code> either: "Cannot store new borrows in 'self'".</p>
+<h2 id="a-value-cant-borrow-itself"><a class="anchor" href="#a-value-cant-borrow-itself">A value can't borrow itself</a></h2>
+<p>A value can't hold a borrow of its own storage. Moving the value would move the borrow along with it, still pointing at the old place:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-499"></button><textarea hidden id="copy-499">mod example
+
+Pair: ref rec
+{
+	value: i32
+	alias: mut[i32]
+}
+
+main: fun
+{
+	var spare = 0
+	var pair = Pair(1, mut spare)
+	pair.alias = mut pair.value
+}</textarea><pre><code><span class="line"><span class="c-type">Pair</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">alias</span>: <span class="c-keyword">mut</span>[<span class="c-type">i32</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> spare = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">var</span> pair = <span class="c-type">Pair</span>(<span class="c-literal">1</span>, <span class="c-keyword">mut</span> spare)</span><span class="line">	pair.<span class="c-field">alias</span> = <span class="c-keyword">mut</span> pair.<span class="c-field">value</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:14ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot store borrows of values in themselves</span></span><span class="line">}</span></code></pre></div>
+<p>The same holds in constructors (<code>self.alias = mut self.value</code>), between elements of one array, and through payloads. Structures that point into themselves, like a circular list, use <a href="pointers.html">pointers</a>, which the compiler doesn't check.</p>
+<h2 id="module-variables-cant-hold-borrows"><a class="anchor" href="#module-variables-cant-hold-borrows">Module variables can't hold borrows</a></h2>
+<p>A module variable or static field declared with <code>var</code> can't hold a borrow, since it outlives every local. A module <code>val</code> can hold one only when its value is a constant, like a string literal:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-500"></button><textarea hidden id="copy-500">mod example
+
+title: val str = &quot;Cella&quot;
+name: var str = &quot;a&quot;
+limit: val i32 = 4
+pointed: val imm[i32] = limit
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-constant">title</span>: <span class="c-keyword">val</span> <span class="c-type">str</span> = <span class="c-literal">"Cella"</span></span><span class="line">name: <span class="c-keyword">var</span> <span class="c-type">str</span> = <span class="c-literal">"a"</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot store borrows in module variables</span></span><span class="line"><span class="c-constant">limit</span>: <span class="c-keyword">val</span> <span class="c-type">i32</span> = <span class="c-literal">4</span></span><span class="line"><span class="c-constant">pointed</span>: <span class="c-keyword">val</span> <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] = <span class="c-constant">limit</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot store borrows in module values</span></span></code></pre></div>
+<p>Borrows of module variables can be made, kept in locals and returned, as <code>maxLevel</code> showed above. They follow the same rules: reassigning a module variable whose type has a destructor ends the borrows of it.</p>
+<h2 id="borrows-in-closures"><a class="anchor" href="#borrows-in-closures">Borrows in closures</a></h2>
+<p>A lambda that uses a local variable captures it by reference, which makes the closure a borrow of that variable. The rules in this chapter apply to it: calling a closure after a variable it captured is moved or out of scope is an error. <a href="closures.html">Function values and closures</a> covers the details.</p>
+<h2 id="what-isnt-checked"><a class="anchor" href="#what-isnt-checked">What isn't checked</a></h2>
+<p>The compiler checks that a borrow never outlives the value it borrows. It doesn't check how borrows overlap. Several <code>mut</code> borrows of one variable can exist at once, and the variable can be written while an <code>imm</code> borrow of it is held:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-501"></button><textarea hidden id="copy-501">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var x = 1
+	val reader = imm x
+	val first = mut x
+	val second = mut x
+	first += 100
+	second += 1000
+	printf(&quot;%d %d\n&quot;, x, reader)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> x = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> reader = <span class="c-keyword">imm</span> x</span><span class="line">	<span class="c-keyword">val</span> first = <span class="c-keyword">mut</span> x</span><span class="line">	<span class="c-keyword">val</span> second = <span class="c-keyword">mut</span> x</span><span class="line">	first += <span class="c-literal">100</span></span><span class="line">	second += <span class="c-literal">1000</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, x, reader)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1101 1101</pre></div>
+<p>The same goes for calls: one variable can be passed to two <code>mut</code> parameters (see <a href="parameter-modes.html#aliasing-isnt-checked">Parameter modes</a>).</p>
+<p>An <code>imm</code> borrow promises only that code using it doesn't write through it. The value can still change through other names.</p>
+<p>Also unchecked, as in C:</p>
+<ul><li>Invalidation. A borrow of memory reached through a pointer, such as an element of a heap buffer, isn't tied to that memory. Freeing or reallocating it leaves the borrow pointing at freed memory. See <a href="pointers.html">Pointers and raw memory</a>.</li><li>Data races. Nothing stops two threads from using borrows of the same value at once. See <a href="atomics.html">Atomics</a>.</li></ul>
+</article>
+<nav class="pager"><a class="previous" href="parameter-modes.html"><span>Previous</span>Parameter modes</a><a class="next" href="pointers.html"><span>Next</span>Pointers and raw memory</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#what-a-borrow-is">What a borrow is</a></li><li class="level-2"><a href="#making-a-borrow">Making a borrow</a></li><li class="level-2"><a href="#using-a-borrow">Using a borrow</a></li><li class="level-2"><a href="#borrow-types">Borrow types</a></li><li class="level-2"><a href="#assigning-to-a-borrow">Assigning to a borrow</a></li><li class="level-2"><a href="#borrowing-declarations">Borrowing declarations</a></li><li class="level-2"><a href="#a-borrow-cant-outlive-its-value">A borrow can&#x27;t outlive its value</a></li><li class="level-2"><a href="#returning-borrows">Returning borrows</a></li><li class="level-2"><a href="#records-that-hold-borrows">Records that hold borrows</a></li><li class="level-2"><a href="#view-records">View records</a></li><li class="level-2"><a href="#storing-borrows">Storing borrows</a></li><li class="level-2"><a href="#a-value-cant-borrow-itself">A value can&#x27;t borrow itself</a></li><li class="level-2"><a href="#module-variables-cant-hold-borrows">Module variables can&#x27;t hold borrows</a></li><li class="level-2"><a href="#borrows-in-closures">Borrows in closures</a></li><li class="level-2"><a href="#what-isnt-checked">What isn&#x27;t checked</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

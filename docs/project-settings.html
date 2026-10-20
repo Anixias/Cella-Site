@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project settings - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html" class="current"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Project settings</h1>
+<p>A project file, the <code>.celp</code> file in a project's folder, is written in TOML. This page lists every setting it can hold, the values each takes and what it does when it's left out. <a href="projects.html">Projects and building</a> introduces project files and the commands that read them.</p>
+<h2 id="summary"><a class="anchor" href="#summary">Summary</a></h2>
+<div class="table-wrap"><table><thead><tr><th>Setting</th><th>Values</th><th>Default</th><th>In <code>[When]</code> tables</th></tr></thead><tbody><tr><td><code>OutputType</code></td><td><code>"Executable"</code>, <code>"WindowedExecutable"</code>, <code>"SharedLibrary"</code>, <code>"StaticLibrary"</code></td><td>required</td><td>no</td></tr><tr><td><code>CellaVersion</code></td><td>a version such as <code>"0.1.0"</code></td><td>none</td><td>no</td></tr><tr><td><code>StandardLibrary</code></td><td><code>"Full"</code>, <code>"Core"</code>, <code>"None"</code></td><td><code>"Full"</code></td><td>no</td></tr><tr><td><code>SystemLinkPreference</code></td><td><code>"Dynamic"</code>, <code>"Static"</code></td><td><code>"Dynamic"</code></td><td>yes</td></tr><tr><td><code>AssemblyName</code></td><td>a file name</td><td>the project file's name</td><td>yes</td></tr><tr><td><code>BoundsChecks</code></td><td><code>true</code>, <code>false</code></td><td><code>true</code></td><td>yes</td></tr><tr><td><code>OverflowChecks</code></td><td><code>true</code>, <code>false</code></td><td><code>true</code> in debug builds, <code>false</code> in release builds</td><td>yes</td></tr><tr><td><code>DebugInfo</code></td><td><code>true</code>, <code>false</code></td><td><code>true</code></td><td>yes</td></tr><tr><td><code>Referenceable</code></td><td><code>true</code>, <code>false</code></td><td><code>false</code></td><td>yes</td></tr><tr><td><code>Imports</code></td><td>a list of import paths</td><td>none</td><td>no</td></tr><tr><td><code>Prelude</code></td><td>a list of import paths</td><td>none</td><td>no</td></tr><tr><td><code>[Flags]</code></td><td>flag names set to <code>true</code> or <code>false</code></td><td>none</td><td>no</td></tr><tr><td><code>[[ProjectReferences]]</code></td><td><code>Path</code> and <code>Alias</code></td><td>none</td><td>yes</td></tr><tr><td><code>[When."..."]</code></td><td>a condition and the settings it changes</td><td>none</td><td></td></tr></tbody></table></div>
+<p>Setting names are case-sensitive, and any other name is an error such as "Unknown setting 'Optimize'". A setting given twice is an error too.</p>
+<h2 id="outputtype"><a class="anchor" href="#outputtype">OutputType</a></h2>
+<p>What the project builds. It's the one setting every project file needs; without it the build stops with "Missing 'OutputType'".</p>
+<div class="table-wrap"><table><thead><tr><th>Value</th><th>Builds</th><th>Windows file</th><th>Linux file</th></tr></thead><tbody><tr><td><code>"Executable"</code></td><td>a program</td><td><code>name.exe</code></td><td><code>name</code></td></tr><tr><td><code>"WindowedExecutable"</code></td><td>a program that opens no console window on Windows</td><td><code>name.exe</code></td><td><code>name</code></td></tr><tr><td><code>"SharedLibrary"</code></td><td>a library loaded when a program starts</td><td><code>name.dll</code></td><td><code>libname.so</code></td></tr><tr><td><code>"StaticLibrary"</code></td><td>a library linked into each program that uses it</td><td><code>name.lib</code></td><td><code>libname.a</code></td></tr></tbody></table></div>
+<p><code>name</code> is the <a href="#assemblyname">AssemblyName</a>. Executables need a <code>main</code> function, as <a href="functions.html#the-main-function">Functions</a> explains.</p>
+<h2 id="cellaversion"><a class="anchor" href="#cellaversion">CellaVersion</a></h2>
+<p>The version of Cella the project is written for. <code>cella new</code> writes the version that created the project. When you run <code>cella</code>, the launcher reads this setting and runs that version of the compiler, which must be installed; without it, the launcher runs the newest version installed. <a href="projects.html#the-launcher">Projects and building</a> covers the launcher.</p>
+<p>The compiler compares the setting with its own version. A project pinned to a newer version is an error ("Pinned to Cella 99.0.0, newer than this compiler"), and one pinned to an older version gets a warning. The value must be a full version with three numbers, such as <code>"0.1.0"</code> or <code>"0.2.0-dev"</code>.</p>
+<h2 id="standardlibrary"><a class="anchor" href="#standardlibrary">StandardLibrary</a></h2>
+<p>How much of the standard library the project references.</p>
+<div class="table-wrap"><table><thead><tr><th>Value</th><th>References</th></tr></thead><tbody><tr><td><code>"Full"</code></td><td>all of the standard library</td></tr><tr><td><code>"Core"</code></td><td>only the parts that don't depend on the operating system</td></tr><tr><td><code>"None"</code></td><td>nothing</td></tr></tbody></table></div>
+<p>The standard library's <code>panic</code> is in the part that depends on the operating system, so with <code>"Core"</code> or <code>"None"</code> a project has none unless it declares one, as <a href="panics.html#declaring-a-panic-operator">Checks and panics</a> shows.</p>
+<h2 id="systemlinkpreference"><a class="anchor" href="#systemlinkpreference">SystemLinkPreference</a></h2>
+<p>How a program links the C runtime when it's built for Windows with Visual Studio's C++ build tools. <code>"Dynamic"</code> uses the runtime's DLLs, and <code>"Static"</code> copies the runtime into the program. Other builds link the C runtime the same way with either value.</p>
+<p>All projects in one program must agree, in every build. A program that links the C runtime statically can't use a shared library project, and a library used by two programs that link differently is an error. <a href="calling-c.html#linking-the-c-runtime">Calling C</a> covers linking.</p>
+<h2 id="assemblyname"><a class="anchor" href="#assemblyname">AssemblyName</a></h2>
+<p>The name of the output file, without its extension or <code>lib</code> prefix. It defaults to the project file's name, so <code>game.celp</code> builds <code>game.exe</code>. It must be a valid file name, so it can't be empty or contain a path, and the name of a shared library must be ASCII.</p>
+<h2 id="boundschecks"><a class="anchor" href="#boundschecks">BoundsChecks</a></h2>
+<p>Whether indexing an array or a string checks that the index is in range, stopping the program with a panic when it isn't. On by default in every build. The built-in flag <code>boundsChecks</code> says whether the checks are on. <a href="panics.html#turning-checks-on-and-off">Checks and panics</a> covers the checks.</p>
+<h2 id="overflowchecks"><a class="anchor" href="#overflowchecks">OverflowChecks</a></h2>
+<p>Whether arithmetic checks for overflow, stopping the program with a panic when a result doesn't fit its type. On by default in debug builds and off in release builds. The built-in flag <code>overflowChecks</code> says whether the checks are on. <a href="numbers.html#overflow">Numbers</a> and <a href="panics.html#turning-checks-on-and-off">Checks and panics</a> cover overflow.</p>
+<h2 id="debuginfo"><a class="anchor" href="#debuginfo">DebugInfo</a></h2>
+<p>Whether the build includes debug information for debuggers. On by default.</p>
+<h2 id="referenceable"><a class="anchor" href="#referenceable">Referenceable</a></h2>
+<p>Whether other projects can reference this executable and use its <code>pub</code> declarations, as they would a library's. A referenceable executable is built as a shared library that holds its code, and a small program that runs it. The setting applies only to executables, and a referenceable executable can't link the C runtime statically. Referencing an executable without it is an error that names the executable's project file: "... is an executable without 'Referenceable = true'".</p>
+<h2 id="imports-and-prelude"><a class="anchor" href="#imports-and-prelude">Imports and Prelude</a></h2>
+<p><code>Imports</code> lists imports that apply to every source file in the project, written as they would be after <code>use</code>. <code>Prelude</code> lists imports that apply to every project that references this one. <a href="modules.html#project-imports">Modules and visibility</a> covers both.</p>
+<h2 id="flags"><a class="anchor" href="#flags">Flags</a></h2>
+<p><code>[Flags]</code> declares the project's own flags, each set to <code>true</code> or <code>false</code>. Code tests them with <code>when</code>:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-922"></button><textarea hidden id="copy-922">OutputType = &quot;Executable&quot;
+
+[Flags]
+verbose = true</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[Flags]</span></span><span class="line"><span class="c-field">verbose </span>= <span class="c-literal">true</span></span></code></pre></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-923"></button><textarea hidden id="copy-923">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	when verbose
+	{
+		printf(&quot;starting\n&quot;)
+	}
+
+	printf(&quot;done\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> verbose</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"starting\n"</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"done\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>starting
+done</pre></div>
+<p>A flag's name must be an identifier, and it can't be the name of a built-in flag. <code>cella build --flag verbose=false</code> changes a flag's value for one build, as <a href="projects.html#flags">Projects and building</a> shows. <a href="conditional-compilation.html#project-flags">Conditional compilation</a> covers <code>when</code>.</p>
+<p>The built-in flags are always defined:</p>
+<div class="table-wrap"><table><thead><tr><th>Flag</th><th>True when</th></tr></thead><tbody><tr><td><code>windows</code>, <code>linux</code>, <code>macos</code></td><td>building for that operating system</td></tr><tr><td><code>x64</code>, <code>x86</code>, <code>arm64</code>, <code>wasm64</code></td><td>building for that processor</td></tr><tr><td><code>debug</code></td><td>building without <code>--release</code></td></tr><tr><td><code>release</code></td><td>building with <code>--release</code></td></tr><tr><td><code>boundsChecks</code></td><td>bounds checks are on</td></tr><tr><td><code>overflowChecks</code></td><td>overflow checks are on</td></tr></tbody></table></div>
+<h2 id="projectreferences"><a class="anchor" href="#projectreferences">ProjectReferences</a></h2>
+<p>Each <code>[[ProjectReferences]]</code> table makes the project use another one, usually a library. It has two settings:</p>
+<div class="table-wrap"><table><thead><tr><th>Setting</th><th>Meaning</th></tr></thead><tbody><tr><td><code>Path</code></td><td>The other project's <code>.celp</code> file, relative to this project's folder. Required.</td></tr><tr><td><code>Alias</code></td><td>A name to reach the other project's modules through. Optional.</td></tr></tbody></table></div>
+<p>Without an alias, the other project's modules are reached by their own names. With one, they are reached only through the alias, which keeps modules of the same name in different projects apart:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-924"></button><textarea hidden id="copy-924">OutputType = &quot;Executable&quot;
+
+[[ProjectReferences]]
+Path = &#x27;geometry/geometry.celp&#x27;
+Alias = &#x27;geo&#x27;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">'geometry/geometry.celp'</span></span><span class="line"><span class="c-field">Alias </span>= <span class="c-literal">'geo'</span></span></code></pre></div>
+<div class="code toml"><div class="code-title">geometry/geometry.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-925"></button><textarea hidden id="copy-925">OutputType = &quot;StaticLibrary&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span></code></pre></div>
+<div class="code cella"><div class="code-title">geometry/shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-926"></button><textarea hidden id="copy-926">mod shapes
+
+area: pub fun(width: f64, height: f64) -&gt; f64 =&gt; width * height</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">shapes</span></span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">pub</span> <span class="c-keyword">fun</span>(<span class="c-parameter">width</span>: <span class="c-type">f64</span>, <span class="c-parameter">height</span>: <span class="c-type">f64</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-parameter">width</span> * <span class="c-parameter">height</span></span></code></pre></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-927"></button><textarea hidden id="copy-927">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	printf(&quot;%.1f\n&quot;, geo.shapes.area(2.0, 3.0))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f\n"</span>, <span class="c-module">geo</span>.<span class="c-module">shapes</span>.<span class="c-function">area</span>(<span class="c-literal">2.0</span>, <span class="c-literal">3.0</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>6.0</pre></div>
+<p>An alias must be an identifier, can't be the name of a built-in type, and can't name two references. <a href="projects.html#using-a-library-project">Projects and building</a> covers using library projects.</p>
+<h2 id="when-tables"><a class="anchor" href="#when-tables">When tables</a></h2>
+<p>A <code>[When."condition"]</code> table changes settings in the builds where its condition holds. The condition uses flags, built-in or the project's own, with <code>!</code>, <code>&amp;&amp;</code>, <code>||</code> and parentheses, as in a <code>when</code> block. A condition that is a single flag can leave out the quotes: <code>[When.debug]</code>.</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-928"></button><textarea hidden id="copy-928">OutputType = &quot;Executable&quot;
+
+[Flags]
+fast = false
+
+[When.debug]
+OverflowChecks = false
+
+[When.&quot;release || fast&quot;]
+BoundsChecks = false</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[Flags]</span></span><span class="line"><span class="c-field">fast </span>= <span class="c-literal">false</span></span><span class="line"> </span><span class="line"><span class="c-type">[When.debug]</span></span><span class="line"><span class="c-field">OverflowChecks </span>= <span class="c-literal">false</span></span><span class="line"> </span><span class="line"><span class="c-type">[When."release || fast"]</span></span><span class="line"><span class="c-field">BoundsChecks </span>= <span class="c-literal">false</span></span></code></pre></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-929"></button><textarea hidden id="copy-929">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	when overflowChecks
+	{
+		printf(&quot;overflow checks on\n&quot;)
+	}
+	else
+	{
+		printf(&quot;overflow checks off\n&quot;)
+	}
+
+	when boundsChecks
+	{
+		printf(&quot;bounds checks on\n&quot;)
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">when</span> overflowChecks</span><span class="line">	{</span><span class="line">		printf(<span class="c-literal">"overflow checks on\n"</span>)</span><span class="line">	}</span><span class="line">	<span class="c-keyword">else</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"overflow checks off\n"</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">when</span> boundsChecks</span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"bounds checks on\n"</span>)</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>overflow checks off
+bounds checks on</pre></div>
+<p>This is a debug build, so the first table applies and the second doesn't. A release build, or one with <code>--flag fast</code>, would also turn bounds checks off.</p>
+<p>A setting in a <code>When</code> table replaces the one at the top level. Only <code>SystemLinkPreference</code>, <code>AssemblyName</code>, <code>BoundsChecks</code>, <code>OverflowChecks</code>, <code>DebugInfo</code>, <code>Referenceable</code> and project references can go in one. <code>[[When."condition".ProjectReferences]]</code> tables add references in the builds where the condition holds, after the ones at the top level:</p>
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-930"></button><textarea hidden id="copy-930">[[When.windows.ProjectReferences]]
+Path = &#x27;win32/win32.celp&#x27;</textarea><pre><code><span class="line"><span class="c-type">[[When.windows.ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">'win32/win32.celp'</span></span></code></pre></div>
+<p>Two tables whose conditions both hold can't set the same setting: that's an error such as "'BoundsChecks' is set more than once, by [When."debug"] and [When."windows || linux"]".</p>
+<h2 id="problems-in-project-files"><a class="anchor" href="#problems-in-project-files">Problems in project files</a></h2>
+<p>The compiler checks the whole project file before building and reports every problem it finds. Besides unknown and repeated settings, it reports values of the wrong kind, each naming the setting and the table it's in:</p>
+<ul><li>"'Program' is not a valid 'OutputType'"</li><li>"'BoundsChecks' must be true or false"</li><li>"'logging' in [Flags] must be true or false"</li><li>"'Imports' must be a list of strings"</li><li>"Missing 'Path' in [[ProjectReferences]]"</li><li>"Project 'lib/lib.celp' not found"</li><li>"Cannot set 'OutputType' in [When."debug"]"</li><li>"Flag 'unknown' not found in [When."debug &amp;&amp; unknown"]"</li></ul>
+<p>A folder can hold only one project file; a second one is an error, "Cannot share a directory with 'other.celp'".</p>
+</article>
+<nav class="pager"><a class="previous" href="builtin-types.html"><span>Previous</span>Built-in types</a><span></span></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#summary">Summary</a></li><li class="level-2"><a href="#outputtype">OutputType</a></li><li class="level-2"><a href="#cellaversion">CellaVersion</a></li><li class="level-2"><a href="#standardlibrary">StandardLibrary</a></li><li class="level-2"><a href="#systemlinkpreference">SystemLinkPreference</a></li><li class="level-2"><a href="#assemblyname">AssemblyName</a></li><li class="level-2"><a href="#boundschecks">BoundsChecks</a></li><li class="level-2"><a href="#overflowchecks">OverflowChecks</a></li><li class="level-2"><a href="#debuginfo">DebugInfo</a></li><li class="level-2"><a href="#referenceable">Referenceable</a></li><li class="level-2"><a href="#imports-and-prelude">Imports and Prelude</a></li><li class="level-2"><a href="#flags">Flags</a></li><li class="level-2"><a href="#projectreferences">ProjectReferences</a></li><li class="level-2"><a href="#when-tables">When tables</a></li><li class="level-2"><a href="#problems-in-project-files">Problems in project files</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

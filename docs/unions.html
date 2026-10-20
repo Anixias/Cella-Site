@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unions - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html" class="current"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Unions</h1>
+<p>A union stores several members in the same memory. Writing one member and reading another reads the same bytes as a different type, which is how C programs look at the bits of a float or describe data that can take one of several layouts. Unions work like C's unions and have the same layout, so they can be shared with C code.</p>
+<h2 id="declaring-a-union"><a class="anchor" href="#declaring-a-union">Declaring a union</a></h2>
+<p>A union is declared like a record, with <code>union</code> in place of <code>rec</code>. <code>T()</code> creates a union with every byte zero, as does declaring a variable without a value:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-398"></button><textarea hidden id="copy-398">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Bits: union
+{
+	float: f32
+	raw: u32
+}
+
+main: fun
+{
+	var bits = Bits()
+	printf(&quot;%x\n&quot;, bits.raw)
+
+	bits.float = 1.0
+	printf(&quot;%x\n&quot;, bits.raw)
+
+	bits.raw = 0x40490fdb
+	printf(&quot;%.5f\n&quot;, f64(bits.float))
+}</textarea><pre><code><span class="line"><span class="c-type">Bits</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">float</span>: <span class="c-type">f32</span></span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">u32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> bits = <span class="c-type">Bits</span>()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%x\n"</span>, bits.<span class="c-field">raw</span>)</span><span class="line"> </span><span class="line">	bits.<span class="c-field">float</span> = <span class="c-literal">1.0</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%x\n"</span>, bits.<span class="c-field">raw</span>)</span><span class="line"> </span><span class="line">	bits.<span class="c-field">raw</span> = <span class="c-literal">0x40490fdb</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.5f\n"</span>, <span class="c-type">f64</span>(bits.<span class="c-field">float</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0
+3f800000
+3.14159</pre></div>
+<p>Writing <code>bits.float</code> stores the four bytes of the float, and reading <code>bits.raw</code> gives those same bytes as an integer. Nothing records which member was written last; every member can be read at any time.</p>
+<p>A union has no field-by-field constructor, since its members aren't separate values:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-399"></button><textarea hidden id="copy-399">mod example
+
+Bits: union
+{
+	float: f32
+	raw: u32
+}
+
+main: fun
+{
+	val bits = Bits(1)
+}</textarea><pre><code><span class="line"><span class="c-type">Bits</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">float</span>: <span class="c-type">f32</span></span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">u32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> bits = <span class="c-type">Bits</span>(<span class="c-literal">1</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:15ch">No constructor for &#x27;Bits&#x27; accepts these arguments</span></span><span class="line">}</span></code></pre></div>
+<h2 id="members-share-one-address"><a class="anchor" href="#members-share-one-address">Members share one address</a></h2>
+<p>Every member of a union starts at offset 0, so they all have the same address:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-400"></button><textarea hidden id="copy-400">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Bits: union
+{
+	float: f32
+	raw: u32
+	bytes: array[u8, 4]
+}
+
+main: fun
+{
+	var bits = Bits()
+	val a = isize(@bits.float)
+	val b = isize(@bits.raw)
+	val c = isize(@bits.bytes)
+	printf(&quot;%d %d\n&quot;, i32(a == b), i32(b == c))
+
+	bits.raw = 0x11223344
+	printf(&quot;%x %x\n&quot;, bits.bytes[0], bits.bytes[3])
+}</textarea><pre><code><span class="line"><span class="c-type">Bits</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">float</span>: <span class="c-type">f32</span></span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">u32</span></span><span class="line">	<span class="c-field">bytes</span>: <span class="c-type">array</span>[<span class="c-type">u8</span>, <span class="c-literal">4</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> bits = <span class="c-type">Bits</span>()</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-type">isize</span>(@bits.<span class="c-field">float</span>)</span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-type">isize</span>(@bits.<span class="c-field">raw</span>)</span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-type">isize</span>(@bits.<span class="c-field">bytes</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-type">i32</span>(a == b), <span class="c-type">i32</span>(b == c))</span><span class="line"> </span><span class="line">	bits.<span class="c-field">raw</span> = <span class="c-literal">0x11223344</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%x %x\n"</span>, bits.<span class="c-field">bytes</span>[<span class="c-literal">0</span>], bits.<span class="c-field">bytes</span>[<span class="c-literal">3</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 1
+44 11</pre></div>
+<p>A member smaller than the union covers only its first bytes. On the 64-bit Windows and Linux targets, the lowest byte of an integer comes first in memory, which is why <code>bytes[0]</code> is <code>0x44</code>.</p>
+<h2 id="reading-and-writing-members"><a class="anchor" href="#reading-and-writing-members">Reading and writing members</a></h2>
+<p>Members are read and written with <code>.</code>, like fields, and so are the parts of a member that is a record or an array. A union can be a field of a record, and a record can be a member of a union:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-401"></button><textarea hidden id="copy-401">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+MouseInput: rec
+{
+	x: i32
+	y: i32
+	buttons: u32
+}
+
+KeyInput: rec
+{
+	key: u16
+	scan: u16
+	flags: u32
+	time: u64
+}
+
+InputData: union
+{
+	mouse: MouseInput
+	keyboard: KeyInput
+}
+
+Input: rec
+{
+	kind: u32
+	data: InputData
+}
+
+main: fun
+{
+	var input = Input(1, InputData())
+	input.data.keyboard.key = 65
+	input.data.keyboard.time = 99
+	printf(&quot;%d %d\n&quot;, input.data.mouse.x, input.data.keyboard.key)
+}</textarea><pre><code><span class="line"><span class="c-type">MouseInput</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">buttons</span>: <span class="c-type">u32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">KeyInput</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">key</span>: <span class="c-type">u16</span></span><span class="line">	<span class="c-field">scan</span>: <span class="c-type">u16</span></span><span class="line">	<span class="c-field">flags</span>: <span class="c-type">u32</span></span><span class="line">	<span class="c-field">time</span>: <span class="c-type">u64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">InputData</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">mouse</span>: <span class="c-type">MouseInput</span></span><span class="line">	<span class="c-field">keyboard</span>: <span class="c-type">KeyInput</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Input</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">kind</span>: <span class="c-type">u32</span></span><span class="line">	<span class="c-field">data</span>: <span class="c-type">InputData</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> input = <span class="c-type">Input</span>(<span class="c-literal">1</span>, <span class="c-type">InputData</span>())</span><span class="line">	input.<span class="c-field">data</span>.<span class="c-field">keyboard</span>.<span class="c-field">key</span> = <span class="c-literal">65</span></span><span class="line">	input.<span class="c-field">data</span>.<span class="c-field">keyboard</span>.<span class="c-field">time</span> = <span class="c-literal">99</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, input.<span class="c-field">data</span>.<span class="c-field">mouse</span>.<span class="c-field">x</span>, input.<span class="c-field">data</span>.<span class="c-field">keyboard</span>.<span class="c-field">key</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>65 65</pre></div>
+<p><code>mouse.x</code> and <code>keyboard.key</code> start at the same offset, so <code>mouse.x</code> reads the key code in its low bytes.</p>
+<p>Reading a member whose type allows only some bit patterns makes the value valid first. A <code>bool</code> read from a union is <code>true</code> when its byte is not zero:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-402"></button><textarea hidden id="copy-402">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Flags: rec
+{
+	on: bool
+	off: bool
+}
+
+Packed: union
+{
+	flags: Flags
+	raw: u16
+}
+
+main: fun
+{
+	var packed = Packed()
+	packed.raw = 0x0200
+	printf(&quot;%d %d\n&quot;, i32(packed.flags.on), i32(packed.flags.off))
+}</textarea><pre><code><span class="line"><span class="c-type">Flags</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">on</span>: <span class="c-type">bool</span></span><span class="line">	<span class="c-field">off</span>: <span class="c-type">bool</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Packed</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">flags</span>: <span class="c-type">Flags</span></span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">u16</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> packed = <span class="c-type">Packed</span>()</span><span class="line">	packed.<span class="c-field">raw</span> = <span class="c-literal">0x0200</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-type">i32</span>(packed.<span class="c-field">flags</span>.<span class="c-field">on</span>), <span class="c-type">i32</span>(packed.<span class="c-field">flags</span>.<span class="c-field">off</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0 1</pre></div>
+<p>A <code>char</code> read from a union is checked: bytes that aren't a valid character panic.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-403"></button><textarea hidden id="copy-403">mod example
+
+Letter: union
+{
+	letter: char
+	raw: u32
+}
+
+main: fun
+{
+	var letter = Letter()
+	letter.raw = 0xFFFFFFFF
+	val c = letter.letter
+}</textarea><pre><code><span class="line"><span class="c-type">Letter</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">letter</span>: <span class="c-type">char</span></span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">u32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> letter = <span class="c-type">Letter</span>()</span><span class="line">	letter.<span class="c-field">raw</span> = <span class="c-literal">0xFFFFFFFF</span></span><span class="line">	<span class="c-keyword">val</span> c = letter.<span class="c-field">letter</span></span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>Panic at main.ce:13:10: invalid char</pre></div>
+<h2 id="sizes"><a class="anchor" href="#sizes">Sizes</a></h2>
+<p>A union is as large as its largest member, rounded up to a multiple of its alignment, and its alignment is the largest alignment of its members:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-404"></button><textarea hidden id="copy-404">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Mixed: union
+{
+	small: u8
+	wide: i64
+	triple: array[u16, 3]
+}
+
+Color: union
+{
+	floats: array[f32, 4]
+	ints: array[i32, 4]
+}
+
+main: fun
+{
+	printf(&quot;%d %d\n&quot;, i32(sizeOf(Mixed)), i32(alignOf(Mixed)))
+	printf(&quot;%d %d\n&quot;, i32(sizeOf(Color)), i32(alignOf(Color)))
+}</textarea><pre><code><span class="line"><span class="c-type">Mixed</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">small</span>: <span class="c-type">u8</span></span><span class="line">	<span class="c-field">wide</span>: <span class="c-type">i64</span></span><span class="line">	<span class="c-field">triple</span>: <span class="c-type">array</span>[<span class="c-type">u16</span>, <span class="c-literal">3</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Color</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">floats</span>: <span class="c-type">array</span>[<span class="c-type">f32</span>, <span class="c-literal">4</span>]</span><span class="line">	<span class="c-field">ints</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">4</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-type">i32</span>(<span class="c-keyword">sizeOf</span>(<span class="c-type">Mixed</span>)), <span class="c-type">i32</span>(<span class="c-keyword">alignOf</span>(<span class="c-type">Mixed</span>)))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-type">i32</span>(<span class="c-keyword">sizeOf</span>(<span class="c-type">Color</span>)), <span class="c-type">i32</span>(<span class="c-keyword">alignOf</span>(<span class="c-type">Color</span>)))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>8 8
+16 4</pre></div>
+<h2 id="constructors-methods-and-properties"><a class="anchor" href="#constructors-methods-and-properties">Constructors, methods and properties</a></h2>
+<p>A union can declare constructors, methods and properties, as a record does; <a href="records.html">Records</a> and <a href="methods.html">Methods and properties</a> cover them. A constructor sets the members it wants through <code>self</code>. Declaring a constructor removes <code>T()</code>, the same as for records. Properties can give names to the bits of an integer member:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-405"></button><textarea hidden id="copy-405">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+ClearColor: union
+{
+	floats: array[f32, 4]
+	uints: array[u32, 4]
+
+	new: op(red: f32, green: f32, blue: f32)
+	{
+		self.floats = [red, green, blue, 1.0]
+	}
+
+	alpha: fun(self) -&gt; f32 =&gt; self.floats[3]
+}
+
+Flags: union
+{
+	raw: u32
+
+	visible: prop bool
+	{
+		get(self) =&gt; (self.raw &amp; 1) != 0
+		set(mut self, value) =&gt; self.raw = (self.raw &amp; ~1) | u32(value)
+	}
+
+	layer: prop u32
+	{
+		get(self) =&gt; (self.raw &gt;&gt; 2) &amp; 15
+		set(mut self, value) =&gt; self.raw = (self.raw &amp; ~(15 &lt;&lt; 2)) | ((value &amp; 15) &lt;&lt; 2)
+	}
+}
+
+main: fun
+{
+	val color = ClearColor(0.5, 0.25, 0.125)
+	printf(&quot;%.1f %x\n&quot;, f64(color.alpha()), color.uints[3])
+
+	var flags = Flags()
+	flags.visible = true
+	flags.layer = 5
+	printf(&quot;%d %d %d\n&quot;, i32(flags.visible), flags.layer, flags.raw)
+}</textarea><pre><code><span class="line"><span class="c-type">ClearColor</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">floats</span>: <span class="c-type">array</span>[<span class="c-type">f32</span>, <span class="c-literal">4</span>]</span><span class="line">	<span class="c-field">uints</span>: <span class="c-type">array</span>[<span class="c-type">u32</span>, <span class="c-literal">4</span>]</span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">red</span>: <span class="c-type">f32</span>, <span class="c-parameter">green</span>: <span class="c-type">f32</span>, <span class="c-parameter">blue</span>: <span class="c-type">f32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">floats</span> = [<span class="c-parameter">red</span>, <span class="c-parameter">green</span>, <span class="c-parameter">blue</span>, <span class="c-literal">1.0</span>]</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">alpha</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">f32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">floats</span>[<span class="c-literal">3</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Flags</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">u32</span></span><span class="line"> </span><span class="line">	visible: <span class="c-keyword">prop</span> <span class="c-type">bool</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">get</span>(<span class="c-keyword">self</span>) =&gt; (<span class="c-keyword">self</span>.<span class="c-field">raw</span> &amp; <span class="c-literal">1</span>) != <span class="c-literal">0</span></span><span class="line">		<span class="c-keyword">set</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">value</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">raw</span> = (<span class="c-keyword">self</span>.<span class="c-field">raw</span> &amp; ~<span class="c-literal">1</span>) | <span class="c-type">u32</span>(<span class="c-parameter">value</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	layer: <span class="c-keyword">prop</span> <span class="c-type">u32</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">get</span>(<span class="c-keyword">self</span>) =&gt; (<span class="c-keyword">self</span>.<span class="c-field">raw</span> &gt;&gt; <span class="c-literal">2</span>) &amp; <span class="c-literal">15</span></span><span class="line">		<span class="c-keyword">set</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">value</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">raw</span> = (<span class="c-keyword">self</span>.<span class="c-field">raw</span> &amp; ~(<span class="c-literal">15</span> &lt;&lt; <span class="c-literal">2</span>)) | ((<span class="c-parameter">value</span> &amp; <span class="c-literal">15</span>) &lt;&lt; <span class="c-literal">2</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> color = <span class="c-type">ClearColor</span>(<span class="c-literal">0.5</span>, <span class="c-literal">0.25</span>, <span class="c-literal">0.125</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %x\n"</span>, <span class="c-type">f64</span>(color.<span class="c-function">alpha</span>()), color.<span class="c-field">uints</span>[<span class="c-literal">3</span>])</span><span class="line"> </span><span class="line">	<span class="c-keyword">var</span> flags = <span class="c-type">Flags</span>()</span><span class="line">	flags.visible = <span class="c-keyword">true</span></span><span class="line">	flags.layer = <span class="c-literal">5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-type">i32</span>(flags.<span class="c-function">visible</span>), flags.<span class="c-function">layer</span>, flags.<span class="c-field">raw</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1.0 3f800000
+1 5 21</pre></div>
+<p>A union can't declare a destructor or <code>req</code> members, can't take type parameters and can't be a <code>ref union</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-406"></button><textarea hidden id="copy-406">mod example
+
+Holder: union
+{
+	count: req i32
+	raw: u32
+
+	drop: op
+	{
+	}
+}
+
+Generic[T]: union
+{
+	value: i32
+}
+
+Shared: ref union
+{
+	value: i32
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Holder</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">count</span>: <span class="c-keyword">req</span> <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare required fields in unions</span></span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">u32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare destructors in unions</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Generic</span>[T]: <span class="c-keyword">union</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot declare type parameters on unions</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Shared</span>: <span class="c-keyword">ref</span> <span class="c-keyword">union</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot declare &#x27;ref&#x27; unions</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="what-a-union-can-hold"><a class="anchor" href="#what-a-union-can-hold">What a union can hold</a></h2>
+<p>A union holds only plain data: integers, floats, <code>bool</code>, <code>char</code>, pointers, <code>cstr</code>, <code>ext enum</code> values, and arrays and records made of them. A member can't have a destructor, hold a borrow, or be a type with no all-zero value such as a function value. Plain enums can't be members either, and neither can records with fields that the union's module can't see or write, such as <code>pvt</code> and <code>pvt set</code> fields:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-407"></button><textarea hidden id="copy-407">mod example
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Color: enum
+{
+	red
+	green
+}
+
+Locked: rec
+{
+	count: pvt set i32
+}
+
+Holds: union
+{
+	name: Name
+	callback: fun[i32]
+	color: Color
+	locked: Locked
+	raw: u64
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Name</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Color</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">red</span></span><span class="line">	<span class="c-case">green</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Locked</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">count</span>: <span class="c-keyword">pvt</span> <span class="c-keyword">set</span> <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Holds</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">name</span>: <span class="c-type">Name</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot store values with destructors in unions</span></span><span class="line">	<span class="c-field">callback</span>: <span class="c-keyword">fun</span>[<span class="c-type">i32</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot store values without defaults in unions</span></span><span class="line">	<span class="c-field">color</span>: <span class="c-type">Color</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot store &#x27;Color&#x27; values in unions</span></span><span class="line">	<span class="c-field">locked</span>: <span class="c-type">Locked</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot store &#x27;Locked&#x27; values in unions</span></span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">u64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>All members of a union share one visibility. A member can't be less visible than the others, and a member can't restrict who may write it:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-408"></button><textarea hidden id="copy-408">mod example
+
+Hidden: union
+{
+	a: pvt i32
+	b: i32
+}
+
+Guarded: union
+{
+	a: pvt set i32
+	b: i32
+}
+
+Private: union
+{
+	a: pvt i32
+	b: pvt u32
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Hidden</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">a</span>: <span class="c-keyword">pvt</span> <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:7ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:7ch">Cannot make union members less visible than other members</span></span><span class="line">	<span class="c-field">b</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Guarded</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">a</span>: <span class="c-keyword">pvt</span> <span class="c-keyword">set</span> <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:7ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:7ch">Cannot restrict writes to union members</span></span><span class="line">	<span class="c-field">b</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Private</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">a</span>: <span class="c-keyword">pvt</span> <span class="c-type">i32</span></span><span class="line">	<span class="c-field">b</span>: <span class="c-keyword">pvt</span> <span class="c-type">u32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="using-unions-with-c"><a class="anchor" href="#using-unions-with-c">Using unions with C</a></h2>
+<p>A union has the layout of the C union with the same members in the same order, so a union or a record that contains one can be passed to C functions, by value or through a pointer, and C can fill it in. Here C's <code>memset</code> writes the bytes of a union through its address:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-409"></button><textarea hidden id="copy-409">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+ext
+{
+	memset: fun(dest: ptr, value: i32, count: usize) -&gt; ptr
+}
+
+Bits: union
+{
+	float: f32
+	raw: u32
+	bytes: array[u8, 4]
+}
+
+main: fun
+{
+	var bits = Bits()
+	memset(@bits, 0x3f, sizeOf(Bits))
+	printf(&quot;%x %d %.4f\n&quot;, bits.raw, bits.bytes[2], f64(bits.float))
+}</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">memset</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">dest</span>: <span class="c-type">ptr</span>, <span class="c-parameter">value</span>: <span class="c-type">i32</span>, <span class="c-parameter">count</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">ptr</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Bits</span>: <span class="c-keyword">union</span></span><span class="line">{</span><span class="line">	<span class="c-field">float</span>: <span class="c-type">f32</span></span><span class="line">	<span class="c-field">raw</span>: <span class="c-type">u32</span></span><span class="line">	<span class="c-field">bytes</span>: <span class="c-type">array</span>[<span class="c-type">u8</span>, <span class="c-literal">4</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> bits = <span class="c-type">Bits</span>()</span><span class="line">	<span class="c-function">memset</span>(@bits, <span class="c-literal">0x3f</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">Bits</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%x %d %.4f\n"</span>, bits.<span class="c-field">raw</span>, bits.<span class="c-field">bytes</span>[<span class="c-literal">2</span>], <span class="c-type">f64</span>(bits.<span class="c-field">float</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3f3f3f3f 63 0.7471</pre></div>
+<p>The record-with-a-union shape from <a href="#reading-and-writing-members">Reading and writing members</a>, a tag field followed by a union, is how C APIs describe a value that can take one of several forms. In Cella's own code, an <a href="enums.html#payloads">enum with payloads</a> does the same job and checks which case a value is. <a href="calling-c.html">Calling C</a> covers declaring C functions and the types that can cross into C.</p>
+</article>
+<nav class="pager"><a class="previous" href="pattern-matching.html"><span>Previous</span>Pattern matching</a><a class="next" href="ownership.html"><span>Next</span>Ownership and destructors</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#declaring-a-union">Declaring a union</a></li><li class="level-2"><a href="#members-share-one-address">Members share one address</a></li><li class="level-2"><a href="#reading-and-writing-members">Reading and writing members</a></li><li class="level-2"><a href="#sizes">Sizes</a></li><li class="level-2"><a href="#constructors-methods-and-properties">Constructors, methods and properties</a></li><li class="level-2"><a href="#what-a-union-can-hold">What a union can hold</a></li><li class="level-2"><a href="#using-unions-with-c">Using unions with C</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

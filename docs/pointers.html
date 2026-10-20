@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pointers and raw memory - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html" class="current"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Pointers and raw memory</h1>
+<p><code>ptr[T]</code> is a raw pointer to a <code>T</code>, like <code>T *</code> in C. Pointers are for the places borrows can't go: memory from an allocator, structures that point into themselves, and data shared with C. The compiler doesn't check what a pointer points to. A pointer can be null, can outlive its target, and can be freed twice, and what happens then is undefined, as in C.</p>
+<h2 id="addresses-and-dereferencing"><a class="anchor" href="#addresses-and-dereferencing">Addresses and dereferencing</a></h2>
+<p><code>@place</code> gives the address of a place: a variable, a field, an array element, or a value behind another pointer. <code>*p</code> is the value <code>p</code> points to, which can be read, assigned or borrowed:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-502"></button><textarea hidden id="copy-502">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var score = 10
+	val p = @score
+	*p += 5
+	val copy = *p
+	*p = 1
+	printf(&quot;%d %d\n&quot;, score, copy)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> score = <span class="c-literal">10</span></span><span class="line">	<span class="c-keyword">val</span> p = @score</span><span class="line">	*p += <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">val</span> copy = *p</span><span class="line">	*p = <span class="c-literal">1</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, score, copy)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 15</pre></div>
+<p>The type of <code>@score</code> is <code>ptr[i32]</code>. A pointer is plain data: it copies, it can be stored in any record or module variable, and it has no destructor.</p>
+<p>Constants have no storage, so they have no address. Taking the address of a value that was moved away, or of a variable that hasn't been given a value, is an error too:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-503"></button><textarea hidden id="copy-503">mod example
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+limit: const i32 = 4
+
+constant: fun
+{
+	val p = @limit
+}
+
+moved: fun
+{
+	val b = Buffer(1)
+	val c = own b
+	val q = @b
+}
+
+unset: fun
+{
+	var later: Buffer
+	val r = @later
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-constant">limit</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">4</span></span><span class="line"> </span><span class="line"><span class="c-function">constant</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = @<span class="c-constant">limit</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot take the address of constants</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">moved</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-type">Buffer</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-keyword">own</span> b</span><span class="line">	<span class="c-keyword">val</span> q = @b</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot use moved values<span class="diagnostic-note">Moved on line 22</span></span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">unset</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> later: <span class="c-type">Buffer</span></span><span class="line">	<span class="c-keyword">val</span> r = @later</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot use uninitialized values</span></span><span class="line">}</span></code></pre></div>
+<p>[Filling <code>undef</code> storage](#filling-undef-storage) shows the one way to take the address of storage that has no value yet.</p>
+<h2 id="members-through-pointers"><a class="anchor" href="#members-through-pointers">Members through pointers</a></h2>
+<p><code>.</code> looks through one pointer, like C's <code>-&gt;</code>. Fields, methods and properties of the target are reached directly, and they can be assigned, borrowed and have their address taken:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-504"></button><textarea hidden id="copy-504">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+
+	sum: fun(imm self) -&gt; i32 =&gt; self.x + self.y
+}
+
+shift: fun(p: ptr[Point], dx: i32)
+{
+	p.x += dx
+}
+
+grow: fun(mut n: i32) =&gt; n *= 2
+
+main: fun
+{
+	var point = Point(1, 2)
+	val p = @point
+	shift(p, 3)
+	grow(mut p.y)
+	val y = @p.y
+	*y += 1
+	printf(&quot;%d %d %d\n&quot;, point.x, point.y, p.sum())
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">sum</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">x</span> + <span class="c-keyword">self</span>.<span class="c-field">y</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">shift</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">p</span>: <span class="c-type">ptr</span>[<span class="c-type">Point</span>], <span class="c-parameter">dx</span>: <span class="c-type">i32</span>)</span><span class="line">{</span><span class="line">	<span class="c-parameter">p</span>.<span class="c-field">x</span> += <span class="c-parameter">dx</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">grow</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">n</span>: <span class="c-type">i32</span>) =&gt; <span class="c-parameter">n</span> *= <span class="c-literal">2</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> point = <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">val</span> p = @point</span><span class="line">	<span class="c-function">shift</span>(p, <span class="c-literal">3</span>)</span><span class="line">	<span class="c-function">grow</span>(<span class="c-keyword">mut</span> p.<span class="c-field">y</span>)</span><span class="line">	<span class="c-keyword">val</span> y = @p.<span class="c-field">y</span></span><span class="line">	*y += <span class="c-literal">1</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, point.<span class="c-field">x</span>, point.<span class="c-field">y</span>, p.<span class="c-function">sum</span>())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4 5 9</pre></div>
+<p>Chains of pointers work the same way, one level per <code>.</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-505"></button><textarea hidden id="copy-505">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Node: rec
+{
+	value: i32
+	next: ptr[Node]
+}
+
+main: fun
+{
+	val third = Node(4, null)
+	val second = Node(2, @third)
+	val head = Node(1, @second)
+	printf(&quot;%d\n&quot;, head.value + head.next.value + head.next.next.value)
+}</textarea><pre><code><span class="line"><span class="c-type">Node</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">next</span>: <span class="c-type">ptr</span>[<span class="c-type">Node</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> third = <span class="c-type">Node</span>(<span class="c-literal">4</span>, <span class="c-keyword">null</span>)</span><span class="line">	<span class="c-keyword">val</span> second = <span class="c-type">Node</span>(<span class="c-literal">2</span>, @third)</span><span class="line">	<span class="c-keyword">val</span> head = <span class="c-type">Node</span>(<span class="c-literal">1</span>, @second)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, head.<span class="c-field">value</span> + head.<span class="c-field">next</span>.<span class="c-field">value</span> + head.<span class="c-field">next</span>.<span class="c-field">next</span>.<span class="c-field">value</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>7</pre></div>
+<p><code>.</code> looks through exactly one pointer. A <code>ptr[ptr[Point]]</code> needs a <code>*</code> first, as in <code>(*pp).x</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-506"></button><textarea hidden id="copy-506">mod example
+
+Point: rec
+{
+	x: i32
+}
+
+main: fun
+{
+	var point = Point(1)
+	val p = @point
+	val pp = @p
+	val x = pp.x
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> point = <span class="c-type">Point</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> p = @point</span><span class="line">	<span class="c-keyword">val</span> pp = @p</span><span class="line">	<span class="c-keyword">val</span> x = pp.x</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:15ch">Type &#x27;ptr[Point]&#x27; has no member &#x27;x&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="null"><a class="anchor" href="#null">Null</a></h2>
+<p><code>null</code> is the pointer that points nowhere. It converts to every pointer type, and a pointer compares with it using <code>==</code> and <code>!=</code>. A pointer starts as null when its storage is zeroed, as in a <code>var</code> declared without a value or a record built with <code>T()</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-507"></button><textarea hidden id="copy-507">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Node: rec
+{
+	value: i32
+	next: ptr[Node]
+}
+
+length: fun(head: ptr[Node]) -&gt; i32
+{
+	var count = 0
+	var node = head
+	while node != null
+	{
+		count += 1
+		node = node.next
+	}
+
+	ret count
+}
+
+main: fun
+{
+	var last: ptr[Node]
+	val empty = Node()
+	val second = Node(2, last)
+	val first = Node(1, @second)
+	printf(&quot;%d %d %d\n&quot;, length(@first), length(@empty), i32(empty.next == null))
+}</textarea><pre><code><span class="line"><span class="c-type">Node</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">next</span>: <span class="c-type">ptr</span>[<span class="c-type">Node</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">length</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">head</span>: <span class="c-type">ptr</span>[<span class="c-type">Node</span>]) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">var</span> node = <span class="c-parameter">head</span></span><span class="line">	<span class="c-keyword">while</span> node != <span class="c-keyword">null</span></span><span class="line">	{</span><span class="line">		count += <span class="c-literal">1</span></span><span class="line">		node = node.<span class="c-field">next</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> count</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> last: <span class="c-type">ptr</span>[<span class="c-type">Node</span>]</span><span class="line">	<span class="c-keyword">val</span> empty = <span class="c-type">Node</span>()</span><span class="line">	<span class="c-keyword">val</span> second = <span class="c-type">Node</span>(<span class="c-literal">2</span>, last)</span><span class="line">	<span class="c-keyword">val</span> first = <span class="c-type">Node</span>(<span class="c-literal">1</span>, @second)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">length</span>(@first), <span class="c-function">length</span>(@empty), <span class="c-type">i32</span>(empty.<span class="c-field">next</span> == <span class="c-keyword">null</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2 1 1</pre></div>
+<p>Nothing stops a null pointer from being dereferenced. Reading or writing through one is undefined and usually crashes the program, as in C.</p>
+<h2 id="the-untyped-pointer-ptr"><a class="anchor" href="#the-untyped-pointer-ptr">The untyped pointer <code>ptr</code></a></h2>
+<p><code>ptr</code> without a type argument is an untyped pointer, like C's <code>void *</code>. Every <code>ptr[T]</code> converts to <code>ptr</code> implicitly, and <code>ptr[T](raw)</code> converts back. An untyped pointer has no target type, so it can't be dereferenced, indexed or used with <code>.</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-508"></button><textarea hidden id="copy-508">mod example
+
+Point: rec
+{
+	x: i32
+}
+
+main: fun
+{
+	var point = Point(1)
+	val raw: ptr = @point
+	val value = *raw
+	val x = raw.x
+	val first = raw[0]
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> point = <span class="c-type">Point</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> raw: <span class="c-type">ptr</span> = @point</span><span class="line">	<span class="c-keyword">val</span> value = *raw</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot dereference untyped pointers</span></span><span class="line">	<span class="c-keyword">val</span> x = raw.x</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:16ch">Type &#x27;ptr&#x27; has no member &#x27;x&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> first = raw[<span class="c-literal">0</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot index into type &#x27;ptr&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="pointer-arithmetic"><a class="anchor" href="#pointer-arithmetic">Pointer arithmetic</a></h2>
+<p>Adding an integer to a <code>ptr[T]</code> moves it by that many elements, as in C, and subtracting one moves it back. <code>p[i]</code> is <code>*(p + i)</code>, and the index can be negative:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-509"></button><textarea hidden id="copy-509">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var values = [10, 20, 30, 40]
+	var p = @values[0]
+	p[1] = 25
+	val third = p + 2
+	printf(&quot;%d %d %d %d\n&quot;, *third, third[-1], p[3], *(1 + p))
+	p += 3
+	p -= 1
+	printf(&quot;%d\n&quot;, *p)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> values = [<span class="c-literal">10</span>, <span class="c-literal">20</span>, <span class="c-literal">30</span>, <span class="c-literal">40</span>]</span><span class="line">	<span class="c-keyword">var</span> p = @values[<span class="c-literal">0</span>]</span><span class="line">	p[<span class="c-literal">1</span>] = <span class="c-literal">25</span></span><span class="line">	<span class="c-keyword">val</span> third = p + <span class="c-literal">2</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, *third, third[-<span class="c-literal">1</span>], p[<span class="c-literal">3</span>], *(<span class="c-literal">1</span> + p))</span><span class="line">	p += <span class="c-literal">3</span></span><span class="line">	p -= <span class="c-literal">1</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, *p)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>30 25 40 25
+30</pre></div>
+<p>The offset can be any integer type that converts to <code>isize</code> or <code>usize</code> without loss on every target: the integer types up to 32 bits, <code>isize</code> and <code>usize</code>. An <code>i64</code> or <code>u64</code> offset needs a conversion, as in <code>p + isize(n)</code>.</p>
+<p>Subtracting two pointers of the same type gives the number of elements between them, as an <code>isize</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-510"></button><textarea hidden id="copy-510">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var values = [10, 20, 30, 40]
+	val first = @values[0]
+	val last = @values[3]
+	val count = last - first
+	printf(&quot;%lld %d %d\n&quot;, count, i32(first &lt; last), i32(last == first + 3))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> values = [<span class="c-literal">10</span>, <span class="c-literal">20</span>, <span class="c-literal">30</span>, <span class="c-literal">40</span>]</span><span class="line">	<span class="c-keyword">val</span> first = @values[<span class="c-literal">0</span>]</span><span class="line">	<span class="c-keyword">val</span> last = @values[<span class="c-literal">3</span>]</span><span class="line">	<span class="c-keyword">val</span> count = last - first</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%lld %d %d\n"</span>, count, <span class="c-type">i32</span>(first &lt; last), <span class="c-type">i32</span>(last == first + <span class="c-literal">3</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 1 1</pre></div>
+<p>Arithmetic on the untyped <code>ptr</code> counts bytes. A difference between pointers to a type of size zero has no answer, so it's an error where the size is known and a panic in generic code where it turns out to be zero:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-511"></button><textarea hidden id="copy-511">mod example
+
+Empty: rec
+
+main: fun
+{
+	var marks: array[Empty, 3]
+	val gap = @marks[2] - @marks[0]
+}</textarea><pre><code><span class="line"><span class="c-type">Empty</span>: <span class="c-keyword">rec</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> marks: <span class="c-type">array</span>[<span class="c-type">Empty</span>, <span class="c-literal">3</span>]</span><span class="line">	<span class="c-keyword">val</span> gap = @marks[<span class="c-literal">2</span>] - @marks[<span class="c-literal">0</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:21ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot subtract pointers to zero-size type &#x27;Empty&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="comparing-pointers"><a class="anchor" href="#comparing-pointers">Comparing pointers</a></h2>
+<p>Pointers of the same type compare with <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code> and <code>&gt;=</code> by address. The untyped <code>ptr</code> compares with any pointer using <code>==</code> and <code>!=</code>. Pointers to different types don't compare or subtract:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-512"></button><textarea hidden id="copy-512">mod example
+
+main: fun
+{
+	var wide: array[i64, 3]
+	var small: array[i32, 3]
+	val q = @wide[0]
+	val p = @small[0]
+	val gap = q - p
+	val same = q == p
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> wide: <span class="c-type">array</span>[<span class="c-type">i64</span>, <span class="c-literal">3</span>]</span><span class="line">	<span class="c-keyword">var</span> small: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">3</span>]</span><span class="line">	<span class="c-keyword">val</span> q = @wide[<span class="c-literal">0</span>]</span><span class="line">	<span class="c-keyword">val</span> p = @small[<span class="c-literal">0</span>]</span><span class="line">	<span class="c-keyword">val</span> gap = q - p</span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:14ch">No operation defined for &#x27;-&#x27; between &#x27;ptr[i64]&#x27; and &#x27;ptr[i32]&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> same = q == p</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:15ch">No operation defined for &#x27;==&#x27; between &#x27;ptr[i64]&#x27; and &#x27;ptr[i32]&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="converting-pointers"><a class="anchor" href="#converting-pointers">Converting pointers</a></h2>
+<p>Conversions between pointer types are written out, except to <code>ptr</code>:</p>
+<div class="table-wrap"><table><thead><tr><th>From</th><th>To</th><th>Written</th></tr></thead><tbody><tr><td><code>ptr[T]</code></td><td><code>ptr</code></td><td>implicit, or <code>ptr(p)</code></td></tr><tr><td><code>ptr</code></td><td><code>ptr[T]</code></td><td><code>ptr[T](raw)</code></td></tr><tr><td><code>ptr[T]</code></td><td><code>ptr[U]</code></td><td><code>ptr[U](ptr(p))</code></td></tr><tr><td><code>ptr[T]</code></td><td><code>usize</code> or <code>isize</code></td><td><code>usize(p)</code></td></tr><tr><td><code>usize</code> or <code>isize</code></td><td><code>ptr[T]</code></td><td><code>ptr[T](address)</code></td></tr><tr><td><code>cstr</code></td><td><code>ptr[u8]</code></td><td><code>ptr[u8](text)</code></td></tr><tr><td><code>ptr[u8]</code></td><td><code>cstr</code></td><td><code>cstr(bytes)</code></td></tr></tbody></table></div>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-513"></button><textarea hidden id="copy-513">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var value: u32 = 0x07070707
+	val p = @value
+	val bytes = ptr[u8](ptr(p))
+	val address = usize(p)
+	val again = ptr[u32](address)
+	printf(&quot;%d %d\n&quot;, i32(bytes[0]), i32(*again == value))
+	val text: cstr = &quot;hello&quot;
+	val letters = ptr[u8](text)
+	printf(&quot;%c\n&quot;, i32(letters[1]))
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> value: <span class="c-type">u32</span> = <span class="c-literal">0x07070707</span></span><span class="line">	<span class="c-keyword">val</span> p = @value</span><span class="line">	<span class="c-keyword">val</span> bytes = ptr[<span class="c-type">u8</span>](<span class="c-type">ptr</span>(p))</span><span class="line">	<span class="c-keyword">val</span> address = <span class="c-type">usize</span>(p)</span><span class="line">	<span class="c-keyword">val</span> again = ptr[<span class="c-type">u32</span>](address)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-type">i32</span>(bytes[<span class="c-literal">0</span>]), <span class="c-type">i32</span>(*again == value))</span><span class="line">	<span class="c-keyword">val</span> text: <span class="c-type">cstr</span> = <span class="c-literal">"hello"</span></span><span class="line">	<span class="c-keyword">val</span> letters = ptr[<span class="c-type">u8</span>](text)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%c\n"</span>, <span class="c-type">i32</span>(letters[<span class="c-literal">1</span>]))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>7 1
+e</pre></div>
+<p>Going from one typed pointer to another directly is an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-514"></button><textarea hidden id="copy-514">mod example
+
+main: fun
+{
+	var value: u32 = 1
+	val bytes = ptr[u8](@value)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> value: <span class="c-type">u32</span> = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> bytes = ptr[<span class="c-type">u8</span>](@value)</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:15ch"></span><span class="diagnostic-text" style="margin-left:16ch">No constructor for &#x27;ptr[u8]&#x27; accepts argument of type &#x27;ptr[u32]&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="allocating-memory"><a class="anchor" href="#allocating-memory">Allocating memory</a></h2>
+<p>Cella has no allocator of its own. Programs call C's <code>malloc</code> and <code>free</code>, declared in an <code>ext</code> block (see <a href="calling-c.html">Calling C</a>), and size the request with <code>sizeOf</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-515"></button><textarea hidden id="copy-515">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+ext
+{
+	malloc: fun(size: usize) -&gt; ptr
+	free: fun(memory: ptr)
+}
+
+main: fun
+{
+	val count: usize = 5
+	val squares = ptr[i32](malloc(count * sizeOf(i32)))
+	for i in 0..count
+		squares[i] = i32(i * i)
+
+	var total = 0
+	for i in 0..count
+		total += squares[i]
+
+	printf(&quot;%d\n&quot;, total)
+	free(squares)
+}</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">malloc</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">size</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">ptr</span></span><span class="line">	<span class="c-function">free</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">memory</span>: <span class="c-type">ptr</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">usize</span> = <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">val</span> squares = ptr[<span class="c-type">i32</span>](<span class="c-function">malloc</span>(count * <span class="c-keyword">sizeOf</span>(<span class="c-type">i32</span>)))</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..count</span><span class="line">		squares[i] = <span class="c-type">i32</span>(i * i)</span><span class="line"> </span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..count</span><span class="line">		total += squares[i]</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, total)</span><span class="line">	<span class="c-function">free</span>(squares)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>30</pre></div>
+<p><code>squares</code> converts to <code>ptr</code> implicitly when it's passed to <code>free</code>.</p>
+<h2 id="values-with-destructors"><a class="anchor" href="#values-with-destructors">Values with destructors</a></h2>
+<p>Assigning through a pointer is an assignment like any other: <code>*p = v</code> drops the value that was there before storing the new one. Memory fresh from <code>malloc</code> holds no value yet, so dropping it would run a destructor on garbage. Four forms handle values with destructors in raw memory:</p>
+<ul><li><code>own *p = v</code> stores <code>v</code> without dropping anything first.</li><li><code>own *p</code> moves the value out, leaving the memory without one.</li><li><code>drop *p</code> runs the value's destructor in place.</li><li><code>*p = v</code> drops the old value, then stores <code>v</code>.</li></ul>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-516"></button><textarea hidden id="copy-516">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+ext
+{
+	malloc: fun(size: usize) -&gt; ptr
+	free: fun(memory: ptr)
+}
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;drop %d\n&quot;, self.id)
+	}
+}
+
+main: fun
+{
+	val p = ptr[Buffer](malloc(sizeOf(Buffer)))
+	own *p = Buffer(1)
+	*p = Buffer(2)
+	val taken = own *p
+	printf(&quot;took %d\n&quot;, taken.id)
+	own *p = Buffer(3)
+	drop *p
+	free(p)
+	printf(&quot;end\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"drop %d\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = ptr[<span class="c-type">Buffer</span>](<span class="c-function">malloc</span>(<span class="c-keyword">sizeOf</span>(<span class="c-type">Buffer</span>)))</span><span class="line">	<span class="c-keyword">own</span> *p = <span class="c-type">Buffer</span>(<span class="c-literal">1</span>)</span><span class="line">	*p = <span class="c-type">Buffer</span>(<span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">val</span> taken = <span class="c-keyword">own</span> *p</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"took %d\n"</span>, taken.<span class="c-field">id</span>)</span><span class="line">	<span class="c-keyword">own</span> *p = <span class="c-type">Buffer</span>(<span class="c-literal">3</span>)</span><span class="line">	<span class="c-keyword">drop</span> *p</span><span class="line">	<span class="c-function">free</span>(p)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"end\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>drop 1
+took 2
+drop 3
+end
+drop 2</pre></div>
+<p>The compiler doesn't track what the memory holds. After <code>own *p</code> or <code>drop *p</code>, reading <code>*p</code> again, or forgetting to destroy what's there before <code>free</code>, isn't an error.</p>
+<p>The same forms work on fields and elements reached through a pointer, as in <code>own h.buffer = Buffer(4)</code> and <code>own items[0] = Buffer(5)</code>. <code>own</code> assignment only works through pointers, and never on compound assignments. Reading <code>*p</code> without <code>own</code> borrows the value, as any declaration of a value with a destructor does (see <a href="borrows.html">Borrows</a>), so moving it needs <code>own</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-517"></button><textarea hidden id="copy-517">mod example
+
+ext
+{
+	malloc: fun(size: usize) -&gt; ptr
+}
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+take: fun(own b: Buffer)
+{
+}
+
+main: fun
+{
+	val p = ptr[Buffer](malloc(sizeOf(Buffer)))
+	own *p = Buffer(1)
+	val seen = *p
+	take(*p)
+	var b = Buffer(2)
+	own b = Buffer(3)
+	val q = ptr[i32](malloc(4))
+	own *q += 1
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">take</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">b</span>: <span class="c-type">Buffer</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = ptr[<span class="c-type">Buffer</span>](<span class="c-function">malloc</span>(<span class="c-keyword">sizeOf</span>(<span class="c-type">Buffer</span>)))</span><span class="line">	<span class="c-keyword">own</span> *p = <span class="c-type">Buffer</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> seen = *p</span><span class="line">	<span class="c-function">take</span>(*p)</span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:9ch">Cannot move &#x27;Buffer&#x27; values implicitly</span></span><span class="line">	<span class="c-keyword">var</span> b = <span class="c-type">Buffer</span>(<span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">own</span> b = <span class="c-type">Buffer</span>(<span class="c-literal">3</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot assign with &#x27;own&#x27; except through pointers</span></span><span class="line">	<span class="c-keyword">val</span> q = ptr[<span class="c-type">i32</span>](<span class="c-function">malloc</span>(<span class="c-literal">4</span>))</span><span class="line">	<span class="c-keyword">own</span> *q += <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot use &#x27;own&#x27; on compound assignments</span></span><span class="line">}</span></code></pre></div>
+<p>A generic function can do the same with a <code>ptr[T]</code> for any <code>T</code>, as in <code>drop *memory</code> on a <code>memory: ptr[T]</code> parameter. <code>drop *p</code> on a pointer to a trait object is covered in <a href="trait-objects.html">Trait objects</a>.</p>
+<h2 id="filling-undef-storage"><a class="anchor" href="#filling-undef-storage">Filling <code>undef</code> storage</a></h2>
+<p>A variable declared <code>= undef</code> has storage but no value (see <a href="variables.html">Variables and constants</a>). Taking its address with <code>@</code> doesn't count as reading it. Once its address has been taken, the compiler treats the storage as filled, so C functions with out-parameters, like <code>memset</code>, and loops through a pointer can fill it:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-518"></button><textarea hidden id="copy-518">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+ext
+{
+	memset: fun(target: ptr, value: i32, size: usize) -&gt; ptr
+}
+
+fill: fun(target: ptr[i32]) =&gt; *target = 42
+
+main: fun
+{
+	var cleared: array[i32, 4] = undef
+	memset(@cleared, 0, sizeOf(array[i32, 4]))
+	var counted: array[i32, 4] = undef
+	val first = @counted[0]
+	for i in 0..4
+		first[i] = i32(i) * 3
+	var answer: i32 = undef
+	fill(@answer)
+	printf(&quot;%d %d %d\n&quot;, cleared[3], counted[2], answer)
+}</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">memset</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">target</span>: <span class="c-type">ptr</span>, <span class="c-parameter">value</span>: <span class="c-type">i32</span>, <span class="c-parameter">size</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">ptr</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">fill</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">target</span>: <span class="c-type">ptr</span>[<span class="c-type">i32</span>]) =&gt; *<span class="c-parameter">target</span> = <span class="c-literal">42</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> cleared: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">4</span>] = <span class="c-keyword">undef</span></span><span class="line">	<span class="c-function">memset</span>(@cleared, <span class="c-literal">0</span>, <span class="c-keyword">sizeOf</span>(array[<span class="c-type">i32</span>, <span class="c-literal">4</span>]))</span><span class="line">	<span class="c-keyword">var</span> counted: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">4</span>] = <span class="c-keyword">undef</span></span><span class="line">	<span class="c-keyword">val</span> first = @counted[<span class="c-literal">0</span>]</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">4</span></span><span class="line">		first[i] = <span class="c-type">i32</span>(i) * <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">var</span> answer: <span class="c-type">i32</span> = <span class="c-keyword">undef</span></span><span class="line">	<span class="c-function">fill</span>(@answer)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, cleared[<span class="c-literal">3</span>], counted[<span class="c-literal">2</span>], answer)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0 6 42</pre></div>
+<p>The address of an element covers the whole array, and the address of a field covers only that field. Elements with destructors are stored with <code>own</code>, as in <code>own first[i] = Buffer(i32(i))</code>. Anything else that would read the storage before it's filled is still an error, including a <code>mut</code> borrow and a fill that happens on only some paths:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-519"></button><textarea hidden id="copy-519">mod example
+
+fill: fun(target: ptr[i32]) =&gt; *target = 42
+
+bump: fun(mut n: i32) =&gt; n += 1
+
+Pair: rec
+{
+	left: i32
+	right: i32
+}
+
+borrowed: fun -&gt; i32
+{
+	var n: i32 = undef
+	bump(mut n)
+	ret 0
+}
+
+sometimes: fun(flag: bool) -&gt; i32
+{
+	var x: i32 = undef
+	if flag
+		fill(@x)
+
+	ret x
+}
+
+field: fun -&gt; i32
+{
+	var pair: Pair = undef
+	fill(@pair.left)
+	ret pair.right
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">fill</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">target</span>: <span class="c-type">ptr</span>[<span class="c-type">i32</span>]) =&gt; *<span class="c-parameter">target</span> = <span class="c-literal">42</span></span><span class="line"> </span><span class="line"><span class="c-function">bump</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">n</span>: <span class="c-type">i32</span>) =&gt; <span class="c-parameter">n</span> += <span class="c-literal">1</span></span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">left</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">right</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">borrowed</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> n: <span class="c-type">i32</span> = <span class="c-keyword">undef</span></span><span class="line">	<span class="c-function">bump</span>(<span class="c-keyword">mut</span> n)</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot use uninitialized values</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">sometimes</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">flag</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> x: <span class="c-type">i32</span> = <span class="c-keyword">undef</span></span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">flag</span></span><span class="line">		<span class="c-function">fill</span>(@x)</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> x</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot use uninitialized values</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">field</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> pair: <span class="c-type">Pair</span> = <span class="c-keyword">undef</span></span><span class="line">	<span class="c-function">fill</span>(@pair.<span class="c-field">left</span>)</span><span class="line">	<span class="c-keyword">ret</span> pair.<span class="c-field">right</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot use uninitialized values</span></span><span class="line">}</span></code></pre></div>
+<h2 id="sizeof-and-alignof"><a class="anchor" href="#sizeof-and-alignof"><code>sizeOf</code> and <code>alignOf</code></a></h2>
+<p><code>sizeOf(X)</code> is the size of a type or of an expression's type in bytes, and <code>alignOf(X)</code> its alignment. Both are compile-time constants of type <code>usize</code>, so they can size arrays and module constants, and they print with <code>%zu</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-520"></button><textarea hidden id="copy-520">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Mixed: rec
+{
+	flag: bool
+	count: u16
+	total: f64
+}
+
+alignUp: fun(offset: usize, alignment: usize) -&gt; usize =&gt; (offset + alignment - 1) / alignment * alignment
+
+place[T]: fun(offset: usize) -&gt; usize =&gt; alignUp(offset, alignOf(T))
+
+main: fun
+{
+	val value: u16 = 7
+	printf(&quot;%zu %zu %zu %zu\n&quot;, sizeOf(Mixed), alignOf(Mixed), sizeOf(value), alignOf(array[u16, 5]))
+	printf(&quot;%zu %zu %zu\n&quot;, place[u8](3), place[i32](3), place[f64](3))
+}</textarea><pre><code><span class="line"><span class="c-type">Mixed</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">flag</span>: <span class="c-type">bool</span></span><span class="line">	<span class="c-field">count</span>: <span class="c-type">u16</span></span><span class="line">	<span class="c-field">total</span>: <span class="c-type">f64</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">alignUp</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">offset</span>: <span class="c-type">usize</span>, <span class="c-parameter">alignment</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">usize</span> =&gt; (<span class="c-parameter">offset</span> + <span class="c-parameter">alignment</span> - <span class="c-literal">1</span>) / <span class="c-parameter">alignment</span> * <span class="c-parameter">alignment</span></span><span class="line"> </span><span class="line"><span class="c-function">place</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">offset</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">usize</span> =&gt; <span class="c-function">alignUp</span>(<span class="c-parameter">offset</span>, <span class="c-keyword">alignOf</span>(<span class="c-typeparam">T</span>))</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> value: <span class="c-type">u16</span> = <span class="c-literal">7</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">Mixed</span>), <span class="c-keyword">alignOf</span>(<span class="c-type">Mixed</span>), <span class="c-keyword">sizeOf</span>(value), <span class="c-keyword">alignOf</span>(array[<span class="c-type">u16</span>, <span class="c-literal">5</span>]))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu\n"</span>, <span class="c-function">place</span>[<span class="c-type">u8</span>](<span class="c-literal">3</span>), <span class="c-function">place</span>[<span class="c-type">i32</span>](<span class="c-literal">3</span>), <span class="c-function">place</span>[<span class="c-type">f64</span>](<span class="c-literal">3</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>16 8 2 2
+3 4 8</pre></div>
+<p><code>place</code> rounds an offset up to the alignment of <code>T</code>, which is what an allocator other than <code>malloc</code>, such as an arena, needs before handing out memory for a <code>T</code>. Since they're <code>usize</code>, storing them in a narrower type needs a conversion, as in <code>i32(sizeOf(Mixed))</code>. How records are laid out is covered in <a href="records.html">Records</a>.</p>
+<h2 id="what-isnt-checked"><a class="anchor" href="#what-isnt-checked">What isn't checked</a></h2>
+<p>The compiler doesn't follow pointers. This program compiles, and calling <code>dangle</code> returns the address of a variable that no longer exists:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-521"></button><textarea hidden id="copy-521">mod example
+
+dangle: fun -&gt; ptr[i32]
+{
+	var local = 5
+	ret @local
+}
+
+main: fun
+{
+	val p = dangle()
+}</textarea><pre><code><span class="line"><span class="c-function">dangle</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">ptr</span>[<span class="c-type">i32</span>]</span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> local = <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">ret</span> @local</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = <span class="c-function">dangle</span>()</span><span class="line">}</span></code></pre></div>
+<p>None of these are errors, and all of them are undefined at run time, as in C:</p>
+<ul><li>dereferencing a null or dangling pointer;</li><li>reading or writing past the end of an allocation, through <code>*</code> or <code>[]</code>;</li><li>freeing memory twice, or using it after <code>free</code>;</li><li>writing through a pointer to storage that is read-only elsewhere;</li><li>reinterpreting memory through a converted pointer.</li></ul>
+<p>Pointers also take no part in <a href="ownership.html">ownership</a>: a <code>ptr[T]</code> doesn't own its target, and nothing drops what it points to unless the code does it with <code>drop *p</code> or <code>own *p</code>. A borrow made through a pointer, like <code>imm *p</code>, counts as a borrow of a variable when <code>p</code> was taken from that variable with <code>@</code> in the same function, as in <code>val p = @b</code>. A borrow through a pointer that came back from a call, or from an allocator, is tied to nothing, so it stays usable after the memory is freed.</p>
+<p>Structures that point into themselves, like circular lists, are built with pointers for this reason. A borrow could never point at its own record (see <a href="borrows.html">Borrows</a>), but a pointer can:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-522"></button><textarea hidden id="copy-522">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Link: rec
+{
+	next: ptr[Link]
+	prev: ptr[Link]
+}
+
+initialize: fun(mut head: Link)
+{
+	head.next = @head
+	head.prev = @head
+}
+
+append: fun(mut head: Link, mut node: Link)
+{
+	node.next = @head
+	node.prev = head.prev
+	head.prev.next = @node
+	head.prev = @node
+}
+
+length: fun(head: ptr[Link]) -&gt; i32
+{
+	var total = 0
+	var node = head.next
+	while node != head
+	{
+		total += 1
+		node = node.next
+	}
+
+	ret total
+}
+
+main: fun
+{
+	var head = Link()
+	initialize(mut head)
+	var first = Link()
+	var second = Link()
+	append(mut head, mut first)
+	append(mut head, mut second)
+	printf(&quot;%d\n&quot;, length(@head))
+}</textarea><pre><code><span class="line"><span class="c-type">Link</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">next</span>: <span class="c-type">ptr</span>[<span class="c-type">Link</span>]</span><span class="line">	<span class="c-field">prev</span>: <span class="c-type">ptr</span>[<span class="c-type">Link</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">initialize</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">head</span>: <span class="c-type">Link</span>)</span><span class="line">{</span><span class="line">	<span class="c-parameter">head</span>.<span class="c-field">next</span> = @<span class="c-parameter">head</span></span><span class="line">	<span class="c-parameter">head</span>.<span class="c-field">prev</span> = @<span class="c-parameter">head</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">append</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">head</span>: <span class="c-type">Link</span>, <span class="c-keyword">mut</span> <span class="c-parameter">node</span>: <span class="c-type">Link</span>)</span><span class="line">{</span><span class="line">	<span class="c-parameter">node</span>.<span class="c-field">next</span> = @<span class="c-parameter">head</span></span><span class="line">	<span class="c-parameter">node</span>.<span class="c-field">prev</span> = <span class="c-parameter">head</span>.<span class="c-field">prev</span></span><span class="line">	<span class="c-parameter">head</span>.<span class="c-field">prev</span>.<span class="c-field">next</span> = @<span class="c-parameter">node</span></span><span class="line">	<span class="c-parameter">head</span>.<span class="c-field">prev</span> = @<span class="c-parameter">node</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">length</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">head</span>: <span class="c-type">ptr</span>[<span class="c-type">Link</span>]) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">var</span> node = <span class="c-parameter">head</span>.<span class="c-field">next</span></span><span class="line">	<span class="c-keyword">while</span> node != <span class="c-parameter">head</span></span><span class="line">	{</span><span class="line">		total += <span class="c-literal">1</span></span><span class="line">		node = node.<span class="c-field">next</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> total</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> head = <span class="c-type">Link</span>()</span><span class="line">	<span class="c-function">initialize</span>(<span class="c-keyword">mut</span> head)</span><span class="line">	<span class="c-keyword">var</span> first = <span class="c-type">Link</span>()</span><span class="line">	<span class="c-keyword">var</span> second = <span class="c-type">Link</span>()</span><span class="line">	<span class="c-function">append</span>(<span class="c-keyword">mut</span> head, <span class="c-keyword">mut</span> first)</span><span class="line">	<span class="c-function">append</span>(<span class="c-keyword">mut</span> head, <span class="c-keyword">mut</span> second)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">length</span>(@head))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2</pre></div>
+<p>The list stays correct only while <code>head</code>, <code>first</code> and <code>second</code> stay where they are. Moving any of them would leave the others pointing at the old place, and the compiler wouldn't notice.</p>
+</article>
+<nav class="pager"><a class="previous" href="borrows.html"><span>Previous</span>Borrows</a><a class="next" href="generics.html"><span>Next</span>Generics</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#addresses-and-dereferencing">Addresses and dereferencing</a></li><li class="level-2"><a href="#members-through-pointers">Members through pointers</a></li><li class="level-2"><a href="#null">Null</a></li><li class="level-2"><a href="#the-untyped-pointer-ptr">The untyped pointer ptr</a></li><li class="level-2"><a href="#pointer-arithmetic">Pointer arithmetic</a></li><li class="level-2"><a href="#comparing-pointers">Comparing pointers</a></li><li class="level-2"><a href="#converting-pointers">Converting pointers</a></li><li class="level-2"><a href="#allocating-memory">Allocating memory</a></li><li class="level-2"><a href="#values-with-destructors">Values with destructors</a></li><li class="level-2"><a href="#filling-undef-storage">Filling undef storage</a></li><li class="level-2"><a href="#sizeof-and-alignof">sizeOf and alignOf</a></li><li class="level-2"><a href="#what-isnt-checked">What isn&#x27;t checked</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

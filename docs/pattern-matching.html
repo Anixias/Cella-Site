@@ -1,0 +1,1378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pattern matching - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html" class="current"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="closures.html"><span class="number">24.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">25.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">26.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">27.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">28.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">29.</span> Calling C</a></li><li><a href="panics.html"><span class="number">30.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">31.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">32.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">33.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">34.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">35.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Pattern matching</h1>
+<p>A pattern describes a shape a value can have: a particular number, a range, an enum case with certain payload values, a record with certain fields. <code>match</code> compares a value against a list of patterns and runs the first one that fits, and <code>is</code> tests a value against one pattern. Patterns can also bind names to the parts of the value they look at.</p>
+<h2 id="the-match-statement"><a class="anchor" href="#the-match-statement">The match statement</a></h2>
+<p><code>match</code> takes a value and a block of arms. Each arm is a pattern, <code>=&gt;</code>, and a statement. The arms are tried from top to bottom, and the first one whose pattern fits runs:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-351"></button><textarea hidden id="copy-351">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Light: enum { red, yellow, green }
+
+main: fun
+{
+	val lights = [Light.green, Light.yellow, Light.red]
+	for light in lights
+	{
+		match light
+		{
+			green =&gt; printf(&quot;go\n&quot;)
+			yellow =&gt;
+			{
+				printf(&quot;slow down\n&quot;)
+				printf(&quot;then stop\n&quot;)
+			}
+			red =&gt; printf(&quot;stop\n&quot;)
+		}
+	}
+}</textarea><pre><code><span class="line"><span class="c-type">Light</span>: <span class="c-keyword">enum</span> { <span class="c-case">red</span>, <span class="c-case">yellow</span>, <span class="c-case">green</span> }</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> lights = [<span class="c-type">Light</span>.<span class="c-case">green</span>, <span class="c-type">Light</span>.<span class="c-case">yellow</span>, <span class="c-type">Light</span>.<span class="c-case">red</span>]</span><span class="line">	<span class="c-keyword">for</span> light <span class="c-keyword">in</span> lights</span><span class="line">	{</span><span class="line">		<span class="c-keyword">match</span> light</span><span class="line">		{</span><span class="line">			green =&gt; <span class="c-function">printf</span>(<span class="c-literal">"go\n"</span>)</span><span class="line">			yellow =&gt;</span><span class="line">			{</span><span class="line">				<span class="c-function">printf</span>(<span class="c-literal">"slow down\n"</span>)</span><span class="line">				<span class="c-function">printf</span>(<span class="c-literal">"then stop\n"</span>)</span><span class="line">			}</span><span class="line">			red =&gt; <span class="c-function">printf</span>(<span class="c-literal">"stop\n"</span>)</span><span class="line">		}</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>go
+slow down
+then stop
+stop</pre></div>
+<p>An arm's statement can be a block. Arms go on separate lines, or on one line separated by commas, but not both:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-352"></button><textarea hidden id="copy-352">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val n = 2
+	match n { 1 =&gt; printf(&quot;one\n&quot;), 2 =&gt; printf(&quot;two\n&quot;), else =&gt; printf(&quot;many\n&quot;) }
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> n = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">match</span> n { <span class="c-literal">1</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"one\n"</span>), <span class="c-literal">2</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"two\n"</span>), <span class="c-keyword">else</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"many\n"</span>) }</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>two</pre></div>
+<p>An <code>else</code> arm runs when no other arm fits. It must be the last arm, and a match has at most one. A match statement doesn't have to handle every value: when no arm fits and there is no <code>else</code>, it does nothing.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-353"></button><textarea hidden id="copy-353">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	for n in 0..4
+	{
+		match n
+		{
+			1 =&gt; printf(&quot;one\n&quot;)
+			3 =&gt; printf(&quot;three\n&quot;)
+		}
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> n <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">4</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">match</span> n</span><span class="line">		{</span><span class="line">			<span class="c-literal">1</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"one\n"</span>)</span><span class="line">			<span class="c-literal">3</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"three\n"</span>)</span><span class="line">		}</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>one
+three</pre></div>
+<p>The compiler rejects arms that can never run: an arm after <code>else</code>, a second <code>else</code>, or a value that an earlier arm already matched:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-354"></button><textarea hidden id="copy-354">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Light: enum { red, yellow, green }
+
+first: fun(light: Light)
+{
+	match light
+	{
+		else =&gt; printf(&quot;any\n&quot;)
+		red =&gt; printf(&quot;red\n&quot;)
+	}
+}
+
+second: fun(light: Light)
+{
+	match light
+	{
+		red =&gt; printf(&quot;red\n&quot;)
+		red =&gt; printf(&quot;red again\n&quot;)
+		else =&gt; printf(&quot;other\n&quot;)
+		else =&gt; printf(&quot;other again\n&quot;)
+	}
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Light</span>: <span class="c-keyword">enum</span> { <span class="c-case">red</span>, <span class="c-case">yellow</span>, <span class="c-case">green</span> }</span><span class="line"> </span><span class="line"><span class="c-function">first</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">light</span>: <span class="c-type">Light</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">match</span> <span class="c-parameter">light</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">else</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"any\n"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:8ch">&#x27;else&#x27; must be the last arm</span></span><span class="line">		red =&gt; <span class="c-function">printf</span>(<span class="c-literal">"red\n"</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">second</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">light</span>: <span class="c-type">Light</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">match</span> <span class="c-parameter">light</span></span><span class="line">	{</span><span class="line">		red =&gt; <span class="c-function">printf</span>(<span class="c-literal">"red\n"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:8ch">&#x27;red&#x27; is matched more than once</span></span><span class="line">		red =&gt; <span class="c-function">printf</span>(<span class="c-literal">"red again\n"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:8ch">&#x27;red&#x27; is matched more than once</span></span><span class="line">		<span class="c-keyword">else</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"other\n"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:8ch">A match can have only one &#x27;else&#x27; arm</span></span><span class="line">		<span class="c-keyword">else</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"other again\n"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:8ch">A match can have only one &#x27;else&#x27; arm</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="match-expressions"><a class="anchor" href="#match-expressions">Match expressions</a></h2>
+<p>A <code>match</code> can also give a value. Each arm is then a pattern, <code>=&gt;</code>, and an expression, and the match's value is the value of the arm that fits. A match expression works anywhere an expression does, including as a function's expression body:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-355"></button><textarea hidden id="copy-355">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Role: enum { fighter, healer, tank }
+
+damage: fun(role: Role) -&gt; i32 =&gt; match role
+{
+	fighter =&gt; 7
+	tank =&gt; 3
+	else =&gt; 1
+}
+
+main: fun
+{
+	val role = Role.healer
+	val bonus = match role { fighter =&gt; 10, else =&gt; 2 }
+	printf(&quot;%d %d %d\n&quot;, damage(Role.fighter), damage(role), bonus)
+
+	if match role { healer =&gt; true, else =&gt; false }
+		printf(&quot;healer\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-type">Role</span>: <span class="c-keyword">enum</span> { <span class="c-case">fighter</span>, <span class="c-case">healer</span>, <span class="c-case">tank</span> }</span><span class="line"> </span><span class="line"><span class="c-function">damage</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">role</span>: <span class="c-type">Role</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">role</span></span><span class="line">{</span><span class="line">	fighter =&gt; <span class="c-literal">7</span></span><span class="line">	tank =&gt; <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> role = <span class="c-type">Role</span>.<span class="c-case">healer</span></span><span class="line">	<span class="c-keyword">val</span> bonus = <span class="c-keyword">match</span> role { fighter =&gt; <span class="c-literal">10</span>, <span class="c-keyword">else</span> =&gt; <span class="c-literal">2</span> }</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">damage</span>(<span class="c-type">Role</span>.<span class="c-case">fighter</span>), <span class="c-function">damage</span>(role), bonus)</span><span class="line"> </span><span class="line">	<span class="c-keyword">if</span> <span class="c-keyword">match</span> role { healer =&gt; <span class="c-keyword">true</span>, <span class="c-keyword">else</span> =&gt; <span class="c-keyword">false</span> }</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"healer\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>7 1 2
+healer</pre></div>
+<p>The arms must agree on a type. When the match is used where a type is expected, as in a typed declaration or an argument, the arms are checked against that type; otherwise each arm's value has to convert to a common type, and a literal takes the type of the others:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-356"></button><textarea hidden id="copy-356">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Role: enum { fighter, healer, tank }
+
+main: fun
+{
+	val role = Role.healer
+	val small: u8 = match role { fighter =&gt; 1, healer =&gt; 200, tank =&gt; 3 }
+	val big: i64 = match role { fighter =&gt; 1, else =&gt; 5_000_000_000 }
+	printf(&quot;%d %lld\n&quot;, small, big)
+}</textarea><pre><code><span class="line"><span class="c-type">Role</span>: <span class="c-keyword">enum</span> { <span class="c-case">fighter</span>, <span class="c-case">healer</span>, <span class="c-case">tank</span> }</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> role = <span class="c-type">Role</span>.<span class="c-case">healer</span></span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">u8</span> = <span class="c-keyword">match</span> role { fighter =&gt; <span class="c-literal">1</span>, healer =&gt; <span class="c-literal">200</span>, tank =&gt; <span class="c-literal">3</span> }</span><span class="line">	<span class="c-keyword">val</span> big: <span class="c-type">i64</span> = <span class="c-keyword">match</span> role { fighter =&gt; <span class="c-literal">1</span>, <span class="c-keyword">else</span> =&gt; <span class="c-literal">5_000_000_000</span> }</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %lld\n"</span>, small, big)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>200 5000000000</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-357"></button><textarea hidden id="copy-357">mod example
+
+Role: enum { fighter, healer, tank }
+
+main: fun
+{
+	val r = Role.tank
+	val mixed = match r
+	{
+		fighter =&gt; 1
+		healer =&gt; &quot;two&quot;
+		tank =&gt; 3
+	}
+}</textarea><pre><code><span class="line"><span class="c-type">Role</span>: <span class="c-keyword">enum</span> { <span class="c-case">fighter</span>, <span class="c-case">healer</span>, <span class="c-case">tank</span> }</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> r = <span class="c-type">Role</span>.<span class="c-case">tank</span></span><span class="line">	<span class="c-keyword">val</span> mixed = <span class="c-keyword">match</span> r</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:16ch">The arms of this match have incompatible types: &#x27;i32&#x27;, &#x27;str&#x27;</span></span><span class="line">	{</span><span class="line">		fighter =&gt; <span class="c-literal">1</span></span><span class="line">		healer =&gt; <span class="c-literal">"two"</span></span><span class="line">		tank =&gt; <span class="c-literal">3</span></span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<p>An arm can leave the function or loop instead of giving a value, since <code>ret</code>, <code>break</code> and <code>cont</code> are expressions:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-358"></button><textarea hidden id="copy-358">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Reading: enum
+{
+	missing
+	value(n: i32)
+}
+
+show: fun(reading: Reading)
+{
+	val n = match reading { value(val n) =&gt; n, missing =&gt; ret }
+	printf(&quot;read %d\n&quot;, n)
+}
+
+main: fun
+{
+	show(Reading.value(4))
+	show(Reading.missing)
+}</textarea><pre><code><span class="line"><span class="c-type">Reading</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">missing</span></span><span class="line">	<span class="c-case">value</span>(n: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">reading</span>: <span class="c-type">Reading</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> n = <span class="c-keyword">match</span> <span class="c-parameter">reading</span> { value(<span class="c-keyword">val</span> n) =&gt; n, missing =&gt; <span class="c-keyword">ret</span> }</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"read %d\n"</span>, n)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>(<span class="c-type">Reading</span>.<span class="c-case">value</span>(<span class="c-literal">4</span>))</span><span class="line">	<span class="c-function">show</span>(<span class="c-type">Reading</span>.<span class="c-case">missing</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>read 4</pre></div>
+<p>A match expression can be followed by an index, a member access or a call, which apply to its value:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-359"></button><textarea hidden id="copy-359">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Kind: enum { small, large }
+
+main: fun
+{
+	val kind = Kind.large
+	val n = match kind { small =&gt; [1, 2], large =&gt; [3, 4] }[1]
+	printf(&quot;%d\n&quot;, n)
+}</textarea><pre><code><span class="line"><span class="c-type">Kind</span>: <span class="c-keyword">enum</span> { <span class="c-case">small</span>, <span class="c-case">large</span> }</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> kind = <span class="c-type">Kind</span>.<span class="c-case">large</span></span><span class="line">	<span class="c-keyword">val</span> n = <span class="c-keyword">match</span> kind { small =&gt; [<span class="c-literal">1</span>, <span class="c-literal">2</span>], large =&gt; [<span class="c-literal">3</span>, <span class="c-literal">4</span>] }[<span class="c-literal">1</span>]</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, n)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4</pre></div>
+<h2 id="covering-every-value"><a class="anchor" href="#covering-every-value">Covering every value</a></h2>
+<p>A match expression must handle every value its input can have, since it has to give a value either way. The compiler counts enum cases, the values of <code>bool</code>, integer types and <code>char</code>, and record fields. For other types, such as floats, only an <code>else</code> arm covers the rest, and an <code>else</code> arm always does:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-360"></button><textarea hidden id="copy-360">mod example
+
+Role: enum { fighter, healer, tank }
+
+name: fun(role: Role) -&gt; i32 =&gt; match role
+{
+	fighter =&gt; 1
+}
+
+parity: fun(b: bool) -&gt; i32 =&gt; match b
+{
+	true =&gt; 1
+}
+
+bucket: fun(b: u8) -&gt; i32 =&gt; match b
+{
+	0..100 =&gt; 1
+	101..=255 =&gt; 2
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Role</span>: <span class="c-keyword">enum</span> { <span class="c-case">fighter</span>, <span class="c-case">healer</span>, <span class="c-case">tank</span> }</span><span class="line"> </span><span class="line"><span class="c-function">name</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">role</span>: <span class="c-type">Role</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">role</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:32ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:32ch">This match doesn&#x27;t handle every case of &#x27;Role&#x27;: &#x27;healer&#x27; and &#x27;tank&#x27;</span></span><span class="line">{</span><span class="line">	fighter =&gt; <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">parity</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">b</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">b</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:31ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:31ch">This match doesn&#x27;t handle every value of &#x27;bool&#x27;</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">true</span> =&gt; <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">bucket</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">b</span>: <span class="c-type">u8</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">b</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:29ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:29ch">This match doesn&#x27;t handle every value of &#x27;u8&#x27;</span></span><span class="line">{</span><span class="line">	<span class="c-literal">0</span>..<span class="c-literal">100</span> =&gt; <span class="c-literal">1</span></span><span class="line">	<span class="c-literal">101</span>..=<span class="c-literal">255</span> =&gt; <span class="c-literal">2</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>The last match misses 100. Ranges and relational patterns that together cover an integer type's whole range need no <code>else</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-361"></button><textarea hidden id="copy-361">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+sign: fun(n: i8) -&gt; i32 =&gt; match n
+{
+	&lt; 0 =&gt; -1
+	0 =&gt; 0
+	&gt; 0 =&gt; 1
+}
+
+half: fun(b: u8) -&gt; i32 =&gt; match b
+{
+	0..128 =&gt; 0
+	128..=255 =&gt; 1
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d %d\n&quot;, sign(-5), sign(0), half(5), half(200))
+}</textarea><pre><code><span class="line"><span class="c-function">sign</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i8</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">n</span></span><span class="line">{</span><span class="line">	&lt; <span class="c-literal">0</span> =&gt; -<span class="c-literal">1</span></span><span class="line">	<span class="c-literal">0</span> =&gt; <span class="c-literal">0</span></span><span class="line">	&gt; <span class="c-literal">0</span> =&gt; <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">half</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">b</span>: <span class="c-type">u8</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">b</span></span><span class="line">{</span><span class="line">	<span class="c-literal">0</span>..<span class="c-literal">128</span> =&gt; <span class="c-literal">0</span></span><span class="line">	<span class="c-literal">128</span>..=<span class="c-literal">255</span> =&gt; <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, <span class="c-function">sign</span>(-<span class="c-literal">5</span>), <span class="c-function">sign</span>(<span class="c-literal">0</span>), <span class="c-function">half</span>(<span class="c-literal">5</span>), <span class="c-function">half</span>(<span class="c-literal">200</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>-1 0 0 1</pre></div>
+<p>A match statement in which every arm returns counts as returning when it covers every value, so the function needs no <code>ret</code> after it:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-362"></button><textarea hidden id="copy-362">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Team: enum { red, blue }
+
+number: fun(team: Team) -&gt; i32
+{
+	match team
+	{
+		red =&gt; ret 1
+		blue =&gt; ret 2
+	}
+}
+
+main: fun
+{
+	printf(&quot;%d\n&quot;, number(Team.blue))
+}</textarea><pre><code><span class="line"><span class="c-type">Team</span>: <span class="c-keyword">enum</span> { <span class="c-case">red</span>, <span class="c-case">blue</span> }</span><span class="line"> </span><span class="line"><span class="c-function">number</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">team</span>: <span class="c-type">Team</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">match</span> <span class="c-parameter">team</span></span><span class="line">	{</span><span class="line">		red =&gt; <span class="c-keyword">ret</span> <span class="c-literal">1</span></span><span class="line">		blue =&gt; <span class="c-keyword">ret</span> <span class="c-literal">2</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">number</span>(<span class="c-type">Team</span>.<span class="c-case">blue</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2</pre></div>
+<h2 id="value-patterns"><a class="anchor" href="#value-patterns">Value patterns</a></h2>
+<p>Any expression can be a pattern. A value pattern fits when the input is <code>==</code> to it, so it works for any type that has <code>==</code>: literals, constants, variables and parameters are all values:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-363"></button><textarea hidden id="copy-363">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+limit: const i32 = 50
+
+pick: fun(x: i32, low: i32, high: i32) -&gt; i32 =&gt; match x
+{
+	0 =&gt; 0
+	limit =&gt; 1
+	low =&gt; 2
+	high =&gt; 3
+	else =&gt; 4
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d %d %d\n&quot;, pick(0, 3, 9), pick(50, 3, 9), pick(3, 3, 9), pick(9, 3, 9), pick(7, 3, 9))
+}</textarea><pre><code><span class="line"><span class="c-constant">limit</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">50</span></span><span class="line"> </span><span class="line"><span class="c-function">pick</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>, <span class="c-parameter">low</span>: <span class="c-type">i32</span>, <span class="c-parameter">high</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">x</span></span><span class="line">{</span><span class="line">	<span class="c-literal">0</span> =&gt; <span class="c-literal">0</span></span><span class="line">	<span class="c-constant">limit</span> =&gt; <span class="c-literal">1</span></span><span class="line">	<span class="c-parameter">low</span> =&gt; <span class="c-literal">2</span></span><span class="line">	<span class="c-parameter">high</span> =&gt; <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">4</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d %d\n"</span>, <span class="c-function">pick</span>(<span class="c-literal">0</span>, <span class="c-literal">3</span>, <span class="c-literal">9</span>), <span class="c-function">pick</span>(<span class="c-literal">50</span>, <span class="c-literal">3</span>, <span class="c-literal">9</span>), <span class="c-function">pick</span>(<span class="c-literal">3</span>, <span class="c-literal">3</span>, <span class="c-literal">9</span>), <span class="c-function">pick</span>(<span class="c-literal">9</span>, <span class="c-literal">3</span>, <span class="c-literal">9</span>), <span class="c-function">pick</span>(<span class="c-literal">7</span>, <span class="c-literal">3</span>, <span class="c-literal">9</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0 1 2 3 4</pre></div>
+<p>A name in a pattern is always a value, never a new variable: <code>low</code> compares with the parameter <code>low</code>. Binding a new name takes a keyword, as shown in <a href="#bindings">Bindings</a>.</p>
+<p>A record with its own <code>==</code> operator can be matched by value too. <a href="operators.html">Operators</a> shows how to declare one. A type without <code>==</code> can't:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-364"></button><textarea hidden id="copy-364">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+
+	==: op(a: Point, b: Point) -&gt; bool =&gt; a.x == b.x &amp;&amp; a.y == b.y
+}
+
+origin: val Point = Point(0, 0)
+
+where: fun(p: Point) -&gt; i32 =&gt; match p
+{
+	origin =&gt; 0
+	Point(1, 1) =&gt; 1
+	else =&gt; 2
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d\n&quot;, where(Point(0, 0)), where(Point(1, 1)), where(Point(3, 1)))
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">==</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">a</span>.<span class="c-field">x</span> == <span class="c-parameter">b</span>.<span class="c-field">x</span> &amp;&amp; <span class="c-parameter">a</span>.<span class="c-field">y</span> == <span class="c-parameter">b</span>.<span class="c-field">y</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-constant">origin</span>: <span class="c-keyword">val</span> <span class="c-type">Point</span> = <span class="c-type">Point</span>(<span class="c-literal">0</span>, <span class="c-literal">0</span>)</span><span class="line"> </span><span class="line"><span class="c-function">where</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">p</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">p</span></span><span class="line">{</span><span class="line">	<span class="c-constant">origin</span> =&gt; <span class="c-literal">0</span></span><span class="line">	<span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">1</span>) =&gt; <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">2</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">where</span>(<span class="c-type">Point</span>(<span class="c-literal">0</span>, <span class="c-literal">0</span>)), <span class="c-function">where</span>(<span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">1</span>)), <span class="c-function">where</span>(<span class="c-type">Point</span>(<span class="c-literal">3</span>, <span class="c-literal">1</span>)))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0 1 2</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-365"></button><textarea hidden id="copy-365">mod example
+
+Size: rec
+{
+	width: i32
+}
+
+main: fun
+{
+	val s = Size(1)
+	match s
+	{
+		Size(1) =&gt; {}
+	}
+}</textarea><pre><code><span class="line"><span class="c-type">Size</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">width</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> s = <span class="c-type">Size</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">match</span> s</span><span class="line">	{</span><span class="line">		<span class="c-type">Size</span>(<span class="c-literal">1</span>) =&gt; {}</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:8ch">No operation defined for &#x27;==&#x27; between &#x27;Size&#x27; and &#x27;Size&#x27;</span></span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<p>Two constant patterns with the same value in one match are an error, whichever way they're written:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-366"></button><textarea hidden id="copy-366">mod example
+
+five: const i32 = 5
+
+grade: fun(x: i32) -&gt; i32 =&gt; match x
+{
+	5 =&gt; 1
+	five =&gt; 2
+	else =&gt; 0
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-constant">five</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">5</span></span><span class="line"> </span><span class="line"><span class="c-function">grade</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">x</span></span><span class="line">{</span><span class="line">	<span class="c-literal">5</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;5&#x27; and &#x27;five&#x27; are the same value</span></span><span class="line">	<span class="c-constant">five</span> =&gt; <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;5&#x27; and &#x27;five&#x27; are the same value</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="ranges"><a class="anchor" href="#ranges">Ranges</a></h2>
+<p><code>a..b</code> fits values from <code>a</code> up to but not including <code>b</code>, and <code>a..=b</code> includes <code>b</code>. Ranges work for any type with <code>&lt;</code> and <code>&lt;=</code>, such as integers and <code>char</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-367"></button><textarea hidden id="copy-367">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+kind: fun(c: char) -&gt; i32 =&gt; match c
+{
+	&#x27;a&#x27;..=&#x27;z&#x27; =&gt; 1
+	&#x27;A&#x27;..=&#x27;Z&#x27; =&gt; 2
+	&#x27;0&#x27;..=&#x27;9&#x27; =&gt; 3
+	else =&gt; 0
+}
+
+grade: fun(score: i32) -&gt; i32 =&gt; match score
+{
+	0..50 =&gt; 0
+	50..80 =&gt; 1
+	80..=100 =&gt; 2
+	else =&gt; -1
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d %d\n&quot;, kind(&#x27;q&#x27;), kind(&#x27;Q&#x27;), kind(&#x27;7&#x27;), kind(&#x27;#&#x27;))
+	printf(&quot;%d %d %d %d\n&quot;, grade(49), grade(50), grade(100), grade(101))
+}</textarea><pre><code><span class="line"><span class="c-function">kind</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">c</span>: <span class="c-type">char</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">c</span></span><span class="line">{</span><span class="line">	<span class="c-literal">'a'</span>..=<span class="c-literal">'z'</span> =&gt; <span class="c-literal">1</span></span><span class="line">	<span class="c-literal">'A'</span>..=<span class="c-literal">'Z'</span> =&gt; <span class="c-literal">2</span></span><span class="line">	<span class="c-literal">'0'</span>..=<span class="c-literal">'9'</span> =&gt; <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">grade</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">score</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">score</span></span><span class="line">{</span><span class="line">	<span class="c-literal">0</span>..<span class="c-literal">50</span> =&gt; <span class="c-literal">0</span></span><span class="line">	<span class="c-literal">50</span>..<span class="c-literal">80</span> =&gt; <span class="c-literal">1</span></span><span class="line">	<span class="c-literal">80</span>..=<span class="c-literal">100</span> =&gt; <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; -<span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, <span class="c-function">kind</span>(<span class="c-literal">'q'</span>), <span class="c-function">kind</span>(<span class="c-literal">'Q'</span>), <span class="c-function">kind</span>(<span class="c-literal">'7'</span>), <span class="c-function">kind</span>(<span class="c-literal">'#'</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, <span class="c-function">grade</span>(<span class="c-literal">49</span>), <span class="c-function">grade</span>(<span class="c-literal">50</span>), <span class="c-function">grade</span>(<span class="c-literal">100</span>), <span class="c-function">grade</span>(<span class="c-literal">101</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 2 3 0
+0 1 2 -1</pre></div>
+<h2 id="relational-patterns"><a class="anchor" href="#relational-patterns">Relational patterns</a></h2>
+<p>A comparison operator followed by a value fits the values that compare that way: <code>&lt; x</code>, <code>&lt;= x</code>, <code>&gt; x</code>, <code>&gt;= x</code> and <code>!= x</code>. Since the first fitting arm wins, the order of arms matters:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-368"></button><textarea hidden id="copy-368">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+size: fun(x: i32) -&gt; i32 =&gt; match x
+{
+	&gt; 10 =&gt; 3
+	&gt;= 5 =&gt; 2
+	!= 0 =&gt; 1
+	else =&gt; 0
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d %d\n&quot;, size(11), size(5), size(-3), size(0))
+}</textarea><pre><code><span class="line"><span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">x</span></span><span class="line">{</span><span class="line">	&gt; <span class="c-literal">10</span> =&gt; <span class="c-literal">3</span></span><span class="line">	&gt;= <span class="c-literal">5</span> =&gt; <span class="c-literal">2</span></span><span class="line">	!= <span class="c-literal">0</span> =&gt; <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, <span class="c-function">size</span>(<span class="c-literal">11</span>), <span class="c-function">size</span>(<span class="c-literal">5</span>), <span class="c-function">size</span>(-<span class="c-literal">3</span>), <span class="c-function">size</span>(<span class="c-literal">0</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 2 1 0</pre></div>
+<h2 id="several-patterns-in-one-arm"><a class="anchor" href="#several-patterns-in-one-arm">Several patterns in one arm</a></h2>
+<p>An arm can list several patterns separated by commas. It fits when any of them does:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-369"></button><textarea hidden id="copy-369">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	var total = 0
+	for i in 0..20
+	{
+		match i
+		{
+			0, 1 =&gt; total += 1
+			2..5, 7 =&gt; total += 10
+			&gt;= 15 =&gt; total += 100
+			else =&gt; {}
+		}
+	}
+
+	printf(&quot;%d\n&quot;, total)
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">20</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">match</span> i</span><span class="line">		{</span><span class="line">			<span class="c-literal">0</span>, <span class="c-literal">1</span> =&gt; total += <span class="c-literal">1</span></span><span class="line">			<span class="c-literal">2</span>..<span class="c-literal">5</span>, <span class="c-literal">7</span> =&gt; total += <span class="c-literal">10</span></span><span class="line">			&gt;= <span class="c-literal">15</span> =&gt; total += <span class="c-literal">100</span></span><span class="line">			<span class="c-keyword">else</span> =&gt; {}</span><span class="line">		}</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, total)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>542</pre></div>
+<h2 id="enum-cases"><a class="anchor" href="#enum-cases">Enum cases</a></h2>
+<p>A case name is a pattern that fits values of that case. It can be bare or qualified with its type. For a case with a payload, each payload value gets a pattern of its own in parentheses, in order:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-370"></button><textarea hidden id="copy-370">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Hit: enum
+{
+	miss
+	hit(amount: i32)
+	combo(first: i32, second: i32)
+}
+
+score: fun(h: Hit) -&gt; i32 =&gt; match h
+{
+	Hit.miss =&gt; 0
+	hit(0) =&gt; 1
+	hit(1..10) =&gt; 2
+	hit(_) =&gt; 3
+	combo(&gt; 5, _) =&gt; 4
+	combo(_, _) =&gt; 5
+}
+
+main: fun
+{
+	val hits = [Hit.miss, Hit.hit(0), Hit.hit(4), Hit.hit(40), Hit.combo(6, 1), Hit.combo(1, 6)]
+	var total = 0
+	for h in hits
+		total = total * 10 + score(h)
+
+	printf(&quot;%d\n&quot;, total)
+}</textarea><pre><code><span class="line"><span class="c-type">Hit</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">miss</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">	<span class="c-case">combo</span>(first: <span class="c-type">i32</span>, second: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">score</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">h</span>: <span class="c-type">Hit</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">h</span></span><span class="line">{</span><span class="line">	Hit.miss =&gt; <span class="c-literal">0</span></span><span class="line">	hit(<span class="c-literal">0</span>) =&gt; <span class="c-literal">1</span></span><span class="line">	hit(<span class="c-literal">1</span>..<span class="c-literal">10</span>) =&gt; <span class="c-literal">2</span></span><span class="line">	hit(_) =&gt; <span class="c-literal">3</span></span><span class="line">	combo(&gt; <span class="c-literal">5</span>, _) =&gt; <span class="c-literal">4</span></span><span class="line">	combo(_, _) =&gt; <span class="c-literal">5</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> hits = [<span class="c-type">Hit</span>.<span class="c-case">miss</span>, <span class="c-type">Hit</span>.<span class="c-case">hit</span>(<span class="c-literal">0</span>), <span class="c-type">Hit</span>.<span class="c-case">hit</span>(<span class="c-literal">4</span>), <span class="c-type">Hit</span>.<span class="c-case">hit</span>(<span class="c-literal">40</span>), <span class="c-type">Hit</span>.<span class="c-case">combo</span>(<span class="c-literal">6</span>, <span class="c-literal">1</span>), <span class="c-type">Hit</span>.<span class="c-case">combo</span>(<span class="c-literal">1</span>, <span class="c-literal">6</span>)]</span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">for</span> h <span class="c-keyword">in</span> hits</span><span class="line">		total = total * <span class="c-literal">10</span> + <span class="c-function">score</span>(h)</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, total)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>12345</pre></div>
+<p>Any pattern can go inside a payload, including another case pattern, so nested enums are matched in one step:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-371"></button><textarea hidden id="copy-371">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Inner: enum
+{
+	empty
+	value(n: i32)
+}
+
+Outer: enum
+{
+	nothing
+	wrap(inner: Inner)
+}
+
+depth: fun(o: Outer) -&gt; i32 =&gt; match o
+{
+	wrap(value(1..10)) =&gt; 3
+	wrap(value(_)) =&gt; 2
+	wrap(empty) =&gt; 1
+	nothing =&gt; 0
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d %d\n&quot;, depth(Outer.wrap(Inner.value(5))), depth(Outer.wrap(Inner.value(42))),
+		depth(Outer.wrap(Inner.empty)), depth(Outer.nothing))
+}</textarea><pre><code><span class="line"><span class="c-type">Inner</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">empty</span></span><span class="line">	<span class="c-case">value</span>(n: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Outer</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">nothing</span></span><span class="line">	<span class="c-case">wrap</span>(inner: <span class="c-type">Inner</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">depth</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">o</span>: <span class="c-type">Outer</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">o</span></span><span class="line">{</span><span class="line">	wrap(value(<span class="c-literal">1</span>..<span class="c-literal">10</span>)) =&gt; <span class="c-literal">3</span></span><span class="line">	wrap(value(_)) =&gt; <span class="c-literal">2</span></span><span class="line">	wrap(empty) =&gt; <span class="c-literal">1</span></span><span class="line">	nothing =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, <span class="c-function">depth</span>(<span class="c-type">Outer</span>.<span class="c-case">wrap</span>(<span class="c-type">Inner</span>.<span class="c-case">value</span>(<span class="c-literal">5</span>))), <span class="c-function">depth</span>(<span class="c-type">Outer</span>.<span class="c-case">wrap</span>(<span class="c-type">Inner</span>.<span class="c-case">value</span>(<span class="c-literal">42</span>))),</span><span class="line">		<span class="c-function">depth</span>(<span class="c-type">Outer</span>.<span class="c-case">wrap</span>(<span class="c-type">Inner</span>.<span class="c-case">empty</span>)), <span class="c-function">depth</span>(<span class="c-type">Outer</span>.<span class="c-case">nothing</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>3 2 1 0</pre></div>
+<p>A case pattern must give one pattern per payload value, and it has to be a case of the input's enum:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-372"></button><textarea hidden id="copy-372">mod example
+
+Hit: enum
+{
+	miss
+	hit(amount: i32)
+}
+
+Team: enum { red, blue }
+
+main: fun
+{
+	val h = Hit.hit(1)
+	val a = h is hit
+	val b = h is hit(1, 2)
+	val c = h is miss()
+	val d = h is Team.red
+	val e = h is fly
+}</textarea><pre><code><span class="line"><span class="c-type">Hit</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">miss</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Team</span>: <span class="c-keyword">enum</span> { <span class="c-case">red</span>, <span class="c-case">blue</span> }</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> h = <span class="c-type">Hit</span>.<span class="c-case">hit</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> a = h <span class="c-keyword">is</span> hit</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;Hit.hit&#x27; holds 1 value: amount</span></span><span class="line">	<span class="c-keyword">val</span> b = h <span class="c-keyword">is</span> hit(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;Hit.hit&#x27; holds 1 value: amount</span></span><span class="line">	<span class="c-keyword">val</span> c = h <span class="c-keyword">is</span> miss()</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;Hit.miss&#x27; holds no values</span></span><span class="line">	<span class="c-keyword">val</span> d = h <span class="c-keyword">is</span> Team.red</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:17ch">Expected a case of &#x27;Hit&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> e = h <span class="c-keyword">is</span> fly</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;Hit&#x27; has no case &#x27;fly&#x27;</span></span><span class="line">}</span></code></pre></div>
+<h2 id="bindings"><a class="anchor" href="#bindings">Bindings</a></h2>
+<p>A binding gives a name to a part of the value. It starts with a keyword:</p>
+<ul><li><code>val name</code> reads the part. A part that can be copied is copied; any other part is borrowed read-only.</li><li><code>var name</code> makes a copy that the arm can change. The change doesn't reach the matched value. Under <a href="#match-own">match own</a>, it takes the part instead of copying it.</li><li><code>mut name</code> borrows the part mutably, so changing it changes the matched value.</li><li><code>own name</code> moves the part out of the value; see <a href="#match-own">match own</a>.</li></ul>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-373"></button><textarea hidden id="copy-373">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Effect: enum
+{
+	none
+	pair(left: i32, right: i32)
+}
+
+main: fun
+{
+	var effect = Effect.pair(1, 2)
+	match effect
+	{
+		pair(var a, val b) =&gt;
+		{
+			a += 10
+			printf(&quot;%d %d\n&quot;, a, b)
+		}
+		none =&gt; {}
+	}
+
+	if effect is pair(mut a, val b)
+		a = b * 100
+
+	match effect
+	{
+		pair(val a, val b) =&gt; printf(&quot;%d %d\n&quot;, a, b)
+		none =&gt; {}
+	}
+}</textarea><pre><code><span class="line"><span class="c-type">Effect</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">pair</span>(left: <span class="c-type">i32</span>, right: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> effect = <span class="c-type">Effect</span>.<span class="c-case">pair</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">match</span> effect</span><span class="line">	{</span><span class="line">		pair(<span class="c-keyword">var</span> a, <span class="c-keyword">val</span> b) =&gt;</span><span class="line">		{</span><span class="line">			a += <span class="c-literal">10</span></span><span class="line">			<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, a, b)</span><span class="line">		}</span><span class="line">		none =&gt; {}</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">if</span> effect <span class="c-keyword">is</span> pair(<span class="c-keyword">mut</span> a, <span class="c-keyword">val</span> b)</span><span class="line">		a = b * <span class="c-literal">100</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">match</span> effect</span><span class="line">	{</span><span class="line">		pair(<span class="c-keyword">val</span> a, <span class="c-keyword">val</span> b) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, a, b)</span><span class="line">		none =&gt; {}</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>11 2
+200 2</pre></div>
+<p><code>mut</code> needs a value that can be changed, and a <code>val</code> binding can't be assigned:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-374"></button><textarea hidden id="copy-374">mod example
+
+Effect: enum
+{
+	none
+	hit(amount: i32)
+}
+
+main: fun
+{
+	val fixed = Effect.hit(1)
+	if fixed is hit(mut n)
+		n = 2
+
+	var e = Effect.hit(1)
+	if e is hit(val n)
+		n = 5
+}</textarea><pre><code><span class="line"><span class="c-type">Effect</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> fixed = <span class="c-type">Effect</span>.<span class="c-case">hit</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">if</span> fixed <span class="c-keyword">is</span> hit(<span class="c-keyword">mut</span> n)</span><span class="diagnostic"><span class="squiggle" style="margin-left:7ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:7ch">Cannot mutably borrow values</span></span><span class="line">		n = <span class="c-literal">2</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">var</span> e = <span class="c-type">Effect</span>.<span class="c-case">hit</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">if</span> e <span class="c-keyword">is</span> hit(<span class="c-keyword">val</span> n)</span><span class="line">		n = <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot reassign read-only pattern bindings</span></span><span class="line">}</span></code></pre></div>
+<p>A pattern followed by a binding tests and binds at once: <code>1..10 val n</code> fits values from 1 to 9 and names the value <code>n</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-375"></button><textarea hidden id="copy-375">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Hit: enum
+{
+	miss
+	hit(amount: i32)
+}
+
+describe: fun(h: Hit) -&gt; i32 =&gt; match h
+{
+	hit(1..10 val n) =&gt; n
+	hit(val n) =&gt; n * 100
+	miss =&gt; 0
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d\n&quot;, describe(Hit.hit(4)), describe(Hit.hit(40)), describe(Hit.miss))
+}</textarea><pre><code><span class="line"><span class="c-type">Hit</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">miss</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">h</span>: <span class="c-type">Hit</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">h</span></span><span class="line">{</span><span class="line">	hit(<span class="c-literal">1</span>..<span class="c-literal">10</span> <span class="c-keyword">val</span> n) =&gt; n</span><span class="line">	hit(<span class="c-keyword">val</span> n) =&gt; n * <span class="c-literal">100</span></span><span class="line">	miss =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">describe</span>(<span class="c-type">Hit</span>.<span class="c-case">hit</span>(<span class="c-literal">4</span>)), <span class="c-function">describe</span>(<span class="c-type">Hit</span>.<span class="c-case">hit</span>(<span class="c-literal">40</span>)), <span class="c-function">describe</span>(<span class="c-type">Hit</span>.<span class="c-case">miss</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4 4000 0</pre></div>
+<p>Bindings go inside parentheses, in a payload or a record pattern. Apart from a <a href="#type-tests">type test</a>, a pattern can't bind at the top of an arm. A name can be bound only once per pattern, and an arm with several patterns can't bind names:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-376"></button><textarea hidden id="copy-376">mod example
+
+Hit: enum
+{
+	miss
+	hit(amount: i32)
+	pair(a: i32, b: i32)
+}
+
+twice: fun(h: Hit) -&gt; i32 =&gt; match h
+{
+	pair(val n, val n) =&gt; n
+	else =&gt; 0
+}
+
+listed: fun(h: Hit) -&gt; i32 =&gt; match h
+{
+	hit(val n), pair(val n, _) =&gt; n
+	miss =&gt; 0
+}
+
+whole: fun(x: i32) -&gt; i32 =&gt; match x
+{
+	1..10 val n =&gt; n
+	else =&gt; 0
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Hit</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">miss</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">	<span class="c-case">pair</span>(a: <span class="c-type">i32</span>, b: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">twice</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">h</span>: <span class="c-type">Hit</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">h</span></span><span class="line">{</span><span class="line">	pair(<span class="c-keyword">val</span> n, <span class="c-keyword">val</span> n) =&gt; n</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:13ch">&#x27;n&#x27; is bound more than once</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:20ch">&#x27;n&#x27; is bound more than once</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">listed</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">h</span>: <span class="c-type">Hit</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">h</span></span><span class="line">{</span><span class="line">	hit(<span class="c-keyword">val</span> n), pair(<span class="c-keyword">val</span> n, _) =&gt; n</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot bind names in arms with several patterns</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:25ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:25ch">Cannot bind names in arms with several patterns</span></span><span class="line">	miss =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line">whole: <span class="c-keyword">fun</span>(x: i32) -&gt; i32 =&gt; <span class="c-keyword">match</span> x</span><span class="line">{</span><span class="line">	<span class="c-literal">1</span>..<span class="c-literal">10</span> <span class="c-keyword">val</span> n =&gt; n</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:10ch">Expected &#x27;=&gt;&#x27;</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="ignoring-values-with"><a class="anchor" href="#ignoring-values-with">Ignoring values with <code>_</code></a></h2>
+<p><code>_</code> fits any value and binds nothing. It stands in for payload values and fields an arm doesn't care about:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-377"></button><textarea hidden id="copy-377">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Move: enum
+{
+	stay
+	step(dx: i32, dy: i32)
+}
+
+isVertical: fun(m: Move) -&gt; bool =&gt; match m
+{
+	step(0, _) =&gt; true
+	else =&gt; false
+}
+
+main: fun
+{
+	printf(&quot;%d %d\n&quot;, i32(isVertical(Move.step(0, 3))), i32(isVertical(Move.step(1, 3))))
+}</textarea><pre><code><span class="line"><span class="c-type">Move</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">stay</span></span><span class="line">	<span class="c-case">step</span>(dx: <span class="c-type">i32</span>, dy: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">isVertical</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">m</span>: <span class="c-type">Move</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">m</span></span><span class="line">{</span><span class="line">	step(<span class="c-literal">0</span>, _) =&gt; <span class="c-keyword">true</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-keyword">false</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-type">i32</span>(<span class="c-function">isVertical</span>(<span class="c-type">Move</span>.<span class="c-case">step</span>(<span class="c-literal">0</span>, <span class="c-literal">3</span>))), <span class="c-type">i32</span>(<span class="c-function">isVertical</span>(<span class="c-type">Move</span>.<span class="c-case">step</span>(<span class="c-literal">1</span>, <span class="c-literal">3</span>))))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 0</pre></div>
+<h2 id="the-is-operator"><a class="anchor" href="#the-is-operator">The is operator</a></h2>
+<p><code>value is pattern</code> is a <code>bool</code> expression that is <code>true</code> when the pattern fits. It accepts every pattern a match arm does:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-378"></button><textarea hidden id="copy-378">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Effect: enum
+{
+	none
+	hit(amount: i32)
+}
+
+main: fun
+{
+	val x = 7
+	val c = &#x27;k&#x27;
+	printf(&quot;%d %d %d %d\n&quot;, i32(x is 1..10), i32(x is &gt; 7), i32(x is 7), i32(c is &#x27;a&#x27;..=&#x27;z&#x27;))
+
+	val effect = Effect.hit(9)
+	printf(&quot;%d %d\n&quot;, i32(effect is none), i32(effect is hit(&gt; 5)))
+}</textarea><pre><code><span class="line"><span class="c-type">Effect</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x = <span class="c-literal">7</span></span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-literal">'k'</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, <span class="c-type">i32</span>(x <span class="c-keyword">is</span> <span class="c-literal">1</span>..<span class="c-literal">10</span>), <span class="c-type">i32</span>(x <span class="c-keyword">is</span> &gt; <span class="c-literal">7</span>), <span class="c-type">i32</span>(x <span class="c-keyword">is</span> <span class="c-literal">7</span>), <span class="c-type">i32</span>(c <span class="c-keyword">is</span> <span class="c-literal">'a'</span>..=<span class="c-literal">'z'</span>))</span><span class="line"> </span><span class="line">	<span class="c-keyword">val</span> effect = <span class="c-type">Effect</span>.<span class="c-case">hit</span>(<span class="c-literal">9</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-type">i32</span>(effect <span class="c-keyword">is</span> none), <span class="c-type">i32</span>(effect <span class="c-keyword">is</span> hit(&gt; <span class="c-literal">5</span>)))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 0 1 1
+0 1</pre></div>
+<p>Bindings made by <code>is</code> can be used wherever the test is known to have passed: on the right of <code>&amp;&amp;</code>, and in the body of the <code>if</code> or <code>while</code> it controls. They can't be used in an <code>else</code> or after <code>||</code>. The loop here follows a chain of pointers; <code>@</code> takes an address and <code>*</code> reads through it, as <a href="pointers.html">Pointers and raw memory</a> explains:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-379"></button><textarea hidden id="copy-379">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Node: enum
+{
+	end
+	link(value: i32, next: ptr[Node])
+}
+
+main: fun
+{
+	var last = Node.end
+	var middle = Node.link(2, @last)
+	val first = Node.link(1, @middle)
+
+	var current = first
+	var total = 0
+	while current is link(val value, val next)
+	{
+		total += value
+		current = *next
+	}
+
+	if first is link(val value, _) &amp;&amp; value &gt; 0
+		printf(&quot;first %d, total %d\n&quot;, value, total)
+}</textarea><pre><code><span class="line"><span class="c-type">Node</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">end</span></span><span class="line">	<span class="c-case">link</span>(value: <span class="c-type">i32</span>, next: <span class="c-type">ptr</span>[<span class="c-type">Node</span>])</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> last = <span class="c-type">Node</span>.<span class="c-case">end</span></span><span class="line">	<span class="c-keyword">var</span> middle = <span class="c-type">Node</span>.<span class="c-case">link</span>(<span class="c-literal">2</span>, @last)</span><span class="line">	<span class="c-keyword">val</span> first = <span class="c-type">Node</span>.<span class="c-case">link</span>(<span class="c-literal">1</span>, @middle)</span><span class="line"> </span><span class="line">	<span class="c-keyword">var</span> current = first</span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">while</span> current <span class="c-keyword">is</span> link(<span class="c-keyword">val</span> value, <span class="c-keyword">val</span> next)</span><span class="line">	{</span><span class="line">		total += value</span><span class="line">		current = *next</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">if</span> first <span class="c-keyword">is</span> link(<span class="c-keyword">val</span> value, _) &amp;&amp; value &gt; <span class="c-literal">0</span></span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"first %d, total %d\n"</span>, value, total)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>first 1, total 3</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-380"></button><textarea hidden id="copy-380">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Effect: enum
+{
+	none
+	hit(amount: i32)
+}
+
+main: fun
+{
+	val effect = Effect.none
+	if effect is hit(val n)
+		printf(&quot;%d\n&quot;, n)
+	else
+		printf(&quot;%d\n&quot;, n)
+
+	if effect is hit(val m) || m &gt; 3
+		printf(&quot;%d\n&quot;, m)
+}</textarea><pre><code><span class="line"><span class="c-type">Effect</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> effect = <span class="c-type">Effect</span>.<span class="c-case">none</span></span><span class="line">	<span class="c-keyword">if</span> effect <span class="c-keyword">is</span> hit(<span class="c-keyword">val</span> n)</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, n)</span><span class="line">	<span class="c-keyword">else</span></span><span class="line">		printf(<span class="c-literal">"%d\n"</span>, n)</span><span class="diagnostic"><span class="squiggle" style="margin-left:23ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:23ch">Symbol &#x27;n&#x27; not found in this scope</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">if</span> effect <span class="c-keyword">is</span> hit(<span class="c-keyword">val</span> m) || m &gt; <span class="c-literal">3</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:31ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:31ch">Symbol &#x27;m&#x27; not found in this scope</span></span><span class="line">		printf(<span class="c-literal">"%d\n"</span>, m)</span><span class="diagnostic"><span class="squiggle" style="margin-left:23ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:23ch">Symbol &#x27;m&#x27; not found in this scope</span></span><span class="line">}</span></code></pre></div>
+<h2 id="guards"><a class="anchor" href="#guards">Guards</a></h2>
+<p>An arm can add a condition with <code>if</code> after its pattern. The arm runs only when the pattern fits and the condition is true; otherwise the next arms are tried. The condition can use the pattern's bindings:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-381"></button><textarea hidden id="copy-381">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Hit: enum
+{
+	miss
+	hit(amount: i32)
+}
+
+score: fun(h: Hit) -&gt; i32 =&gt; match h
+{
+	hit(val n) if n &gt; 10 =&gt; 2
+	hit(_) =&gt; 1
+	miss =&gt; 0
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d\n&quot;, score(Hit.hit(20)), score(Hit.hit(5)), score(Hit.miss))
+}</textarea><pre><code><span class="line"><span class="c-type">Hit</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">miss</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">score</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">h</span>: <span class="c-type">Hit</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">h</span></span><span class="line">{</span><span class="line">	hit(<span class="c-keyword">val</span> n) <span class="c-keyword">if</span> n &gt; <span class="c-literal">10</span> =&gt; <span class="c-literal">2</span></span><span class="line">	hit(_) =&gt; <span class="c-literal">1</span></span><span class="line">	miss =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">score</span>(<span class="c-type">Hit</span>.<span class="c-case">hit</span>(<span class="c-literal">20</span>)), <span class="c-function">score</span>(<span class="c-type">Hit</span>.<span class="c-case">hit</span>(<span class="c-literal">5</span>)), <span class="c-function">score</span>(<span class="c-type">Hit</span>.<span class="c-case">miss</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2 1 0</pre></div>
+<p>An arm with a guard doesn't count toward covering every value, since its condition can be false. It can't move values out of the input either:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-382"></button><textarea hidden id="copy-382">mod example
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Hit: enum
+{
+	miss
+	hit(amount: i32)
+}
+
+Slot: enum
+{
+	empty
+	held(buffer: Buffer)
+}
+
+score: fun(h: Hit) -&gt; i32 =&gt; match h
+{
+	hit(val n) if n &gt; 10 =&gt; 2
+	miss =&gt; 0
+}
+
+size: fun(own slot: Slot) -&gt; i32 =&gt; match own slot
+{
+	held(val b) if b.id &gt; 0 =&gt; 1
+	else =&gt; 0
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Hit</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">miss</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Slot</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">empty</span></span><span class="line">	<span class="c-case">held</span>(buffer: <span class="c-type">Buffer</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">score</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">h</span>: <span class="c-type">Hit</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">h</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:29ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:29ch">This match doesn&#x27;t handle every case of &#x27;Hit&#x27;: &#x27;hit&#x27;</span></span><span class="line">{</span><span class="line">	hit(<span class="c-keyword">val</span> n) <span class="c-keyword">if</span> n &gt; <span class="c-literal">10</span> =&gt; <span class="c-literal">2</span></span><span class="line">	miss =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">size</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">slot</span>: <span class="c-type">Slot</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-keyword">own</span> <span class="c-parameter">slot</span></span><span class="line">{</span><span class="line">	held(<span class="c-keyword">val</span> b) <span class="c-keyword">if</span> b.<span class="c-field">id</span> &gt; <span class="c-literal">0</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot move values in arms with &#x27;if&#x27;</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="record-destructuring"><a class="anchor" href="#record-destructuring">Record destructuring</a></h2>
+<p>A record pattern is the record's type name with fields in parentheses. Each field is named, followed by a pattern for its value; fields that aren't mentioned aren't checked. <code>val x</code> alone binds field <code>x</code> under its own name, and <code>field: val name</code> binds it under another:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-383"></button><textarea hidden id="copy-383">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+}
+
+where: fun(p: Point) -&gt; i32 =&gt; match p
+{
+	Point(x: 0, y: 0) =&gt; 0
+	Point(x: 0, val y) =&gt; 100 + y
+	Point(x: &gt; 10, y: val height) =&gt; 200 + height
+	Point(val x, val y) =&gt; x * y
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d %d\n&quot;, where(Point(0, 0)), where(Point(0, 7)), where(Point(11, 3)), where(Point(2, 3)))
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">where</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">p</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">p</span></span><span class="line">{</span><span class="line">	<span class="c-type">Point</span>(x: <span class="c-literal">0</span>, y: <span class="c-literal">0</span>) =&gt; <span class="c-literal">0</span></span><span class="line">	<span class="c-type">Point</span>(x: <span class="c-literal">0</span>, <span class="c-keyword">val</span> y) =&gt; <span class="c-literal">100</span> + y</span><span class="line">	<span class="c-type">Point</span>(x: &gt; <span class="c-literal">10</span>, y: <span class="c-keyword">val</span> height) =&gt; <span class="c-literal">200</span> + height</span><span class="line">	<span class="c-type">Point</span>(<span class="c-keyword">val</span> x, <span class="c-keyword">val</span> y) =&gt; x * y</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, <span class="c-function">where</span>(<span class="c-type">Point</span>(<span class="c-literal">0</span>, <span class="c-literal">0</span>)), <span class="c-function">where</span>(<span class="c-type">Point</span>(<span class="c-literal">0</span>, <span class="c-literal">7</span>)), <span class="c-function">where</span>(<span class="c-type">Point</span>(<span class="c-literal">11</span>, <span class="c-literal">3</span>)), <span class="c-function">where</span>(<span class="c-type">Point</span>(<span class="c-literal">2</span>, <span class="c-literal">3</span>)))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0 107 203 6</pre></div>
+<p>Record patterns nest inside each other and inside payloads, and a binding can follow a whole record pattern to name the record as well as its parts:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-384"></button><textarea hidden id="copy-384">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+}
+
+Enemy: rec
+{
+	health: i32
+	position: Point
+}
+
+Shot: enum
+{
+	miss
+	hit(at: Point, damage: i32)
+}
+
+state: fun(e: Enemy) -&gt; i32 =&gt; match e
+{
+	Enemy(health: &lt;= 0) =&gt; -1
+	Enemy(health: 1..20 val hp, position: Point(x: 0)) =&gt; hp
+	else =&gt; 99
+}
+
+score: fun(s: Shot) -&gt; i32 =&gt; match s
+{
+	hit(Point(x: 0), val d) =&gt; d
+	hit(Point(val x) val p, &gt; 50) =&gt; x + p.y
+	else =&gt; 0
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d\n&quot;, state(Enemy(0, Point(1, 1))), state(Enemy(10, Point(0, 4))), state(Enemy(10, Point(3, 4))))
+	printf(&quot;%d %d %d\n&quot;, score(Shot.hit(Point(0, 5), 7)), score(Shot.hit(Point(1, 2), 60)), score(Shot.miss))
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Enemy</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">health</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">position</span>: <span class="c-type">Point</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Shot</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">miss</span></span><span class="line">	<span class="c-case">hit</span>(at: <span class="c-type">Point</span>, damage: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">state</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">e</span>: <span class="c-type">Enemy</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">e</span></span><span class="line">{</span><span class="line">	<span class="c-type">Enemy</span>(health: &lt;= <span class="c-literal">0</span>) =&gt; -<span class="c-literal">1</span></span><span class="line">	<span class="c-type">Enemy</span>(health: <span class="c-literal">1</span>..<span class="c-literal">20</span> <span class="c-keyword">val</span> hp, position: <span class="c-type">Point</span>(x: <span class="c-literal">0</span>)) =&gt; hp</span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">99</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">score</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">s</span>: <span class="c-type">Shot</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">s</span></span><span class="line">{</span><span class="line">	hit(<span class="c-type">Point</span>(x: <span class="c-literal">0</span>), <span class="c-keyword">val</span> d) =&gt; d</span><span class="line">	hit(<span class="c-type">Point</span>(<span class="c-keyword">val</span> x) <span class="c-keyword">val</span> p, &gt; <span class="c-literal">50</span>) =&gt; x + p.<span class="c-field">y</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">state</span>(<span class="c-type">Enemy</span>(<span class="c-literal">0</span>, <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">1</span>))), <span class="c-function">state</span>(<span class="c-type">Enemy</span>(<span class="c-literal">10</span>, <span class="c-type">Point</span>(<span class="c-literal">0</span>, <span class="c-literal">4</span>))), <span class="c-function">state</span>(<span class="c-type">Enemy</span>(<span class="c-literal">10</span>, <span class="c-type">Point</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>))))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">score</span>(<span class="c-type">Shot</span>.<span class="c-case">hit</span>(<span class="c-type">Point</span>(<span class="c-literal">0</span>, <span class="c-literal">5</span>), <span class="c-literal">7</span>)), <span class="c-function">score</span>(<span class="c-type">Shot</span>.<span class="c-case">hit</span>(<span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>), <span class="c-literal">60</span>)), <span class="c-function">score</span>(<span class="c-type">Shot</span>.<span class="c-case">miss</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>-1 10 99
+7 3 0</pre></div>
+<p>Parentheses with no field names and no bindings, such as <code>Point(1, 1)</code>, are a value pattern compared with <code>==</code>, as shown in <a href="#value-patterns">Value patterns</a>. Enum payloads are always positional, so payload values can't be named. The compiler checks the fields and the type:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-385"></button><textarea hidden id="copy-385">mod example
+
+Point: rec
+{
+	x: i32
+	y: i32
+}
+
+Enemy: rec
+{
+	health: i32
+	secret: pvt i32
+}
+
+Shot: enum
+{
+	miss
+	hit(at: Point, damage: i32)
+}
+
+positional: fun(p: Point) -&gt; i32 =&gt; match p
+{
+	Point(0, val y) =&gt; y
+	else =&gt; 0
+}
+
+unknown: fun(p: Point) -&gt; i32 =&gt; match p
+{
+	Point(z: 1) =&gt; 1
+	else =&gt; 0
+}
+
+hidden: fun(e: Enemy) -&gt; i32 =&gt; match e
+{
+	Enemy(secret: 1) =&gt; 1
+	else =&gt; 0
+}
+
+wrongType: fun(p: Point) -&gt; i32 =&gt; match p
+{
+	Enemy(health: 1) =&gt; 1
+	else =&gt; 0
+}
+
+named: fun(s: Shot) -&gt; i32 =&gt; match s
+{
+	hit(at: _, damage: val d) =&gt; d
+	else =&gt; 0
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Enemy</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">health</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">secret</span>: <span class="c-keyword">pvt</span> <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Shot</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">miss</span></span><span class="line">	<span class="c-case">hit</span>(at: <span class="c-type">Point</span>, damage: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">positional</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">p</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">p</span></span><span class="line">{</span><span class="line">	<span class="c-type">Point</span>(<span class="c-literal">0</span>, <span class="c-keyword">val</span> y) =&gt; y</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:10ch">Expected a field name</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">unknown</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">p</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">p</span></span><span class="line">{</span><span class="line">	<span class="c-type">Point</span>(z: <span class="c-literal">1</span>) =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:10ch">Type &#x27;Point&#x27; has no member &#x27;z&#x27;</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">hidden</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">e</span>: <span class="c-type">Enemy</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">e</span></span><span class="line">{</span><span class="line">	<span class="c-type">Enemy</span>(secret: <span class="c-literal">1</span>) =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:10ch">&#x27;secret&#x27; is private to its type</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">wrongType</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">p</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">p</span></span><span class="line">{</span><span class="line">	<span class="c-type">Enemy</span>(health: <span class="c-literal">1</span>) =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Expected &#x27;Point&#x27;</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">named</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">s</span>: <span class="c-type">Shot</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">s</span></span><span class="line">{</span><span class="line">	hit(at: _, damage: <span class="c-keyword">val</span> d) =&gt; d</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot name payload values</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>A record pattern that leaves fields unchecked doesn't cover every value, so a match expression over records usually needs a final arm that binds or ignores every field, or an <code>else</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-386"></button><textarea hidden id="copy-386">mod example
+
+Point: rec
+{
+	x: i32
+	y: i32
+}
+
+onAxis: fun(p: Point) -&gt; i32 =&gt; match p
+{
+	Point(x: 0) =&gt; 1
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">onAxis</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">p</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">p</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:32ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:32ch">This match doesn&#x27;t handle every value of &#x27;Point&#x27;</span></span><span class="line">{</span><span class="line">	<span class="c-type">Point</span>(x: <span class="c-literal">0</span>) =&gt; <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="type-tests"><a class="anchor" href="#type-tests">Type tests</a></h2>
+<p>When the input is a trait object, a <code>dyn</code> value, a pattern can test which type it holds and bind it: <code>Circle c</code> fits when the value is a <code>Circle</code>. These patterns are covered in <a href="trait-objects.html">Trait objects</a>. On any other value, a type name alone isn't a pattern:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-387"></button><textarea hidden id="copy-387">mod example
+
+Point: rec
+{
+	x: i32
+}
+
+main: fun
+{
+	val p = Point(3)
+	val n = match p { Point =&gt; 1, else =&gt; 0 }
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = <span class="c-type">Point</span>(<span class="c-literal">3</span>)</span><span class="line">	<span class="c-keyword">val</span> n = <span class="c-keyword">match</span> p { Point =&gt; <span class="c-literal">1</span>, <span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span> }</span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot use types as values</span></span><span class="line">}</span></code></pre></div>
+<h2 id="match-mut"><a class="anchor" href="#match-mut">match mut</a></h2>
+<p>By default, a match reads its input: <code>val</code> bindings copy or borrow read-only. <code>match mut</code> borrows the input mutably instead, so every binding, <code>val</code> ones included, refers to the part inside the input, and assigning to a binding changes the input. <code>is</code> takes the same <code>mut</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-388"></button><textarea hidden id="copy-388">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Effect: enum
+{
+	none
+	hit(amount: i32)
+}
+
+describe: fun(e: Effect) -&gt; i32 =&gt; match e
+{
+	hit(val n) =&gt; n
+	none =&gt; -1
+}
+
+boost: fun(mut e: Effect)
+{
+	match mut e
+	{
+		hit(val n) =&gt; n *= 2
+		none =&gt; {}
+	}
+}
+
+main: fun
+{
+	var effect = Effect.hit(5)
+	match mut effect
+	{
+		hit(val n) =&gt; n += 1
+		none =&gt; {}
+	}
+
+	printf(&quot;%d\n&quot;, describe(effect))
+
+	if mut effect is hit(val n)
+		n += 10
+
+	boost(mut effect)
+	printf(&quot;%d\n&quot;, describe(effect))
+}</textarea><pre><code><span class="line"><span class="c-type">Effect</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">e</span>: <span class="c-type">Effect</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">e</span></span><span class="line">{</span><span class="line">	hit(<span class="c-keyword">val</span> n) =&gt; n</span><span class="line">	none =&gt; -<span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">boost</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">e</span>: <span class="c-type">Effect</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">match</span> <span class="c-keyword">mut</span> <span class="c-parameter">e</span></span><span class="line">	{</span><span class="line">		hit(<span class="c-keyword">val</span> n) =&gt; n *= <span class="c-literal">2</span></span><span class="line">		none =&gt; {}</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> effect = <span class="c-type">Effect</span>.<span class="c-case">hit</span>(<span class="c-literal">5</span>)</span><span class="line">	<span class="c-keyword">match</span> <span class="c-keyword">mut</span> effect</span><span class="line">	{</span><span class="line">		hit(<span class="c-keyword">val</span> n) =&gt; n += <span class="c-literal">1</span></span><span class="line">		none =&gt; {}</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">describe</span>(effect))</span><span class="line"> </span><span class="line">	<span class="c-keyword">if</span> <span class="c-keyword">mut</span> effect <span class="c-keyword">is</span> hit(<span class="c-keyword">val</span> n)</span><span class="line">		n += <span class="c-literal">10</span></span><span class="line"> </span><span class="line">	<span class="c-function">boost</span>(<span class="c-keyword">mut</span> effect)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">describe</span>(effect))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>6
+32</pre></div>
+<p>A <code>var</code> binding under <code>match mut</code> is a copy, as it is elsewhere. The input of <code>match mut</code> must be something that can be borrowed mutably: a <code>var</code>, a <code>mut</code> parameter, a field or element of one, or a place reached through a pointer:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-389"></button><textarea hidden id="copy-389">mod example
+
+Effect: enum
+{
+	none
+	hit(amount: i32)
+}
+
+make: fun -&gt; Effect =&gt; Effect.hit(1)
+
+readOnly: fun(e: Effect)
+{
+	if mut e is hit(val n)
+		n = 1
+}
+
+main: fun
+{
+	val fixed = Effect.hit(1)
+	match mut fixed
+	{
+		hit(val n) =&gt; n += 1
+		else =&gt; {}
+	}
+
+	match mut make()
+	{
+		hit(val n) =&gt; n += 1
+		else =&gt; {}
+	}
+}</textarea><pre><code><span class="line"><span class="c-type">Effect</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">hit</span>(amount: <span class="c-type">i32</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">make</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">Effect</span> =&gt; <span class="c-type">Effect</span>.<span class="c-case">hit</span>(<span class="c-literal">1</span>)</span><span class="line"> </span><span class="line"><span class="c-function">readOnly</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">e</span>: <span class="c-type">Effect</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-keyword">mut</span> <span class="c-parameter">e</span> <span class="c-keyword">is</span> hit(<span class="c-keyword">val</span> n)</span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot mutably borrow read-only parameters</span></span><span class="line">		n = <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> fixed = <span class="c-type">Effect</span>.<span class="c-case">hit</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">match</span> <span class="c-keyword">mut</span> fixed</span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot mutably borrow values</span></span><span class="line">	{</span><span class="line">		hit(<span class="c-keyword">val</span> n) =&gt; n += <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">else</span> =&gt; {}</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">match</span> <span class="c-keyword">mut</span> <span class="c-function">make</span>()</span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot mutably borrow unstored values</span></span><span class="line">	{</span><span class="line">		hit(<span class="c-keyword">val</span> n) =&gt; n += <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">else</span> =&gt; {}</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<h2 id="match-own"><a class="anchor" href="#match-own">match own</a></h2>
+<p>A value whose type has a destructor can't be copied, so a <code>val</code> binding of one borrows it. To take a part out and keep it, write <code>match own</code>. It moves the input into the match, and <code>val</code>, <code>var</code> and <code>own</code> bindings then own the parts they bind. Parts that aren't bound are dropped at the end of the arm. <a href="ownership.html">Ownership and destructors</a> explains moves and destructors.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-390"></button><textarea hidden id="copy-390">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;drop %d\n&quot;, self.id)
+	}
+}
+
+Slot: enum
+{
+	empty
+	held(buffer: Buffer)
+}
+
+keep: fun(own buffer: Buffer) -&gt; i32 =&gt; buffer.id
+
+main: fun
+{
+	val slot = Slot.held(Buffer(4))
+	match own slot
+	{
+		held(var buffer) =&gt;
+		{
+			buffer.id += 10
+			printf(&quot;kept %d\n&quot;, keep(own buffer))
+		}
+		empty =&gt; {}
+	}
+
+	printf(&quot;end\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"drop %d\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Slot</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">empty</span></span><span class="line">	<span class="c-case">held</span>(buffer: <span class="c-type">Buffer</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">keep</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">buffer</span>: <span class="c-type">Buffer</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">buffer</span>.<span class="c-field">id</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> slot = <span class="c-type">Slot</span>.<span class="c-case">held</span>(<span class="c-type">Buffer</span>(<span class="c-literal">4</span>))</span><span class="line">	<span class="c-keyword">match</span> <span class="c-keyword">own</span> slot</span><span class="line">	{</span><span class="line">		held(<span class="c-keyword">var</span> buffer) =&gt;</span><span class="line">		{</span><span class="line">			buffer.<span class="c-field">id</span> += <span class="c-literal">10</span></span><span class="line">			<span class="c-function">printf</span>(<span class="c-literal">"kept %d\n"</span>, <span class="c-function">keep</span>(<span class="c-keyword">own</span> buffer))</span><span class="line">		}</span><span class="line">		empty =&gt; {}</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"end\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>drop 14
+kept 14
+end</pre></div>
+<p>After <code>match own</code>, the input has been moved and can't be used. Moving needs a value the code owns, so a read-only parameter can't be matched with <code>own</code>, and <code>own</code> and <code>mut</code> can't be combined:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-391"></button><textarea hidden id="copy-391">mod example
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Slot: enum
+{
+	empty
+	held(buffer: Buffer)
+}
+
+take: fun(own buffer: Buffer) -&gt; i32 =&gt; buffer.id
+
+used: fun -&gt; i32
+{
+	val slot = Slot.held(Buffer(1))
+	match own slot
+	{
+		held(val buffer) =&gt; take(own buffer)
+		else =&gt; {}
+	}
+
+	ret match slot { held(val buffer) =&gt; buffer.id, else =&gt; 0 }
+}
+
+parameter: fun(imm slot: Slot) -&gt; i32 =&gt; match own slot
+{
+	held(own buffer) =&gt; take(own buffer)
+	else =&gt; 0
+}
+
+both: fun
+{
+	var slot = Slot.empty
+	match own mut slot
+	{
+		else =&gt; {}
+	}
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Slot</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">empty</span></span><span class="line">	<span class="c-case">held</span>(buffer: <span class="c-type">Buffer</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">take</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">buffer</span>: <span class="c-type">Buffer</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">buffer</span>.<span class="c-field">id</span></span><span class="line"> </span><span class="line"><span class="c-function">used</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> slot = <span class="c-type">Slot</span>.<span class="c-case">held</span>(<span class="c-type">Buffer</span>(<span class="c-literal">1</span>))</span><span class="line">	<span class="c-keyword">match</span> <span class="c-keyword">own</span> slot</span><span class="line">	{</span><span class="line">		held(<span class="c-keyword">val</span> buffer) =&gt; <span class="c-function">take</span>(<span class="c-keyword">own</span> buffer)</span><span class="line">		<span class="c-keyword">else</span> =&gt; {}</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> <span class="c-keyword">match</span> slot { held(<span class="c-keyword">val</span> buffer) =&gt; buffer.<span class="c-field">id</span>, <span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span> }</span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot use moved values<span class="diagnostic-note">Moved on line 23</span></span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">parameter</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">slot</span>: <span class="c-type">Slot</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-keyword">own</span> <span class="c-parameter">slot</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:51ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:51ch">Cannot move read-only parameters</span></span><span class="line">{</span><span class="line">	held(<span class="c-keyword">own</span> buffer) =&gt; <span class="c-function">take</span>(<span class="c-keyword">own</span> buffer)</span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">both</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> slot = <span class="c-type">Slot</span>.<span class="c-case">empty</span></span><span class="line">	<span class="c-keyword">match</span> <span class="c-keyword">own</span> <span class="c-keyword">mut</span> slot</span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot combine &#x27;own&#x27; and &#x27;mut&#x27;</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">else</span> =&gt; {}</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>Without <code>match own</code>, an <code>own</code> or <code>var</code> binding of a payload value that can't be copied would move the input implicitly, which is an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-392"></button><textarea hidden id="copy-392">mod example
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Slot: enum
+{
+	empty
+	held(buffer: Buffer)
+}
+
+main: fun
+{
+	val slot = Slot.held(Buffer(5))
+	match slot
+	{
+		held(var buffer) =&gt; buffer.id += 10
+		else =&gt; {}
+	}
+}</textarea><pre><code><span class="line"><span class="c-type">Buffer</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Slot</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">empty</span></span><span class="line">	<span class="c-case">held</span>(buffer: <span class="c-type">Buffer</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> slot = <span class="c-type">Slot</span>.<span class="c-case">held</span>(<span class="c-type">Buffer</span>(<span class="c-literal">5</span>))</span><span class="line">	<span class="c-keyword">match</span> slot</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot move &#x27;Slot&#x27; values implicitly</span></span><span class="line">	{</span><span class="line">		held(<span class="c-keyword">var</span> buffer) =&gt; buffer.<span class="c-field">id</span> += <span class="c-literal">10</span></span><span class="line">		<span class="c-keyword">else</span> =&gt; {}</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<p>A temporary, such as the result of a call, already belongs to the match, so it needs no <code>own</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-393"></button><textarea hidden id="copy-393">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Buffer: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;drop %d\n&quot;, self.id)
+	}
+}
+
+Slot: enum
+{
+	empty
+	held(buffer: Buffer)
+}
+
+make: fun(id: i32) -&gt; Slot =&gt; Slot.held(Buffer(id))
+
+take: fun(own buffer: Buffer) -&gt; i32 =&gt; buffer.id
+
+main: fun
+{
+	val id = match make(7)
+	{
+		held(val buffer) =&gt; take(own buffer)
+		empty =&gt; 0
+	}
+
+	printf(&quot;%d\n&quot;, id)
+}</textarea><pre><code><span class="line"><span class="c-type">Slot</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">empty</span></span><span class="line">	<span class="c-case">held</span>(buffer: <span class="c-type">Buffer</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">make</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Slot</span> =&gt; <span class="c-type">Slot</span>.<span class="c-case">held</span>(<span class="c-type">Buffer</span>(<span class="c-parameter">id</span>))</span><span class="line"> </span><span class="line"><span class="c-function">take</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">buffer</span>: <span class="c-type">Buffer</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">buffer</span>.<span class="c-field">id</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> id = <span class="c-keyword">match</span> <span class="c-function">make</span>(<span class="c-literal">7</span>)</span><span class="line">	{</span><span class="line">		held(<span class="c-keyword">val</span> buffer) =&gt; <span class="c-function">take</span>(<span class="c-keyword">own</span> buffer)</span><span class="line">		empty =&gt; <span class="c-literal">0</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, id)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>drop 7
+7</pre></div>
+<p>In a record pattern, an <code>own</code> binding moves that field out of a local record even without <code>match own</code>, leaving the rest of the record in place. The record can't be used as a whole afterwards, and a record with its own destructor can't have fields moved out of it:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-394"></button><textarea hidden id="copy-394">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Name: rec
+{
+	id: i32
+
+	drop: op
+	{
+		printf(&quot;drop %d\n&quot;, self.id)
+	}
+}
+
+Pair: rec
+{
+	first: Name
+	second: Name
+}
+
+main: fun
+{
+	val pair = Pair(Name(1), Name(2))
+	match pair
+	{
+		Pair(own first) =&gt; printf(&quot;moved %d\n&quot;, first.id)
+	}
+
+	printf(&quot;end\n&quot;)
+}</textarea><pre><code><span class="line"><span class="c-type">Pair</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">first</span>: <span class="c-type">Name</span></span><span class="line">	<span class="c-field">second</span>: <span class="c-type">Name</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> pair = <span class="c-type">Pair</span>(<span class="c-type">Name</span>(<span class="c-literal">1</span>), <span class="c-type">Name</span>(<span class="c-literal">2</span>))</span><span class="line">	<span class="c-keyword">match</span> pair</span><span class="line">	{</span><span class="line">		<span class="c-type">Pair</span>(<span class="c-keyword">own</span> first) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"moved %d\n"</span>, first.<span class="c-field">id</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"end\n"</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>moved 1
+drop 1
+end
+drop 2</pre></div>
+<h2 id="when-arms"><a class="anchor" href="#when-arms">when arms</a></h2>
+<p>A <code>when</code> block inside a match holds arms that exist only in builds where a flag is on, with an optional <code>else</code> block for the other builds. <a href="conditional-compilation.html">Conditional compilation</a> covers flags.</p>
+<h2 id="float-patterns"><a class="anchor" href="#float-patterns">Float patterns</a></h2>
+<p>Floats can be matched like integers. Ranges and relational patterns are the usual way:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-395"></button><textarea hidden id="copy-395">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+classify: fun(f: f64) -&gt; i32 =&gt; match f
+{
+	&lt; 0.0 =&gt; -1
+	0.0..1.0 =&gt; 0
+	else =&gt; 1
+}
+
+main: fun
+{
+	printf(&quot;%d %d %d\n&quot;, classify(-2.5), classify(0.5), classify(3.0))
+}</textarea><pre><code><span class="line"><span class="c-function">classify</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">f</span>: <span class="c-type">f64</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">f</span></span><span class="line">{</span><span class="line">	&lt; <span class="c-literal">0.0</span> =&gt; -<span class="c-literal">1</span></span><span class="line">	<span class="c-literal">0.0</span>..<span class="c-literal">1.0</span> =&gt; <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">else</span> =&gt; <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">classify</span>(-<span class="c-literal">2.5</span>), <span class="c-function">classify</span>(<span class="c-literal">0.5</span>), <span class="c-function">classify</span>(<span class="c-literal">3.0</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>-1 0 1</pre></div>
+<p>A float value pattern, such as <code>0.0</code> or <code>!= 2.0</code>, compares exactly, which rounding makes unreliable. The compiler accepts it with the warning "Float patterns compare exactly". Patterns never cover every float, so a match expression over floats needs an <code>else</code>:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-396"></button><textarea hidden id="copy-396">mod example
+
+sign: fun(f: f64) -&gt; i32 =&gt; match f
+{
+	&lt; 0.0 =&gt; -1
+	&gt;= 0.0 =&gt; 1
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">sign</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">f</span>: <span class="c-type">f64</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">match</span> <span class="c-parameter">f</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:28ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:28ch">This match doesn&#x27;t handle every value of &#x27;f64&#x27;</span></span><span class="line">{</span><span class="line">	&lt; <span class="c-literal">0.0</span> =&gt; -<span class="c-literal">1</span></span><span class="line">	&gt;= <span class="c-literal">0.0</span> =&gt; <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="order-of-evaluation"><a class="anchor" href="#order-of-evaluation">Order of evaluation</a></h2>
+<p>The input of a match is evaluated once, before any arm. Arms are then tried from top to bottom, and a pattern's values and guard are evaluated only when that arm is tried:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-397"></button><textarea hidden id="copy-397">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+trace: fun(n: i32) -&gt; i32
+{
+	printf(&quot;trace %d\n&quot;, n)
+	ret n
+}
+
+main: fun
+{
+	match trace(3)
+	{
+		trace(1) =&gt; printf(&quot;one\n&quot;)
+		trace(3) =&gt; printf(&quot;three\n&quot;)
+		trace(5) =&gt; printf(&quot;five\n&quot;)
+	}
+}</textarea><pre><code><span class="line"><span class="c-function">trace</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"trace %d\n"</span>, <span class="c-parameter">n</span>)</span><span class="line">	<span class="c-keyword">ret</span> <span class="c-parameter">n</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">match</span> <span class="c-function">trace</span>(<span class="c-literal">3</span>)</span><span class="line">	{</span><span class="line">		<span class="c-function">trace</span>(<span class="c-literal">1</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"one\n"</span>)</span><span class="line">		<span class="c-function">trace</span>(<span class="c-literal">3</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"three\n"</span>)</span><span class="line">		<span class="c-function">trace</span>(<span class="c-literal">5</span>) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"five\n"</span>)</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>trace 3
+trace 1
+trace 3
+three</pre></div>
+</article>
+<nav class="pager"><a class="previous" href="enums.html"><span>Previous</span>Enums</a><a class="next" href="unions.html"><span>Next</span>Unions</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#the-match-statement">The match statement</a></li><li class="level-2"><a href="#match-expressions">Match expressions</a></li><li class="level-2"><a href="#covering-every-value">Covering every value</a></li><li class="level-2"><a href="#value-patterns">Value patterns</a></li><li class="level-2"><a href="#ranges">Ranges</a></li><li class="level-2"><a href="#relational-patterns">Relational patterns</a></li><li class="level-2"><a href="#several-patterns-in-one-arm">Several patterns in one arm</a></li><li class="level-2"><a href="#enum-cases">Enum cases</a></li><li class="level-2"><a href="#bindings">Bindings</a></li><li class="level-2"><a href="#ignoring-values-with">Ignoring values with _</a></li><li class="level-2"><a href="#the-is-operator">The is operator</a></li><li class="level-2"><a href="#guards">Guards</a></li><li class="level-2"><a href="#record-destructuring">Record destructuring</a></li><li class="level-2"><a href="#type-tests">Type tests</a></li><li class="level-2"><a href="#match-mut">match mut</a></li><li class="level-2"><a href="#match-own">match own</a></li><li class="level-2"><a href="#when-arms">when arms</a></li><li class="level-2"><a href="#float-patterns">Float patterns</a></li><li class="level-2"><a href="#order-of-evaluation">Order of evaluation</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>
