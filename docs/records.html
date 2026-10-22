@@ -105,9 +105,9 @@ Nothing: rec
 
 main: fun
 {
-	val marker = Marker()
+	val _ = Marker()
 	printf(&quot;%zu %zu\n&quot;, sizeOf(Marker), sizeOf(Nothing))
-}</textarea><pre><code><span class="line"><span class="c-type">Marker</span>: <span class="c-keyword">rec</span></span><span class="line"> </span><span class="line"><span class="c-type">Nothing</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> marker = <span class="c-type">Marker</span>()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">Marker</span>), <span class="c-keyword">sizeOf</span>(<span class="c-type">Nothing</span>))</span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-type">Marker</span>: <span class="c-keyword">rec</span></span><span class="line"> </span><span class="line"><span class="c-type">Nothing</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> _ = <span class="c-type">Marker</span>()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">Marker</span>), <span class="c-keyword">sizeOf</span>(<span class="c-type">Nothing</span>))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>0 0</pre></div>
 <p>Without a body, the declaration must end its line.</p>
 <h2 id="creating-values"><a class="anchor" href="#creating-values">Creating values</a></h2>

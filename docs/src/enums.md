@@ -677,12 +677,12 @@ Code: enum
 main: fun
 {
 	val raw = 50
-	val code = Code(raw)
+	val _ = Code(raw)
 }
 ```
 
 ```output
-Panic at main.ce:12:13: 'Code' has no case with this value
+Panic at main.ce:12:10: 'Code' has no case with this value
 ```
 
 An enum with payloads has no conversion to or from integers. An enum can't declare its own conversions to or from integer types either, since those are built in ([Conversions](conversions.md) covers declared conversions):
@@ -964,12 +964,12 @@ Socket: enum match i32
 main: fun
 {
 	val raw = -1
-	val socket: Socket = open(raw)
+	val _: Socket = open(raw)
 }
 ```
 
 ```output
-Panic at main.ce:12:23: 'Socket.open' can't hold this value
+Panic at main.ce:12:18: 'Socket.open' can't hold this value
 ```
 
 `T` can be an integer type, `char`, `bool`, a pointer type or a function type. For pointer and function types the only value a case can list is `null`, which makes an enum for pointers that may be null:

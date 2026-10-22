@@ -306,7 +306,7 @@ No operation defined for '!=' between 'Point' and 'Point'
 No operation defined for '>' between 'Point' and 'Point'
 ```
 
-A record has no operators of its own, not even `==`. An enum whose cases have no payloads compares with `==` and `!=` already; one with payloads has neither until it declares them. Enums declare operators the same way records do:
+A record has no operators of its own, not even `==`. An enum whose cases have no payloads compares with `==` and `!=` already, and declaring either is an error ("Operator '==' between 'Color' and 'Color' is built in"), as is declaring any operator that a built-in type already has for the same operands. An enum with payloads has neither until it declares them. Enums declare operators the same way records do:
 
 ```cella
 ~ mod example

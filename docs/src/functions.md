@@ -508,6 +508,8 @@ isOdd: fun(n: i32) -> bool
 
 The same holds across files: every function in a project can be used from anywhere the [module rules](modules.md) allow.
 
+A function that calls itself on every path, such as `count: fun(n: i32) -> i32 => count(n + 1)`, can never finish, and it gets the warning "'count' recurses forever". A path that returns, panics or calls a function that never returns, without calling itself first, is enough to avoid it.
+
 ## Calling through a module
 
 Every function belongs to the module named by its file's `mod` line. A function in another module is called through that module's name:

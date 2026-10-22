@@ -176,6 +176,7 @@ ready: fun(a: bool, b: bool) -> bool
 ~
 ~ main: fun
 ~ {
+~ 	val _ = ready(true, false)
 ~ }
 ```
 

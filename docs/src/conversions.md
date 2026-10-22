@@ -673,7 +673,7 @@ show: fun(length: Meters) => printf("%.1f\n", length.value)
 
 main: fun
 {
-	val a = Meters(2.0)
+	Meters(2.0)
 	show(3.0)
 }
 ```

@@ -18,6 +18,8 @@ A project file, the `.celp` file in a project's folder, is written in TOML. This
 | `Imports` | a list of import paths | none | no |
 | `Prelude` | a list of import paths | none | no |
 | `[Flags]` | flag names set to `true` or `false` | none | no |
+| `[Lints]` | lint names set to `"Off"`, `"Hint"`, `"Warning"` or `"Error"` | each lint's own level | yes |
+| `[Naming]` | kinds of names set to patterns | the usual style | no |
 | `[[ProjectReferences]]` | `Path` and `Alias` | none | yes |
 | `[When."..."]` | a condition and the settings it changes | none | |
 
@@ -52,7 +54,7 @@ How much of the standard library the project references.
 | `"Core"` | only the parts that don't depend on the operating system |
 | `"None"` | nothing |
 
-The standard library's `panic` is in the part that depends on the operating system, so with `"Core"` or `"None"` a project has none unless it declares one, as [Checks and panics](panics.md#declaring-a-panic-operator) shows.
+With `"None"`, a project has no `panic` unless it declares one, as [Checks and panics](panics.md#declaring-a-panic-operator) shows.
 
 ## SystemLinkPreference
 
@@ -131,6 +133,107 @@ The built-in flags are always defined:
 | `release` | building with `--release` |
 | `boundsChecks` | bounds checks are on |
 | `overflowChecks` | overflow checks are on |
+
+## Lints
+
+Some of the compiler's hints and warnings come from lints, checks for code that works but is likely a mistake or could be simpler. `[Lints]` sets how each is reported: `"Off"` drops it, and `"Hint"`, `"Warning"` and `"Error"` report it at that level. An error from a lint stops the build like any other:
+
+```celp group=lints
+OutputType = "Executable"
+
+[Lints]
+UnusedLocal = "Error"
+NeverChanged = "Off"
+```
+
+```cella error group=lints
+~ mod example
+~
+main: fun -> i32
+{
+	var count = 3
+	val spare = count * 2
+	ret count
+}
+```
+
+```errors
+'spare' is never used
+```
+
+`count` is a `var` that never changes, which would get a hint, but `NeverChanged` is off. The lints and their usual levels:
+
+| Lint | Reports | Level |
+| --- | --- | --- |
+| `Redundant` | marks that change nothing, such as an `imm` where a value is borrowed anyway | hint |
+| `RedundantImport` | imports of names the file can already use | hint |
+| `NeverChanged` | `var` variables that are never changed | hint |
+| `UnusedLocal` | local variables that are never used | hint |
+| `UnusedDeclaration` | functions and globals that nothing uses | hint |
+| `Naming` | names that don't follow the [`[Naming]`](#naming) rules | hint |
+| `UnreachableCode` | code that can never run | warning |
+| `FloatPattern` | patterns that compare floats | warning |
+| `SelfConversion` | conversions that call themselves | warning |
+| `EndlessRecursion` | functions that call themselves on every path | warning |
+
+`UnusedDeclaration` leaves out `pub` declarations, `main`, operators and `ext` functions. Hints are shown only in builds given `--hints` (see [Projects and building](projects.md#hints)). `[When."condition".Lints]` tables change single lints in some builds, so `[When.release.Lints]` with `UnusedLocal = "Warning"` would keep release builds going.
+
+## Naming
+
+The `Naming` lint checks every name a project declares against a pattern for its kind. `[Naming]` replaces the pattern for some kinds:
+
+```celp group=naming
+OutputType = "Executable"
+
+[Naming]
+Constants = "{SCREAMING_CASE}"
+Types = "{PascalCase}|C{PascalCase}"
+```
+
+```cella group=naming
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+MAX_PLAYERS: const i32 = 4
+
+CPoint: rec
+{
+	x: i32
+}
+
+main: fun
+{
+	val point = CPoint(MAX_PLAYERS)
+	printf("%d\n", point.x)
+}
+```
+
+```output
+4
+```
+
+A pattern is a style in braces, `{PascalCase}`, `{camelCase}`, `{snake_case}`, `{SCREAMING_CASE}` or `{lowercase}`, with any letters, digits or `_` before and after it, as in `C{PascalCase}`. `|` separates patterns a name may match instead. PascalCase and camelCase names don't allow two capital letters in a row, so `HttpServer` matches and `HTTPServer` doesn't.
+
+| Kind | Names | Usual pattern |
+| --- | --- | --- |
+| `Types` | records, enums and unions | `{PascalCase}` |
+| `Traits` | traits | `{PascalCase}` |
+| `TypeParameters` | type parameters | `{PascalCase}` |
+| `Functions` | functions and methods | `{camelCase}` |
+| `Fields` | fields, including payload fields | `{camelCase}` |
+| `Properties` | properties | `{camelCase}` |
+| `Locals` | local variables | `{camelCase}` |
+| `Parameters` | parameters, including value parameters | `{camelCase}` |
+| `Constants` | constants | `{camelCase}` |
+| `Globals` | global variables | `{camelCase}` |
+| `EnumCases` | enum cases | `{camelCase}` |
+| `Modules` | each part of a module path | `{camelCase}` |
+
+Names declared in `ext` blocks and the members of trait implementations aren't checked, since their names come from C or from the trait. A name that doesn't match gets a hint such as "'max_players' doesn't match {camelCase}".
 
 ## ProjectReferences
 
@@ -231,7 +334,7 @@ bounds checks on
 
 This is a debug build, so the first table applies and the second doesn't. A release build, or one with `--flag fast`, would also turn bounds checks off.
 
-A setting in a `When` table replaces the one at the top level. Only `SystemLinkPreference`, `AssemblyName`, `BoundsChecks`, `OverflowChecks`, `DebugInfo`, `Referenceable` and project references can go in one. `[[When."condition".ProjectReferences]]` tables add references in the builds where the condition holds, after the ones at the top level:
+A setting in a `When` table replaces the one at the top level. Only `SystemLinkPreference`, `AssemblyName`, `BoundsChecks`, `OverflowChecks`, `DebugInfo`, `Referenceable`, `[Lints]` and project references can go in one; a `Lints` table replaces only the lints it names. `[[When."condition".ProjectReferences]]` tables add references in the builds where the condition holds, after the ones at the top level:
 
 ```celp
 [[When.windows.ProjectReferences]]
@@ -247,6 +350,9 @@ The compiler checks the whole project file before building and reports every pro
 - "'Program' is not a valid 'OutputType'"
 - "'BoundsChecks' must be true or false"
 - "'logging' in [Flags] must be true or false"
+- "Unknown lint 'Unused' in [Lints]"
+- "'Loud' is not a valid 'Naming' in [Lints]"
+- "'Pascal' is not a valid 'Types' in [Naming]"
 - "'Imports' must be a list of strings"
 - "Missing 'Path' in [[ProjectReferences]]"
 - "Project 'lib/lib.celp' not found"

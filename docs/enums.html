@@ -523,9 +523,9 @@ Code: enum
 main: fun
 {
 	val raw = 50
-	val code = Code(raw)
-}</textarea><pre><code><span class="line"><span class="c-type">Code</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">first</span> = <span class="c-literal">100</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> raw = <span class="c-literal">50</span></span><span class="line">	<span class="c-keyword">val</span> code = <span class="c-type">Code</span>(raw)</span><span class="line">}</span></code></pre></div>
-<div class="output"><div class="label">Output</div><pre>Panic at main.ce:12:13: 'Code' has no case with this value</pre></div>
+	val _ = Code(raw)
+}</textarea><pre><code><span class="line"><span class="c-type">Code</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">first</span> = <span class="c-literal">100</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> raw = <span class="c-literal">50</span></span><span class="line">	<span class="c-keyword">val</span> _ = <span class="c-type">Code</span>(raw)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>Panic at main.ce:12:10: 'Code' has no case with this value</pre></div>
 <p>An enum with payloads has no conversion to or from integers. An enum can't declare its own conversions to or from integer types either, since those are built in (<a href="conversions.html">Conversions</a> covers declared conversions):</p>
 <div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-339"></button><textarea hidden id="copy-339">mod example
 
@@ -741,9 +741,9 @@ Socket: enum match i32
 main: fun
 {
 	val raw = -1
-	val socket: Socket = open(raw)
-}</textarea><pre><code><span class="line"><span class="c-type">Socket</span>: <span class="c-keyword">enum</span> <span class="c-keyword">match</span> <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-case">invalid</span> = -<span class="c-literal">1</span></span><span class="line">	<span class="c-case">open</span>(<span class="c-field">handle</span>) = <span class="c-keyword">else</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> raw = -<span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> socket: <span class="c-type">Socket</span> = <span class="c-case">open</span>(raw)</span><span class="line">}</span></code></pre></div>
-<div class="output"><div class="label">Output</div><pre>Panic at main.ce:12:23: 'Socket.open' can't hold this value</pre></div>
+	val _: Socket = open(raw)
+}</textarea><pre><code><span class="line"><span class="c-type">Socket</span>: <span class="c-keyword">enum</span> <span class="c-keyword">match</span> <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-case">invalid</span> = -<span class="c-literal">1</span></span><span class="line">	<span class="c-case">open</span>(<span class="c-field">handle</span>) = <span class="c-keyword">else</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> raw = -<span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> _: <span class="c-type">Socket</span> = <span class="c-case">open</span>(raw)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>Panic at main.ce:12:18: 'Socket.open' can't hold this value</pre></div>
 <p><code>T</code> can be an integer type, <code>char</code>, <code>bool</code>, a pointer type or a function type. For pointer and function types the only value a case can list is <code>null</code>, which makes an enum for pointers that may be null:</p>
 <div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-347"></button><textarea hidden id="copy-347">mod example
 

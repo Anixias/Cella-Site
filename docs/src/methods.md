@@ -517,7 +517,7 @@ Enemy: rec
 main: fun
 {
 	val a = Enemy.spawn()
-	val b = Enemy.spawn()
+	Enemy.spawn()
 	printf("%d %d %d %.1f\n", a.health, Enemy.spawned, Enemy.maxHealth, Enemy.speed)
 	printf("%zu\n", sizeOf(Enemy))
 }
@@ -798,8 +798,8 @@ Unit: rec
 
 main: fun
 {
-	val a = Unit.make(10)
-	val b = Unit.make(20)
+	Unit.make(10)
+	Unit.make(20)
 	printf("%d\n", Unit.count)
 	Unit.resetCount = 0
 	printf("%d\n", Unit.count)

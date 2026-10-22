@@ -274,9 +274,9 @@ Counted[T]: rec
 
 main: fun
 {
-	val a = Counted(1)
-	val b = Counted(2)
-	val c = Counted(true)
+	Counted(1)
+	Counted(2)
+	Counted(true)
 	printf("%d %d %d\n", Counted[i32].made, Counted[bool].made, Counted[f64].made)
 }
 ```
@@ -785,7 +785,7 @@ main: fun
 
 ## Value parameters
 
-A value parameter takes a compile-time integer instead of a type. It's declared with `const` and an integer type, as in `N: const usize`, and inside the declaration it's a constant: it can size an array, appear in expressions, or be passed on as another generic's argument. Like a type parameter, it's inferred from the arguments or written out:
+A value parameter takes a compile-time integer instead of a type. It's declared with `const` and an integer type, as in `length: const usize`, and inside the declaration it's a constant: it can size an array, appear in expressions, or be passed on as another generic's argument. Like a type parameter, it's inferred from the arguments or written out:
 
 ```cella
 ~ mod example
@@ -795,7 +795,7 @@ A value parameter takes a compile-time integer instead of a type. It's declared 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-sum[N: const usize]: fun(values: array[i32, N]) -> i32
+sum[length: const usize]: fun(values: array[i32, length]) -> i32
 {
 	var total = 0
 	for value in values
@@ -804,9 +804,9 @@ sum[N: const usize]: fun(values: array[i32, N]) -> i32
 	ret total
 }
 
-zeros[N: const usize]: fun -> array[i32, N]
+zeros[length: const usize]: fun -> array[i32, length]
 {
-	var result: array[i32, N]
+	var result: array[i32, length]
 	ret result
 }
 
@@ -836,9 +836,9 @@ Each value gets its own compiled copy, as each type does. Records and enums take
 ~
 capacity: const usize = 4
 
-Stack[T: noref, N: const usize]: rec
+Stack[T: noref, size: const usize]: rec
 {
-	items: array[T, N]
+	items: array[T, size]
 	count: usize
 
 	push: fun(mut self, value: T)
@@ -847,7 +847,7 @@ Stack[T: noref, N: const usize]: rec
 		self.count += 1
 	}
 
-	isFull: get(imm self) -> bool => self.count == N
+	isFull: get(imm self) -> bool => self.count == size
 }
 
 main: fun
@@ -865,27 +865,27 @@ main: fun
 1 0 16
 ```
 
-A value parameter must have an integer type, and the value given must fit it. Inside a generic argument, a value parameter must stand alone: `array[i32, N]` works, but `array[i32, N + 1]` doesn't, while expressions of plain constants, like `capacity * 2`, still do. A value parameter isn't a type, and a type isn't a value:
+A value parameter must have an integer type, and the value given must fit it. Inside a generic argument, a value parameter must stand alone: `array[i32, length]` works, but `array[i32, length + 1]` doesn't, while expressions of plain constants, like `capacity * 2`, still do. A value parameter isn't a type, and a type isn't a value:
 
 ```cella error
 ~ mod example
 ~
-grow[N: const usize]: fun(values: array[i32, N]) -> array[i32, N + 1] => undef
+grow[length: const usize]: fun(values: array[i32, length]) -> array[i32, length + 1] => undef
 
-Ratio[N: const f64]: rec
+Ratio[scale: const f64]: rec
 {
 	value: i32
 }
 
-Small[N: const u8]: rec
+Small[count: const u8]: rec
 {
-	items: array[i32, N]
+	items: array[i32, count]
 }
 
-misuse[N: const usize]: fun -> usize
+misuse[count: const usize]: fun -> usize
 {
-	val x: N = 1
-	ret N
+	val x: count = 1
+	ret count
 }
 
 main: fun
@@ -898,7 +898,7 @@ main: fun
 ```errors
 Cannot use arithmetic on value parameters in generic arguments
 Value parameters need an integer type
-'N' is not a type
+'count' is not a type
 '300' doesn't fit in 'u8'
 'i32' is not a constant
 ```

@@ -617,7 +617,7 @@ Atomic[T: atomic]: rec
 main: fun
 {
 	val hits = Atomic[u64](0)
-	hits.add(3)
+	hits.store(3)
 	hits.add(4)
 	printf("%llu\n", hits.load())
 

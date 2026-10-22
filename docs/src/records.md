@@ -101,7 +101,7 @@ Nothing: rec
 
 main: fun
 {
-	val marker = Marker()
+	val _ = Marker()
 	printf("%zu %zu\n", sizeOf(Marker), sizeOf(Nothing))
 }
 ```

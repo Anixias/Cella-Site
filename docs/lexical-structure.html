@@ -94,15 +94,19 @@ ext
 	printf: fun(format: cstr, ...) -&gt; i32
 }
 
+Count: rec
+{
+	value: i32
+}
+
 main: fun
 {
-	val count = 1
-	val Count = 2
-	val player2 = 3
-	val _offset = 4
-	printf(&quot;%d %d %d %d\n&quot;, count, Count, player2, _offset)
-}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> Count = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">val</span> player2 = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> _offset = <span class="c-literal">4</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, count, Count, player2, _offset)</span><span class="line">}</span></code></pre></div>
-<div class="output"><div class="label">Output</div><pre>1 2 3 4</pre></div>
+	val count = Count(1)
+	val player2 = 2
+	printf(&quot;%d %d\n&quot;, count.value, player2)
+}</textarea><pre><code><span class="line"><span class="c-type">Count</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-type">Count</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> player2 = <span class="c-literal">2</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, count.<span class="c-field">value</span>, player2)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1 2</pre></div>
+<p>The compiler accepts any of these names, but by default it gives a hint for names that don't follow the usual style, such as a variable named <code>Count</code> or <code>_offset</code>. <a href="project-settings.html#naming">Project settings</a> covers the rules and how to change them.</p>
 <p>Names are compared after Unicode normalization (NFC), so a letter written as one character and the same letter written as a base letter and a combining mark are the same name.</p>
 <p><code>_</code> on its own isn't a name. It marks a value or parameter that is never used, such as <code>val _ = make()</code> or a parameter written <code>_: i32</code>, and it can't be read:</p>
 <div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-54"></button><textarea hidden id="copy-54">mod example

@@ -461,16 +461,11 @@ A local variable, parameter or declaration can have the same name as a module an
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-geometry: rec
-{
-	x: i32
-}
-
 main: fun
 {
-	val local = geometry(4)
+	val geometry = 4
 	val shape = mod.geometry.Shape(3)
-	printf("%d %d %d\n", local.x, shape.side, mod.geometry.area(2))
+	printf("%d %d %d\n", geometry, shape.side, mod.geometry.area(2))
 }
 ```
 

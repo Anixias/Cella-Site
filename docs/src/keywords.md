@@ -38,7 +38,7 @@ main: fun
 | `fun` | Declares a function (`area: fun(...)`), starts a lambda (`fun(x) => x * 2`) and names function types (`fun[i32 -> i32]`). | [Functions](functions.md), [Closures](closures.md) |
 | `val` | Declares a binding that can't be reassigned; also a read-only static field and a pattern binding. | [Variables](variables.md) |
 | `var` | Declares a binding that can be reassigned; also a writable static field and a pattern binding. | [Variables](variables.md) |
-| `const` | Declares a compile-time constant; also marks value parameters (`N: const usize`). | [Variables](variables.md), [Generics](generics.md) |
+| `const` | Declares a compile-time constant; also marks value parameters (`length: const usize`). | [Variables](variables.md), [Generics](generics.md) |
 | `new` | Names constructors (`new: op(...)`) and explicit conversions (`new: op(self) -> T`); `T: new(...)` constrains a type parameter. | [Records](records.md), [Conversions](conversions.md) |
 | `drop` | Names destructors (`drop: op`), destroys a value early (`drop x`, `drop *p`); `T: drop` constrains a type parameter. | [Ownership](ownership.md) |
 | `default` | Restores zeroed construction (`new: op() = default`); `T: default` constrains a type parameter. | [Records](records.md), [Generics](generics.md) |
@@ -68,7 +68,7 @@ main: fun
 | --- | --- | --- |
 | `imm` | Borrows without writing: `imm` parameters and arguments, `imm[T]` borrow types, `for imm x in xs`. | [Parameter modes](parameter-modes.md), [Borrows](borrows.md) |
 | `mut` | Borrows for writing: `mut` parameters and arguments, `mut[T]` borrow types, `for mut x in xs`, `match mut`. | [Parameter modes](parameter-modes.md), [Borrows](borrows.md) |
-| `own` | Moves a value (`own x`), takes ownership in parameters and loops, and declares types whose values only move (`own rec`, `own enum`) and closures that own their captures (`own fun`). | [Ownership](ownership.md), [Parameter modes](parameter-modes.md) |
+| `own` | Moves a value where a plain use wouldn't (`own *p`, `own slot` out of a `mut` parameter, `own self.field`), and declares types whose values only move (`own rec`, `own enum`) and closures that own their captures (`own fun`). | [Ownership](ownership.md), [Pointers](pointers.md) |
 | `dyn` | Names trait object types: `dyn[Shape]`. | [Trait objects](trait-objects.md) |
 | `atomic` | Starts an atomic load, store, update or fence; `T: atomic` constrains a type parameter. | [Atomics](atomics.md) |
 

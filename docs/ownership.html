@@ -37,7 +37,7 @@ try {
 <p>Cella has no garbage collector, and it doesn't make you free everything by hand either. Every value has exactly one owner, and when the owner goes away, so does the value. A type can declare a destructor, code that runs when one of its values goes away, so a record that holds memory or a handle can release it at the right moment without any call in the code that uses it. This chapter explains who owns a value, when destructors run, and how a value moves from one owner to another.</p>
 <h2 id="one-owner-per-value"><a class="anchor" href="#one-owner-per-value">One owner per value</a></h2>
 <p>A local variable owns the value stored in it. When the variable's scope ends, the value is destroyed. For a number that means nothing happens, but a record can say what destroying it does with a destructor, written <code>drop: op</code> in its body:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-408"></button><textarea hidden id="copy-408">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-412"></button><textarea hidden id="copy-412">mod example
 
 ext
 {
@@ -73,7 +73,7 @@ close 1</pre></div>
 <h2 id="destructors"><a class="anchor" href="#destructors">Destructors</a></h2>
 <p>A destructor is a member named <code>drop</code>, declared as <code>drop: op</code> with a body. It takes no parameters and returns nothing. Inside it, <code>self</code> is the value being destroyed, and the destructor can read and change its fields and pass it to other functions.</p>
 <p>The usual job of a destructor is to give back something the value holds. This <code>Buffer</code> gets memory from C's <code>malloc</code> in its constructor and returns it with <code>free</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-409"></button><textarea hidden id="copy-409">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-413"></button><textarea hidden id="copy-413">mod example
 
 ext
 {
@@ -110,7 +110,7 @@ main: fun
 freeing 4096 bytes
 freeing 16 bytes</pre></div>
 <p>A destructor can't take parameters:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-410"></button><textarea hidden id="copy-410">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-414"></button><textarea hidden id="copy-414">mod example
 
 File: own rec
 {
@@ -125,7 +125,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-type">File</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span>(force: bool)</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:13ch">Destructors cannot take parameters</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>It can't replace <code>self</code> or move it away, since the value is being destroyed and has nowhere to go:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-411"></button><textarea hidden id="copy-411">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-415"></button><textarea hidden id="copy-415">mod example
 
 Counter: own rec
 {
@@ -140,7 +140,7 @@ Counter: own rec
 main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-type">Counter</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">count</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span> = <span class="c-type">Counter</span>(<span class="c-literal">0</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot reassign &#x27;self&#x27; in destructors</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-412"></button><textarea hidden id="copy-412">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-416"></button><textarea hidden id="copy-416">mod example
 
 Counter: own rec
 {
@@ -163,7 +163,7 @@ main: fun
 <h2 id="when-destructors-run"><a class="anchor" href="#when-destructors-run">When destructors run</a></h2>
 <h3 id="at-the-end-of-a-scope"><a class="anchor" href="#at-the-end-of-a-scope">At the end of a scope</a></h3>
 <p>The values a scope owns are destroyed when it ends, in the reverse of the order they were declared. The last one created is the first one destroyed.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-413"></button><textarea hidden id="copy-413">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-417"></button><textarea hidden id="copy-417">mod example
 
 ext
 {
@@ -192,7 +192,7 @@ close 3
 close 2
 close 1</pre></div>
 <p>A scope can end in other ways than reaching its closing brace. <code>ret</code>, <code>break</code> and <code>cont</code> destroy every value owned by the scopes they leave, at the point where they jump:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-414"></button><textarea hidden id="copy-414">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-418"></button><textarea hidden id="copy-418">mod example
 
 ext
 {
@@ -233,7 +233,7 @@ found 1</pre></div>
 <p>Each pass through the loop body is a scope of its own, so <code>File(0)</code> is closed at the end of the first pass. The <code>ret</code> in the second pass closes <code>File(1)</code> and then <code>log</code>.</p>
 <h3 id="fields-elements-and-payloads"><a class="anchor" href="#fields-elements-and-payloads">Fields, elements and payloads</a></h3>
 <p>A value that contains other values destroys them along with itself. A record runs its own destructor first, while its fields are still intact, and then destroys its fields in the reverse of their declared order. An array destroys its elements from the last to the first, and an enum destroys the payload of the case it holds:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-415"></button><textarea hidden id="copy-415">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-419"></button><textarea hidden id="copy-419">mod example
 
 ext
 {
@@ -282,7 +282,7 @@ close 1</pre></div>
 <p>A record doesn't need a destructor of its own for this. A record without <code>drop: op</code> whose fields have destructors still destroys those fields when it's destroyed; it's declared <code>own rec</code> because of them.</p>
 <h3 id="module-variables"><a class="anchor" href="#module-variables">Module variables</a></h3>
 <p>A module variable is owned by the program. Module variables are destroyed after <code>main</code> returns, in the reverse of the order they were declared:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-416"></button><textarea hidden id="copy-416">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-420"></button><textarea hidden id="copy-420">mod example
 
 ext
 {
@@ -315,7 +315,7 @@ close 1</pre></div>
 <ul><li>Numbers, <code>bool</code> and <code>char</code>.</li><li><code>str</code>, <code>cstr</code> and pointers (<code>ptr[T]</code>). Copying a pointer copies the address, not what it points to.</li><li>Function values with a plain function type, such as <code>fun[i32 -&gt; i32]</code>.</li><li>Records, arrays and enums whose fields, elements or payloads all copy, unless they're declared <code>own</code>.</li></ul>
 <p>Everything else moves: the records and enums declared <code>own rec</code> and <code>own enum</code>, and any array or generic record that holds one of them.</p>
 <p>A record of plain data copies, so changing the copy leaves the original alone:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-417"></button><textarea hidden id="copy-417">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-421"></button><textarea hidden id="copy-421">mod example
 
 ext
 {
@@ -339,7 +339,7 @@ main: fun
 <p>A value with a destructor can't be copied, since two copies would both run the destructor and, for the <code>Buffer</code> above, free the same memory twice. Cella moves it instead.</p>
 <h3 id="owning-types"><a class="anchor" href="#owning-types">Owning types</a></h3>
 <p>A type whose values must move says so in its declaration. A record with a destructor is declared <code>own rec</code>, like <code>File</code>, and so is a record or enum that holds an owning value, since destroying it destroys that value too. Leaving out <code>own</code> is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-418"></button><textarea hidden id="copy-418">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-422"></button><textarea hidden id="copy-422">mod example
 
 Handle: rec
 {
@@ -368,7 +368,7 @@ main: fun
 <p>A generic record whose fields have its type parameters' types needs no <code>own</code>; each use follows its type arguments. <code>Pair[A, B]</code> with fields of types <code>A</code> and <code>B</code> copies as <code>Pair[i32, i32]</code> and moves as <code>Pair[File, File]</code>. A field whose type owns whatever the arguments are, such as an <code>Option[File]</code> or a field of another <code>own</code> type, still needs <code>own</code>. A record that both holds borrows and owns a value is declared <code>own ref rec</code> (<a href="borrows.html">Borrows</a>).</p>
 <h2 id="moving-values"><a class="anchor" href="#moving-values">Moving values</a></h2>
 <p>A value that can't be copied moves wherever it's taken by value: into a parameter without a mode, into a constructor or an enum payload, into an element of an array literal, into the left side of an assignment, or into a new variable. Nothing extra is written at the move:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-419"></button><textarea hidden id="copy-419">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-423"></button><textarea hidden id="copy-423">mod example
 
 ext
 {
@@ -403,7 +403,7 @@ back in main
 close 2</pre></div>
 <p><code>archive</code> owns the file once it's called, so the file is closed when <code>archive</code> returns, not at the end of <code>main</code>. <code>main</code> no longer owns it, so it doesn't close it a second time.</p>
 <p>Constructors, assignments and declarations move the same way:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-420"></button><textarea hidden id="copy-420">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-424"></button><textarea hidden id="copy-424">mod example
 
 ext
 {
@@ -447,7 +447,7 @@ close 1</pre></div>
 <p>The keyword <code>own</code> marks a move only where a plain use wouldn't move: taking a value out of a <code>mut</code> parameter (<a href="parameter-modes.html">Parameter modes</a>), out of memory behind a <a href="pointers.html">pointer</a>, and out of a field of <code>self</code> in a method that consumes a value with a destructor (<a href="methods.html">Methods</a>).</p>
 <h3 id="using-a-moved-value"><a class="anchor" href="#using-a-moved-value">Using a moved value</a></h3>
 <p>After a move, the old place holds nothing, and using it is an error. The message points to the move:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-421"></button><textarea hidden id="copy-421">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-425"></button><textarea hidden id="copy-425">mod example
 
 File: own rec
 {
@@ -469,7 +469,7 @@ main: fun
 	archive(report)
 }</textarea><pre><code><span class="line"><span class="c-function">archive</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">file</span>: <span class="c-type">File</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> report = <span class="c-type">File</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-function">archive</span>(report)</span><span class="line">	<span class="c-function">archive</span>(report)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use moved values<span class="diagnostic-note">Moved on line 19</span></span></span><span class="line">}</span></code></pre></div>
 <p>A moved variable declared with <code>var</code> can be given a new value, and is usable again from there on:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-422"></button><textarea hidden id="copy-422">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-426"></button><textarea hidden id="copy-426">mod example
 
 ext
 {
@@ -505,7 +505,7 @@ close 2</pre></div>
 <p>A type that copies is copied in all these places, and the source stays usable.</p>
 <h3 id="what-cant-be-moved"><a class="anchor" href="#what-cant-be-moved">What can't be moved</a></h3>
 <p>A module variable can't be moved out of, since the program owns it until it exits:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-423"></button><textarea hidden id="copy-423">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-427"></button><textarea hidden id="copy-427">mod example
 
 File: own rec
 {
@@ -528,7 +528,7 @@ main: fun
 }</textarea><pre><code><span class="line">current: <span class="c-keyword">var</span> <span class="c-type">File</span> = <span class="c-type">File</span>(<span class="c-literal">1</span>)</span><span class="line"> </span><span class="line"><span class="c-function">archive</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">file</span>: <span class="c-type">File</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">archive</span>(current)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot move module variables</span></span><span class="line">}</span></code></pre></div>
 <h2 id="returning-values"><a class="anchor" href="#returning-values">Returning values</a></h2>
 <p><code>ret</code> moves the value it returns to the caller. A function can create a value and hand it out:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-424"></button><textarea hidden id="copy-424">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-428"></button><textarea hidden id="copy-428">mod example
 
 ext
 {
@@ -562,7 +562,7 @@ using 7
 close 7</pre></div>
 <p>The file isn't closed when <code>open</code> returns, because <code>open</code> no longer owns it. Writing <code>ret own file</code> is accepted, but the compiler points out the <code>own</code> with the hint "Redundant 'own'", as it does for <code>own</code> anywhere a value would move anyway.</p>
 <p>Returning a field moves just that field. The rest of the value is destroyed when the function ends:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-425"></button><textarea hidden id="copy-425">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-429"></button><textarea hidden id="copy-429">mod example
 
 ext
 {
@@ -600,7 +600,7 @@ kept 1
 close 1</pre></div>
 <h2 id="temporaries"><a class="anchor" href="#temporaries">Temporaries</a></h2>
 <p>A value that isn't stored in a variable is a temporary: the result of a call used as an argument, a record built inline, or a call whose field is read, as in <code>open(1).id</code>. A temporary is destroyed at the end of the statement that made it, after everything else in the statement has run. Several temporaries in one statement are destroyed in the reverse of the order they were made:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-426"></button><textarea hidden id="copy-426">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-430"></button><textarea hidden id="copy-430">mod example
 
 ext
 {
@@ -633,7 +633,7 @@ end</pre></div>
 <p>A call whose result is thrown away, like <code>open(3)</code> on its own line, destroys the result right away.</p>
 <p>A temporary passed to a parameter that takes it by value isn't destroyed at the end of the statement. It moves into the function, which then owns it.</p>
 <p>A temporary in the condition of an <code>if</code>, <code>while</code> or <code>do ... while</code> is destroyed after the condition is checked, before the body runs. When an <code>is</code> pattern in the condition binds part of the temporary, it lives until the end of the body instead, so the binding stays valid:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-427"></button><textarea hidden id="copy-427">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-431"></button><textarea hidden id="copy-431">mod example
 
 ext
 {
@@ -675,7 +675,7 @@ close 2
 end</pre></div>
 <h2 id="assignment-destroys-the-old-value"><a class="anchor" href="#assignment-destroys-the-old-value">Assignment destroys the old value</a></h2>
 <p>Assigning to a place that already holds a value destroys the old value. The right side is computed first, then the old value is destroyed, then the new one is stored, so the right side can still read the old value:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-428"></button><textarea hidden id="copy-428">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-432"></button><textarea hidden id="copy-432">mod example
 
 ext
 {
@@ -717,7 +717,7 @@ close 2</pre></div>
 <p>The same holds for fields, array elements and places reached through a <code>mut</code> parameter (see <a href="parameter-modes.html">Parameter modes</a>). A place that holds nothing yet, such as a moved variable, has nothing to destroy, and the assignment only stores.</p>
 <h2 id="destroying-a-value-early"><a class="anchor" href="#destroying-a-value-early">Destroying a value early</a></h2>
 <p><code>drop</code> destroys a value only through a pointer, as in <code>drop *p</code> (see <a href="pointers.html">Pointers</a>). Variables are always destroyed by the compiler when their owner lets go of them, so <code>drop</code> on a variable is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-429"></button><textarea hidden id="copy-429">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-433"></button><textarea hidden id="copy-433">mod example
 
 File: own rec
 {
@@ -736,7 +736,7 @@ main: fun
 <p>To destroy a variable's value before the end of its scope, put the variable in a block of its own, assign it a new value, or move it into a function that takes it by value.</p>
 <h2 id="values-moved-on-only-some-paths"><a class="anchor" href="#values-moved-on-only-some-paths">Values moved on only some paths</a></h2>
 <p>A value can be moved on one path through a function and kept on another. The program then checks at run time whether to destroy it: if the move happened, the new owner destroys it, and if not, the scope's end does.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-430"></button><textarea hidden id="copy-430">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-434"></button><textarea hidden id="copy-434">mod example
 
 ext
 {
@@ -778,7 +778,7 @@ handled
 handled
 close 1</pre></div>
 <p>After the <code>if</code>, <code>file</code> might be moved, so the code after it can't use it. The error lists every move that might have happened:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-431"></button><textarea hidden id="copy-431">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-435"></button><textarea hidden id="copy-435">mod example
 
 File: own rec
 {
@@ -806,7 +806,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">archive</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">file</span>: <span class="c-type">File</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">handle</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">important</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> file = <span class="c-type">File</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">important</span></span><span class="line">		<span class="c-function">archive</span>(file)</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> file.<span class="c-field">id</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot use moved values<span class="diagnostic-note">Moved on line 20</span></span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>In a loop, a move in one iteration leaves the value moved for the next one:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-432"></button><textarea hidden id="copy-432">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-436"></button><textarea hidden id="copy-436">mod example
 
 File: own rec
 {
@@ -828,7 +828,7 @@ main: fun
 		archive(file)
 }</textarea><pre><code><span class="line"><span class="c-function">archive</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">file</span>: <span class="c-type">File</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> file = <span class="c-type">File</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">3</span></span><span class="line">		<span class="c-function">archive</span>(file)</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot use moved values<span class="diagnostic-note">Moved here in an earlier iteration</span></span></span><span class="line">}</span></code></pre></div>
 <p>The message adds "Moved here in an earlier iteration". Giving the variable a new value before the next iteration fixes it:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-433"></button><textarea hidden id="copy-433">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-437"></button><textarea hidden id="copy-437">mod example
 
 ext
 {
@@ -869,7 +869,7 @@ end
 close 3</pre></div>
 <h2 id="moving-fields-out"><a class="anchor" href="#moving-fields-out">Moving fields out</a></h2>
 <p>A field can be moved out of a record on its own. The record is then partly moved: its other fields are still there and are destroyed as usual, but the record as a whole can't be used until the field is filled again:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-434"></button><textarea hidden id="copy-434">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-438"></button><textarea hidden id="copy-438">mod example
 
 ext
 {
@@ -911,7 +911,7 @@ close 1
 close 2
 close 11</pre></div>
 <p><code>show</code> takes the pair with <code>imm</code>, which lends it to the function without moving it (<a href="parameter-modes.html">Parameter modes</a> covers this). Using the whole record while a field is missing is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-435"></button><textarea hidden id="copy-435">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-439"></button><textarea hidden id="copy-439">mod example
 
 File: own rec
 {
@@ -939,7 +939,7 @@ main: fun
 	show(imm pair)
 }</textarea><pre><code><span class="line"><span class="c-type">Pair</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">left</span>: <span class="c-type">File</span></span><span class="line">	<span class="c-field">right</span>: <span class="c-type">File</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">pair</span>: <span class="c-type">Pair</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> pair = <span class="c-type">Pair</span>(<span class="c-type">File</span>(<span class="c-literal">1</span>), <span class="c-type">File</span>(<span class="c-literal">2</span>))</span><span class="line">	<span class="c-keyword">val</span> left = pair.<span class="c-field">left</span></span><span class="line">	<span class="c-function">show</span>(<span class="c-keyword">imm</span> pair)</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot use partly moved values<span class="diagnostic-note">Moved on line 25</span></span></span><span class="line">}</span></code></pre></div>
 <p>A field can't be moved out of a record that has its own destructor, because the destructor would then run on a record with a hole in it:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-436"></button><textarea hidden id="copy-436">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-440"></button><textarea hidden id="copy-440">mod example
 
 File: own rec
 {
@@ -972,7 +972,7 @@ main: fun
 <p>Array elements can be moved out the same way when the index is a constant. Moving one out at an index computed at run time is an error (<a href="arrays.html">Arrays</a> covers this).</p>
 <h2 id="destructors-that-move-fields"><a class="anchor" href="#destructors-that-move-fields">Destructors that move fields</a></h2>
 <p>The one place where fields can be moved out of a record with a destructor is that destructor. The destructor can hand a field to another owner, and the fields it moves are skipped when the record's fields are destroyed afterwards:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-437"></button><textarea hidden id="copy-437">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-441"></button><textarea hidden id="copy-441">mod example
 
 ext
 {
@@ -1025,7 +1025,7 @@ close 2</pre></div>
 <p>The destructor may also put a new value into a field it moved; that value is then destroyed with the other fields. After moving a field, the destructor can't use the field, or <code>self</code> as a whole, until it's filled again ("Cannot use moved values", "Cannot use partly moved values").</p>
 <h2 id="definite-initialization"><a class="anchor" href="#definite-initialization">Definite initialization</a></h2>
 <p>A variable must hold a value before it's read. The compiler follows every path through the function, and reading a variable that might not have been given a value is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-438"></button><textarea hidden id="copy-438">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-442"></button><textarea hidden id="copy-442">mod example
 
 File: own rec
 {
@@ -1049,7 +1049,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">open</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">ready</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> file: <span class="c-type">File</span> = <span class="c-keyword">undef</span></span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">ready</span></span><span class="line">		file = <span class="c-type">File</span>(<span class="c-literal">1</span>)</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> file.<span class="c-field">id</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot use uninitialized values</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>A <code>val</code> declared without a value can be given one later, once on each path:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-439"></button><textarea hidden id="copy-439">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-443"></button><textarea hidden id="copy-443">mod example
 
 ext
 {
@@ -1084,7 +1084,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>chose 2
 close 2</pre></div>
 <p>A record can also be filled one field at a time. It counts as a whole value once every field is set; before that, the fields that are set can be used on their own, and the record as a whole can't:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-440"></button><textarea hidden id="copy-440">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-444"></button><textarea hidden id="copy-444">mod example
 
 File: own rec
 {
@@ -1113,7 +1113,7 @@ main: fun
 	pair.right = File(2)
 }</textarea><pre><code><span class="line"><span class="c-type">Pair</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">left</span>: <span class="c-type">File</span></span><span class="line">	<span class="c-field">right</span>: <span class="c-type">File</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">pair</span>: <span class="c-type">Pair</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> pair: <span class="c-type">Pair</span> = <span class="c-keyword">undef</span></span><span class="line">	pair.<span class="c-field">left</span> = <span class="c-type">File</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-function">show</span>(<span class="c-keyword">imm</span> pair)</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot use partly initialized values</span></span><span class="line">	pair.<span class="c-field">right</span> = <span class="c-type">File</span>(<span class="c-literal">2</span>)</span><span class="line">}</span></code></pre></div>
 <p>The destructors follow the same tracking. Only what was given a value is destroyed, so a record left half filled when its scope ends destroys just the fields that were set:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-441"></button><textarea hidden id="copy-441">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-445"></button><textarea hidden id="copy-445">mod example
 
 ext
 {

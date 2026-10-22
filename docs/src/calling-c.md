@@ -718,7 +718,7 @@ main: fun
 'call' requires 'T: ext'
 ```
 
-The error's note says why: "'Token' can't be used in 'ext' signatures". Types that cross into C can always be copied, so `ext` can't be combined with `drop`.
+The error's note says why: "'Token' can't be used in 'ext' signatures". Types that cross into C can always be copied and never hold borrows, so a `T: ext` meets `copy` and `noref` bounds, and `ext` can't be combined with `drop`.
 
 ## What can't cross into C
 

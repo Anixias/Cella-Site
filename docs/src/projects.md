@@ -238,6 +238,8 @@ Hint at main.ce:10:6
 game -> bin\game.exe
 ```
 
+The [`[Lints]` setting](project-settings.md#lints) can turn such checks off or report them as warnings or errors instead.
+
 ## Running
 
 `cella run` builds a program and runs it. It takes the same path and options as `cella build`:

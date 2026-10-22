@@ -41,7 +41,39 @@ main: fun
 
 Writing `bits.float` stores the four bytes of the float, and reading `bits.raw` gives those same bytes as an integer. Nothing records which member was written last; every member can be read at any time.
 
-A union has no field-by-field constructor, since its members aren't separate values:
+## Creating a union from a member
+
+`T(value)` with one argument creates a union with the member whose type is exactly the type of `value` set to it. Bytes the member doesn't cover are zero:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Bits: union
+{
+	float: f32
+	raw: u32
+}
+
+bitsOf: fun(value: f32) -> u32 => Bits(value).raw
+
+main: fun
+{
+	printf("%x %x\n", bitsOf(1.0), bitsOf(-2.0))
+	printf("%.1f\n", f64(Bits(0x40490fdbu32).float))
+}
+```
+
+```output
+3f800000 c0000000
+3.1
+```
+
+The member is picked by type alone, so the argument's type must be known. An untyped literal like `1` has none and needs a suffix, as in `1u32`. A union with two members of the argument's type can't pick one either:
 
 ```cella error
 ~ mod example
@@ -52,15 +84,25 @@ Bits: union
 	raw: u32
 }
 
+Twin: union
+{
+	first: u32
+	second: u32
+}
+
 main: fun
 {
 	val bits = Bits(1)
+	val twin = Twin(1u32)
 }
 ```
 
 ```errors
 No constructor for 'Bits' accepts these arguments
+Conversion to 'Twin' is ambiguous
 ```
+
+The first error's note lists what `Bits` accepts: "'Bits' takes no arguments, or one value of a field's type: f32, u32".
 
 ## Members share one address
 
@@ -204,7 +246,7 @@ main: fun
 {
 	var letter = Letter()
 	letter.raw = 0xFFFFFFFF
-	val c = letter.letter
+	val _ = letter.letter
 }
 ```
 
@@ -251,7 +293,7 @@ main: fun
 
 ## Constructors, methods and properties
 
-A union can declare constructors, methods and properties, as a record does; [Records](records.md) and [Methods and properties](methods.md) cover them. A constructor sets the members it wants through `self`. Declaring a constructor removes `T()`, the same as for records. Properties can give names to the bits of an integer member:
+A union can declare constructors, methods and properties, as a record does; [Records](records.md) and [Methods and properties](methods.md) cover them. A constructor sets the members it wants through `self`. Declaring a constructor removes `T()` and `T(value)`, the same as for records. Properties can give names to the bits of an integer member:
 
 ```cella
 ~ mod example
@@ -308,7 +350,7 @@ main: fun
 1 5 21
 ```
 
-A union can't declare a destructor or `req` members, can't take type parameters and can't be a `ref union`:
+A union can't declare a destructor or `req` members and can't be a `ref union`:
 
 ```cella error
 ~ mod example
@@ -321,11 +363,6 @@ Holder: union
 	drop: op
 	{
 	}
-}
-
-Generic[T]: union
-{
-	value: i32
 }
 
 Shared: ref union
@@ -341,7 +378,6 @@ main: fun
 ```errors
 Cannot declare required fields in unions
 Cannot declare destructors in unions
-Cannot declare type parameters on unions
 Cannot declare 'ref' unions
 ```
 
@@ -424,6 +460,108 @@ main: fun
 ```errors
 Cannot make union members less visible than other members
 Cannot restrict writes to union members
+```
+
+## Unions in constants
+
+Reading a member of a union built from a constant is a constant too, so constants can be written as raw bits. The bits are kept exactly, including those of infinities and NaNs:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+F32Bits: union
+{
+	raw: u32
+	value: f32
+}
+
+Word: union
+{
+	value: u32
+	bytes: array[u8, 4]
+}
+
+largest: const f32 = F32Bits(0x7F7FFFFFu32).value
+infinity: const f32 = F32Bits(0x7F800000u32).value
+oneBits: const u32 = F32Bits(1.0f32).raw
+lowByte: const u8 = Word(0x11223344u32).bytes[0]
+
+main: fun
+{
+	printf("%g %g\n", f64(largest), f64(infinity))
+	printf("%x %x\n", oneBits, lowByte)
+}
+```
+
+```output
+3.40282e+38 inf
+3f800000 44
+```
+
+A constant can read a member whose type is an integer, a float, `bool`, `char` or an array of them. A `bool` read this way must be 0 or 1, and a `char` must be a valid character; otherwise the value isn't a constant. A constant can also hold a whole union, as in `infinity: const F32Bits = F32Bits(0x7F800000u32)`.
+
+## Generic unions
+
+A union can take type parameters. A type parameter used in a member must have the `ext` and `default` constraints, since a union holds only plain data that is valid when zeroed (see [What a union can hold](#what-a-union-can-hold)). One generic union can then reinterpret the bits of any such type as another:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Bitcast[From: ext + default, To: ext + default]: union
+{
+	from: From
+	to: To
+}
+
+nan: const f32 = Bitcast[u32, f32](0x7FC00000u32).to
+
+bitsOf: fun(value: f64) -> u64 => Bitcast[f64, u64](value).to
+
+main: fun
+{
+	printf("%g %llx\n", f64(nan), bitsOf(-2.0))
+	printf("%x %x\n", Bitcast[u16, u32](0xABCDu16).to, Bitcast[u64, u16](0x1122334455667788u64).to)
+}
+```
+
+```output
+nan c000000000000000
+abcd 7788
+```
+
+When the two types have different sizes, the union is as large as the larger one: a smaller `From` leaves the rest of `to` zero, and a smaller `To` reads only the first bytes of `from`. Without the constraints, the member is rejected:
+
+```cella error
+~ mod example
+~
+Bare[T]: union
+{
+	value: T
+}
+
+Plain[T: ext]: union
+{
+	value: T
+}
+~
+~ main: fun
+~ {
+~ }
+```
+
+```errors
+Cannot store borrows in unions
+Cannot store values without defaults in unions
 ```
 
 ## Using unions with C

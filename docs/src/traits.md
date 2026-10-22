@@ -227,7 +227,7 @@ Money: rec impl Sum
 	empty: fun -> Money => Money(0)
 }
 
-total[T: Sum + noref, N: const usize]: fun(imm values: array[T, N]) -> T
+total[T: Sum + noref, length: const usize]: fun(imm values: array[T, length]) -> T
 {
 	var sum = T.empty()
 	for imm value in values
@@ -248,6 +248,30 @@ main: fun
 ```
 
 The `noref` bound matters here: for a `T` that could hold borrows, `sum + value` could borrow from `sum`, and `sum` couldn't then be reassigned with it. See [Generics](generics.md#noref).
+
+A built-in operator also takes the place of a default body the trait gives for it. An implementation can't declare an operator a type already has built in:
+
+```cella error
+~ mod example
+~
+Sum: trait
+{
+	+: op(imm a: Self, imm b: Self) -> Self
+}
+
+i32: impl Sum
+{
+	+: op(a: i32, b: i32) -> i32 => a + b
+}
+~
+~ main: fun
+~ {
+~ }
+```
+
+```errors
+Operator '+' between 'i32' and 'i32' is built in
+```
 
 ### Constructors
 
@@ -932,6 +956,139 @@ Odd: trait req Even
 ```
 
 A trait with nothing of its own to require, like `Even` here, needs no body.
+
+### Defaults from a requiring trait
+
+A trait can give a default body to a member of a trait it requires, by declaring the member again, with the same signature, and a body. Types that implement it get that body unless they write their own:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Eq: trait
+{
+	==: op(imm a: Self, imm b: Self) -> bool
+}
+
+Ranked: trait req Eq
+{
+	rank: fun(imm self) -> i32
+
+	==: op(imm a: Self, imm b: Self) -> bool => a.rank() == b.rank()
+}
+
+Card: rec impl Ranked
+{
+	value: i32
+
+	rank: fun(imm self) -> i32 => self.value
+}
+
+Tile: rec impl Ranked
+{
+	value: i32
+	color: i32
+
+	rank: fun(imm self) -> i32 => self.value
+	==: op(a: Tile, b: Tile) -> bool => a.value == b.value && a.color == b.color
+}
+
+same[T: Eq]: fun(imm a: T, imm b: T) -> bool => a == b
+
+main: fun
+{
+	printf("%d %d\n", Card(3) == Card(3), same(Card(3), Card(4)))
+	printf("%d\n", Tile(3, 1) == Tile(3, 2))
+}
+```
+
+```output
+1 0
+0
+```
+
+The redeclared member is still `Eq`'s `==`, not a second one, so `same` and every other use of `Eq` get `Card`'s `==` from `Ranked`. When several traits on the way give a default, the one from the trait that requires the others wins. Two unrelated traits that both give one are an error for a type that implements both:
+
+```cella error
+~ mod example
+~
+Eq: trait
+{
+	==: op(imm a: Self, imm b: Self) -> bool
+}
+
+Ranked: trait req Eq
+{
+	rank: fun(imm self) -> i32
+
+	==: op(imm a: Self, imm b: Self) -> bool => a.rank() == b.rank()
+}
+
+Sized: trait req Eq
+{
+	size: fun(imm self) -> i32
+
+	==: op(imm a: Self, imm b: Self) -> bool => a.size() == b.size()
+}
+
+Crate: rec impl Ranked + Sized
+{
+	value: i32
+
+	rank: fun(imm self) -> i32 => self.value
+	size: fun(imm self) -> i32 => self.value
+}
+~
+~ main: fun
+~ {
+~ }
+```
+
+```errors
+'Eq.==' has defaults in both 'Ranked' and 'Sized'
+```
+
+Declaring the member again without a body changes nothing, and it gets the hint "Redundant '=='", with a note naming the trait that declares it.
+
+### Removing a default
+
+`req` before `fun` or `op` in such a redeclaration removes the default the required trait gives, so types that implement the trait must write the member themselves:
+
+```cella error
+~ mod example
+~
+Eq: trait
+{
+	==: op(imm a: Self, imm b: Self) -> bool
+	!=: op(imm a: Self, imm b: Self) -> bool => !(a == b)
+}
+
+Fast: trait req Eq
+{
+	!=: req op(imm a: Self, imm b: Self) -> bool
+}
+
+Point: rec impl Fast
+{
+	x: i32
+
+	==: op(a: Point, b: Point) -> bool => a.x == b.x
+}
+~
+~ main: fun
+~ {
+~ }
+```
+
+```errors
+'Point' needs 'Eq.!='
+```
+
+The error's note says "Default removed by 'Fast'". A `req` on a member that has no default to remove gets the hint "Redundant 'req'". `req` can't have a body, and outside such a redeclaration a function or operator can't be `req` ("Cannot declare required functions"). For a type that implements two unrelated traits, one giving a default and the other removing it, the conflict is an error: "'Eq.!=' has a default in 'Loose' that 'Fast' removes".
 
 ## Constraints on Self
 

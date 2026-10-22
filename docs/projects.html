@@ -128,6 +128,7 @@ ext
              ╘═══╛ &#x27;shown&#x27; is never changed
 
 game -&gt; bin\game.exe</textarea><pre><code><span class="line">Hint at main.ce:10:6</span><span class="line"> 9 │ {</span><span class="line">10 │     var shown = 1</span><span class="line">             ╘═══╛ 'shown' is never changed</span><span class="line"> </span><span class="line">game -&gt; bin\game.exe</span></code></pre></div>
+<p>The [<code>[Lints]</code> setting](project-settings.md#lints) can turn such checks off or report them as warnings or errors instead.</p>
 <h2 id="running"><a class="anchor" href="#running">Running</a></h2>
 <p><code>cella run</code> builds a program and runs it. It takes the same path and options as <code>cella build</code>:</p>
 <div class="code sh"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-33"></button><textarea hidden id="copy-33">cella run

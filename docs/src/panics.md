@@ -230,7 +230,7 @@ main: fun
 {
 	val three = makeOdd(3)
 	printf("%d\n", i32(three is odd(_)))
-	val four = makeOdd(4)
+	makeOdd(4)
 }
 ```
 

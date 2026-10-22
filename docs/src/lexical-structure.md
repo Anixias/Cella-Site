@@ -103,19 +103,24 @@ A name, also called an identifier, starts with a letter or `_` and continues wit
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
+Count: rec
+{
+	value: i32
+}
+
 main: fun
 {
-	val count = 1
-	val Count = 2
-	val player2 = 3
-	val _offset = 4
-	printf("%d %d %d %d\n", count, Count, player2, _offset)
+	val count = Count(1)
+	val player2 = 2
+	printf("%d %d\n", count.value, player2)
 }
 ```
 
 ```output
-1 2 3 4
+1 2
 ```
+
+The compiler accepts any of these names, but by default it gives a hint for names that don't follow the usual style, such as a variable named `Count` or `_offset`. [Project settings](project-settings.md#naming) covers the rules and how to change them.
 
 Names are compared after Unicode normalization (NFC), so a letter written as one character and the same letter written as a base letter and a combining mark are the same name.
 

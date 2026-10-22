@@ -682,7 +682,7 @@ dangle: fun -> ptr[i32]
 
 main: fun
 {
-	val p = dangle()
+	dangle()
 }
 ```
 
