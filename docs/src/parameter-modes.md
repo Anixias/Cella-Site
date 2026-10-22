@@ -1,19 +1,18 @@
 # Parameter modes
 
-A parameter's mode says how an argument gets into a function. There are four: no mode gives the function its own copy, `imm` lends it the caller's value to read, `mut` lends it the caller's value to change, and `own` moves the value into the function. The mode is part of the function's signature, and the call site writes it too, so a call shows which arguments can be changed or taken away.
+A parameter's mode says how an argument gets into a function. There are three: no mode gives the function the value itself, `imm` lends it the caller's value to read, and `mut` lends it the caller's value to change. The mode is part of the function's signature, and the call site writes the borrowing modes too, so a call shows which arguments are lent and which can be changed.
 
 | Mode | The function gets | The call writes | The function can change it | Types |
 | --- | --- | --- | --- | --- |
-| none | a copy | `f(x)` | no | types that copy |
+| none | the value: a copy, or the value itself moved in | `f(x)` | yes, its own value | any |
 | `imm` | the caller's value, read-only | `f(imm x)` | no | any |
 | `mut` | the caller's value | `f(mut x)` | yes, and the caller sees it | any |
-| `own` | the value itself, to keep | `f(own x)` | yes | any |
 
 Examples that need a value that can't be copied use the `File` record from [Ownership](ownership.md), with its declaration hidden: one `id` field and a destructor that prints `close` and the id.
 
-## Copies: no mode
+## Taking a value: no mode
 
-A parameter without a mode receives a copy of the argument. The function reads its copy, and nothing it does affects the caller:
+A parameter without a mode takes its argument by value. For a type that copies, the function gets its own copy, and nothing it does affects the caller:
 
 ```cella
 ~ mod example
@@ -31,70 +30,79 @@ Point: rec
 
 lengthSquared: fun(p: Point) -> i32 => p.x * p.x + p.y * p.y
 
+countDown: fun(n: i32)
+{
+	while n > 0
+	{
+		printf("%d ", n)
+		n -= 1
+	}
+
+	printf("\n")
+}
+
 main: fun
 {
 	val p = Point(3, 4)
 	printf("%d\n", lengthSquared(p))
+	val start = 3
+	countDown(start)
+	printf("start is still %d\n", start)
 }
 ```
 
 ```output
 25
+3 2 1 
+start is still 3
 ```
 
-The copy is read-only. Writing to it, or to any part of it, is an error:
+The parameter belongs to the function, so `countDown` can change `n` while the caller's `start` stays 3.
 
-```cella error
+A type that can't be copied moves into the function instead. The function owns the value from then on: it can change it, move it somewhere else, or let it be destroyed when the function returns, and the caller can't use it afterwards:
+
+```cella
 ~ mod example
 ~
-Point: rec
-{
-	x: i32
-	y: i32
-}
-
-normalize: fun(p: Point)
-{
-	p.x = 0
-}
-
-main: fun
-{
-}
-```
-
-```errors
-Cannot reassign read-only parameters
-```
-
-To get a copy the function can change, declare the parameter `own`, as described [below](#taking-ownership-with-own).
-
-Only a type that copies can be passed this way ([Ownership](ownership.md#copying-and-moving) lists which types copy). A parameter without a mode whose type doesn't copy is an error in the declaration itself:
-
-```cella error
-~ mod example
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
 ~ 	drop: op
 ~ 	{
+~ 		printf("close %d\n", self.id)
 ~ 	}
 ~ }
 ~
-describe: fun(file: File)
+archive: fun(file: File)
 {
+	file.id += 100
+	printf("archiving %d\n", file.id)
 }
 
 main: fun
 {
+	val file = File(1)
+	archive(file)
+	archive(File(2))
+	printf("end of main\n")
 }
 ```
 
-```errors
-Cannot copy 'File'
+```output
+archiving 101
+close 101
+archiving 102
+close 102
+end of main
 ```
+
+Neither call writes anything extra: the parameter already says the value is taken. [Ownership](ownership.md#moving-values) has the rules for moves and the errors for using a moved value.
 
 ## Borrowing with `imm`
 
@@ -108,7 +116,7 @@ An `imm` parameter borrows the argument read-only. The function reads the caller
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -151,7 +159,7 @@ Leaving out `imm` on a named argument is an error, so a borrow always shows at t
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -175,14 +183,14 @@ main: fun
 Cannot borrow arguments implicitly
 ```
 
-Writing `imm` on an argument whose parameter isn't `imm` is an error too, as it is for each mode: the message names the parameter, as in "'p' isn't an 'imm' parameter".
+Writing `imm` on an argument whose parameter isn't `imm` is an error too, as it is for `mut`: the message names the parameter, as in "'p' isn't an 'imm' parameter".
 
 The function can't change an `imm` parameter or move it away, since the value belongs to the caller:
 
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -191,7 +199,7 @@ The function can't change an `imm` parameter or move it away, since the value be
 ~ 	}
 ~ }
 ~
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 }
 
@@ -202,7 +210,7 @@ rename: fun(imm file: File)
 
 keep: fun(imm file: File)
 {
-	archive(own file)
+	archive(file)
 }
 
 main: fun
@@ -321,7 +329,7 @@ Assigning to a `mut` parameter replaces the caller's value. As with any assignme
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -350,7 +358,7 @@ now 2
 close 2
 ```
 
-A function may move a value out of a `mut` parameter, but the caller expects to get a value back, so the function must put one there again before it returns, on every path. This `swap` moves both values around and leaves each parameter filled:
+A function may move a value out of a `mut` parameter, but the caller expects to get a value back, so the function must put one there again before it returns, on every path. A declaration like `val current = a` only looks at a `mut` parameter, so taking the value out is written `own a`. This `swap` moves both values around and leaves each parameter filled:
 
 ```cella
 ~ mod example
@@ -360,7 +368,7 @@ A function may move a value out of a `mut` parameter, but the caller expects to 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -373,8 +381,8 @@ A function may move a value out of a `mut` parameter, but the caller expects to 
 swap: fun(mut a: File, mut b: File)
 {
 	val kept = own a
-	a = own b
-	b = own kept
+	a = b
+	b = kept
 }
 
 main: fun
@@ -397,7 +405,7 @@ Leaving the parameter moved is an error:
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -406,13 +414,13 @@ Leaving the parameter moved is an error:
 ~ 	}
 ~ }
 ~
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 }
 
 close: fun(mut file: File)
 {
-	archive(own file)
+	archive(file)
 }
 
 main: fun
@@ -426,121 +434,9 @@ Cannot leave 'mut' parameters moved
 
 The same holds for a field moved out of a `mut` parameter, which gives "Cannot leave 'mut' parameters partly moved".
 
-## Taking ownership with `own`
-
-An `own` parameter moves the argument into the function. The function owns it from then on: it can change it, move it somewhere else, or let it be destroyed when the function returns. The caller writes `own` for a named value, and can't use it afterwards:
-
-```cella
-~ mod example
-~
-~ ext
-~ {
-~ 	printf: fun(format: cstr, ...) -> i32
-~ }
-~
-~ File: rec
-~ {
-~ 	id: i32
-~
-~ 	drop: op
-~ 	{
-~ 		printf("close %d\n", self.id)
-~ 	}
-~ }
-~
-archive: fun(own file: File)
-{
-	file.id += 100
-	printf("archiving %d\n", file.id)
-}
-
-main: fun
-{
-	val file = File(1)
-	archive(own file)
-	archive(File(2))
-	printf("end of main\n")
-}
-```
-
-```output
-archiving 101
-close 101
-archiving 102
-close 102
-end of main
-```
-
-A temporary like `File(2)` moves in without `own`. [Ownership](ownership.md#moving-with-own) has the rules for moves and the errors for using a moved value.
-
-For a type that copies, an `own` parameter is a copy that the function is allowed to change. The call site needs no `own`, and the caller's variable is unaffected:
-
-```cella
-~ mod example
-~
-~ ext
-~ {
-~ 	printf: fun(format: cstr, ...) -> i32
-~ }
-~
-countDown: fun(own n: i32)
-{
-	while n > 0
-	{
-		printf("%d ", n)
-		n -= 1
-	}
-
-	printf("\n")
-}
-
-main: fun
-{
-	val start = 3
-	countDown(start)
-	printf("start is still %d\n", start)
-}
-```
-
-```output
-3 2 1 
-start is still 3
-```
-
-Writing `own` at the call is still allowed there, and then marks the variable as moved, as `own` does everywhere.
-
-`own` can't stand in for another mode. An `own` argument to a parameter that isn't `own` is an error:
-
-```cella error
-~ mod example
-~
-~ File: rec
-~ {
-~ 	id: i32
-~
-~ 	drop: op
-~ 	{
-~ 	}
-~ }
-~
-describe: fun(imm file: File)
-{
-}
-
-main: fun
-{
-	val file = File(1)
-	describe(own file)
-}
-```
-
-```errors
-'file' isn't an 'own' parameter
-```
-
 ## Receivers
 
-A method's receiver, `self`, takes one of the same four modes: `self` for a copy, `imm self`, `mut self` and `own self`. The call `x.m()` doesn't repeat the mode; the method's declaration shows it. [Methods](methods.md) covers methods in full; the mode rules are the same as for parameters:
+A method's receiver, `self`, takes one of the same three modes: `self` for the value itself, `imm self` and `mut self`. The call `x.m()` doesn't repeat the mode; the method's declaration shows it. [Methods](methods.md) covers methods in full; the mode rules are the same as for parameters:
 
 ```cella
 ~ mod example
@@ -550,7 +446,7 @@ A method's receiver, `self`, takes one of the same four modes: `self` for a copy
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Account: rec
+Account: own rec
 {
 	id: i32
 	balance: i32
@@ -567,7 +463,7 @@ Account: rec
 		self.balance += amount
 	}
 
-	finish: fun(own self) -> i32
+	finish: fun(self) -> i32
 	{
 		printf("finishing %d\n", self.id)
 		ret self.balance
@@ -591,11 +487,11 @@ close 1
 left 15
 ```
 
-`account.finish()` moves `account` into the method, though the call doesn't say `own`, and `account` can't be used after it. A `mut self` method needs a receiver that can be changed, so calling one on a `val` or on a temporary is an error ("Cannot mutably borrow values", "Cannot mutably borrow unstored values"). A copied `self` works only for types that copy.
+`account.finish()` moves `account` into the method, and `account` can't be used after it. For a type that copies, a `self` method gets a copy instead. A `mut self` method needs a receiver that can be changed, so calling one on a `val` or on a temporary is an error ("Cannot mutably borrow values", "Cannot mutably borrow unstored values").
 
 ## Modes in function types
 
-A function type lists each parameter's mode along with its type: `fun[mut i32, i32]` takes an `i32` to change and an `i32` to copy. A call through a function value writes the modes as a direct call does:
+A function type lists each parameter's mode along with its type: `fun[mut i32, i32]` takes an `i32` to change and an `i32` by value. A call through a function value writes the modes as a direct call does:
 
 ```cella
 ~ mod example
@@ -610,7 +506,7 @@ damage: fun(mut health: i32, amount: i32)
 	health -= amount
 }
 
-apply: fun(action: fun[mut i32, i32], mut target: i32)
+apply: fun(imm action: fun[mut i32, i32], mut target: i32)
 {
 	action(mut target, 4)
 }
@@ -641,29 +537,74 @@ damage: fun(mut health: i32, amount: i32)
 
 main: fun
 {
-	val f: fun[own i32, i32] = damage
+	val f: fun[i32, i32] = damage
 }
 ```
 
 ```errors
-Cannot convert type 'fun[mut i32, i32]' to 'fun[own i32, i32]'
+Cannot convert type 'fun[mut i32, i32]' to 'fun[i32, i32]'
 ```
 
-There is one exception: a function that takes a copy can be used where the type says `imm`, as long as the parameter's type copies. The other direction is an error. [Function values and closures](closures.md) covers function types in full.
+There is one exception: a function that takes a parameter by value can be used where the type says `imm`, as long as the parameter's type copies. The other direction is an error. [Function values and closures](closures.md) covers function types in full.
 
 ## Overloads and modes
 
-Two overloads can't differ only in their parameter modes:
+Overloads can differ only in their parameter modes. The call's marks pick one: `f(x)` calls the overload that takes the value, `f(imm x)` the one that borrows it, and `f(mut x)` the one that changes it. A temporary has no mark and goes to the overload that takes the value:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+~ File: own rec
+~ {
+~ 	id: i32
+~
+~ 	drop: op
+~ 	{
+~ 		printf("close %d\n", self.id)
+~ 	}
+~ }
+~
+describe: fun(file: File) => printf("taken %d\n", file.id)
+describe: fun(imm file: File) => printf("lent %d\n", file.id)
+describe: fun(mut file: File) => file.id += 10
+
+main: fun
+{
+	var file = File(1)
+	describe(mut file)
+	describe(imm file)
+	describe(File(2))
+	describe(file)
+	printf("end of main\n")
+}
+```
+
+```output
+lent 11
+taken 2
+close 2
+taken 11
+close 11
+end of main
+```
+
+A function value picks an overload by the modes of the type it's given, as in `val look: fun[imm File] = describe`; without a type, naming an overloaded function this way is ambiguous.
+
+Two overloads that a call could reach the same way are an error. Here a call with two temporaries would take the first argument by value under one overload and the second under the other, so neither is a better match:
 
 ```cella error
 ~ mod example
 ~
-reset: fun(mut value: i32)
+merge: fun(imm a: i32, b: i32)
 {
-	value = 0
 }
 
-reset: fun(value: i32)
+merge: fun(a: i32, imm b: i32)
 {
 }
 
@@ -673,9 +614,34 @@ main: fun
 ```
 
 ```errors
-'reset' overloads cannot differ only in parameter modes
-'reset' overloads cannot differ only in parameter modes
+'merge' overloads cannot accept the same arguments
+'merge' overloads cannot accept the same arguments
 ```
+
+Receivers and operator operands carry no marks at the call, so overloads can't differ only in the mode of `self` or of an operand:
+
+```cella error
+~ mod example
+~
+Point: rec
+{
+	x: i32
+
+	length: fun(self) -> i32 => self.x
+	length: fun(imm self) -> i32 => self.x
+}
+
+main: fun
+{
+}
+```
+
+```errors
+'Point.length' overloads cannot differ only in parameter modes
+'Point.length' overloads cannot differ only in parameter modes
+```
+
+When a [trait](traits.md) declares a member twice with different modes, a type implementing it must declare both, with exactly those modes.
 
 ## Aliasing isn't checked
 
@@ -721,7 +687,7 @@ A function that takes two `mut` parameters can't assume they're different values
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -730,14 +696,14 @@ A function that takes two `mut` parameters can't assume they're different values
 ~ 	}
 ~ }
 ~
-merge: fun(imm first: File, own second: File)
+merge: fun(imm first: File, second: File)
 {
 }
 
 main: fun
 {
 	val file = File(1)
-	merge(imm file, own file)
+	merge(imm file, file)
 }
 ```
 

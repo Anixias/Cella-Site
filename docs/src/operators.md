@@ -181,7 +181,7 @@ main: fun
 245 0 8
 ```
 
-`-` and `+` can be declared both ways: with `self` as unary operators and with two parameters as binary ones. `~` is only unary. The receiver can be `self`, `imm self` or `own self`, but not `mut self`: a unary operator gives a new value and leaves its operand as it was.
+`-` and `+` can be declared both ways: with `self` as unary operators and with two parameters as binary ones. `~` is only unary. The receiver can be `self` or `imm self`, but not `mut self`: a unary operator gives a new value and leaves its operand as it was.
 
 Some operators can't be declared at all: `!`, `&&`, `||`, `=` and `.`.
 
@@ -346,7 +346,7 @@ main: fun
 
 ## Operands and parameter modes
 
-An operand without a mode is a copy, as for any parameter (see [Parameter modes](parameter-modes.md)). A type that can't be copied, because it has a destructor, takes its operands with `imm` to borrow them or `own` to take them over. An operand passed to an `own` parameter is written with `own` when it's a named variable, and a temporary moves in by itself:
+An operand without a mode is taken by value, as for any parameter (see [Parameter modes](parameter-modes.md)): a copy, or the value itself for a type that can't be copied. Such a type usually takes its operands with `imm` to borrow them. Operands carry no marks, so `a + b` borrows or moves each operand as the operator's declaration says:
 
 ```cella
 ~ mod example
@@ -356,12 +356,12 @@ An operand without a mode is a copy, as for any parameter (see [Parameter modes]
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Text: rec
+Text: own rec
 {
 	id: i32
 
 	+: op(imm a: Text, imm b: Text) -> Text => Text(a.id * 10 + b.id)
-	-: op(own a: Text, imm b: Text) -> Text => Text(a.id - b.id)
+	-: op(a: Text, imm b: Text) -> Text => Text(a.id - b.id)
 
 	drop: op
 	{
@@ -374,7 +374,7 @@ main: fun
 	val a = Text(1)
 	val b = Text(2)
 	val c = a + b
-	val d = own c - b
+	val d = c - b
 	printf("result %d\n", d.id)
 }
 ```
@@ -387,7 +387,7 @@ drop 2
 drop 1
 ```
 
-`own c` hands `c` to the operator, which drops it when it returns. A compound assignment's parameter takes modes the same way, except `mut`.
+`c - b` hands `c` to the operator, which drops it when it returns, and `c` can't be used afterwards. A compound assignment's parameter takes modes the same way, except `mut`.
 
 ## Calling an operator through its type
 
@@ -1007,7 +1007,7 @@ Enemy: rec
 	hit: fun(mut self, damage: i32) => self.health -= damage
 }
 
-EnemyBox: rec
+EnemyBox: own rec
 {
 	pointer: req ptr[Enemy]
 
@@ -1066,7 +1066,7 @@ Enemy: rec
 	describe: fun(self) => printf("enemy %d\n", self.health)
 }
 
-EnemyBox: rec
+EnemyBox: own rec
 {
 	pointer: req ptr[Enemy]
 
@@ -1108,7 +1108,7 @@ The type's own members come first: `boxed.describe()` calls `EnemyBox.describe`,
 
 ### Dereference rules
 
-`*` takes a receiver and no other parameters, and `own self` isn't allowed. A type has at most one form of each kind, and both must give the same target type:
+`*` takes a receiver and no other parameters, and a `self` receiver needs a type that copies. A type has at most one form of each kind, and both must give the same target type:
 
 ```cella error
 ~ mod example
@@ -1243,7 +1243,7 @@ left 3
 2 1 0 | left -1
 ```
 
-A cursor with a destructor can also be moved into the loop with `for x in own c`.
+Without `mut`, `for x in c` takes the cursor by value instead: it copies a cursor that copies and moves one that doesn't.
 
 ### Collections
 
@@ -1330,7 +1330,7 @@ The cursor lives until the loop ends, however it ends, and is dropped then. A cu
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Countdown: rec
+Countdown: own rec
 {
 	left: i32
 
@@ -1385,7 +1385,7 @@ main: fun
 
 ### Loop operator rules
 
-`in` takes a receiver, `imm self` or `mut self` but not `own self`, and no other parameters, and returns a cursor rather than a borrow. `for` takes `mut self` only and returns `bool`. A type declares each form once:
+`in` takes a receiver, `imm self`, `mut self` or, for a type that copies, `self`, and no other parameters, and returns a cursor rather than a borrow. `for` takes `mut self` only and returns `bool`. A type declares each form once:
 
 ```cella error
 ~ mod example
@@ -1403,7 +1403,7 @@ Sources: rec
 {
 	x: i32
 
-	in: op(own self) -> Steps => Steps(0)
+	in: op(self) -> Steps => Steps(0)
 	in: op(self, extra: i32) -> Steps => Steps(extra)
 	in: op(imm self) -> imm[i32] => imm self.x
 }
@@ -1417,14 +1417,13 @@ main: fun
 Cannot take 'self' in 'for' operators
 Cannot take parameters in 'for' operators
 Cannot return 'i32' from 'for' operators
-Cannot take 'own self' in 'in' operators
 Cannot take parameters in 'in' operators
 Cannot return 'imm[i32]' from 'in' operators
 ```
 
 ## The `?` operator
 
-Postfix `?` unwraps a value or leaves the function early. A type declares it as `?: op(own self) -> T` with an expression body. When a function writes `x?`, the body runs in that function: its value becomes the value of `x?`, and a `ret` in the body returns from the function that wrote `x?`.
+Postfix `?` unwraps a value or leaves the function early. A type declares it as `?: op(self) -> T` with an expression body. When a function writes `x?`, the body runs in that function: its value becomes the value of `x?`, and a `ret` in the body returns from the function that wrote `x?`.
 
 The usual use is a result type that holds either a value or an error. `?` gives the value, or returns the error to the caller:
 
@@ -1441,10 +1440,10 @@ Result[T, E]: enum
 	ok(value: T)
 	err(error: E)
 
-	?: op(own self) -> T => match own self
+	?: op(self) -> T => match self
 	{
-		ok(own value) => value
-		err(own error) => ret Result.err(own error)
+		ok(val value) => value
+		err(val error) => ret Result.err(error)
 	}
 }
 
@@ -1497,10 +1496,10 @@ The function that uses `?` must be able to return what the body returns. Using i
 ~ 	ok(value: T)
 ~ 	err(error: E)
 ~
-~ 	?: op(own self) -> T => match own self
+~ 	?: op(self) -> T => match self
 ~ 	{
-~ 		ok(own value) => value
-~ 		err(own error) => ret Result.err(own error)
+~ 		ok(val value) => value
+~ 		err(val error) => ret Result.err(error)
 ~ 	}
 ~ }
 ~
@@ -1530,7 +1529,7 @@ Cannot use '?' on 'Result[i32, i32]' in 'nothing'
 Cannot use '?' on 'i32'
 ```
 
-A `?` operator takes `own self` and nothing else, has a return type and a `=>` body, and can't be generic or required by a trait:
+A `?` operator takes `self` and nothing else, has a return type and a `=>` body, and can't be generic or required by a trait:
 
 ```cella error
 ~ mod example
@@ -1539,14 +1538,14 @@ Copied: enum
 {
 	one
 
-	?: op(self) -> i32 => 1
+	?: op(imm self) -> i32 => 1
 }
 
 Block: enum
 {
 	one
 
-	?: op(own self) -> i32
+	?: op(self) -> i32
 	{
 		ret 1
 	}
@@ -1556,12 +1555,12 @@ Untyped: enum
 {
 	one
 
-	?: op(own self) => 1
+	?: op(self) => 1
 }
 
 Fallible: trait
 {
-	?: op(own self) -> i32
+	?: op(self) -> i32
 }
 
 main: fun
@@ -1570,8 +1569,8 @@ main: fun
 ```
 
 ```errors
-Cannot take 'self' in '?' operators
-'?' operators need '=' and a value
+Cannot take 'imm self' in '?' operators
+'?' operators must have an expression body
 '?' operators need a return type
 Cannot declare '?' operators in traits
 ```

@@ -1007,7 +1007,7 @@ Bounded: trait req copy
 
 Built: trait req new(i32)
 
-Handle: rec
+Handle: own rec
 {
 	id: i32
 

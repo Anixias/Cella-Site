@@ -806,7 +806,7 @@ Cannot declare constructors in enums
 
 ## Owned enums
 
-A plain enum copies like an integer. `own enum` declares an enum whose values can't be copied, only moved, the way `own rec` does for records. Every move out of a variable is then written with `own`:
+A plain enum copies like an integer. `own enum` declares an enum whose values can't be copied, only moved, the way `own rec` does for records. After a move, the old variable can't be used:
 
 ```cella error
 ~ mod example
@@ -820,17 +820,16 @@ Ticket: own enum
 main: fun
 {
 	val ticket = Ticket.open(1)
-	val moved = own ticket
-	val other = Ticket.open(2)
-	val copy: Ticket = other
+	val moved = ticket
+	val again = ticket
 }
 ```
 
 ```errors
-Cannot move 'Ticket' values implicitly
+Cannot use moved values
 ```
 
-An enum whose payloads hold values with destructors moves the same way without the `own` keyword. [Ownership and destructors](ownership.md) explains moves.
+An enum whose payloads hold owning values, such as a record with a destructor, must be declared `own enum` ("Cannot store owning values in enums that aren't 'own'"). [Ownership and destructors](ownership.md) explains moves.
 
 ## Generic enums
 

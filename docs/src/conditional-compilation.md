@@ -511,7 +511,7 @@ Because the arguments are still checked as if the call ran, a program means the 
 ```cella error
 ~ mod example
 ~
-Text: rec
+Text: own rec
 {
 	id: i32
 
@@ -520,7 +520,7 @@ Text: rec
 	}
 }
 
-take: fun(own text: Text)
+take: fun(text: Text)
 {
 }
 
@@ -531,7 +531,7 @@ log: fun(imm text: Text) when release
 main: fun
 {
 	val text = Text(1)
-	take(own text)
+	take(text)
 	log(imm text)
 }
 ```
@@ -545,16 +545,25 @@ To leave code out unchecked, put it in a `when` block instead.
 Methods and static functions can be `when` functions too, and generic functions and functions taking templates work the same way. Since calls to them may vanish, `when` functions are limited to what a removed call can't miss:
 
 - They return nothing, and they can't be `-> never`.
-- They can't take `own` parameters, since a removed call would leave the value unmoved.
+- Their parameters without a mode must have types that copy, since a removed call would leave a moved value unmoved.
 - They can't be used as values.
 - `main`, constructors, destructors, getters, setters, operators and `ext` functions can't be `when` functions, a trait can't require one, and one can't implement a trait's member.
 
 ```cella error
 ~ mod example
 ~
+~ File: own rec
+~ {
+~ 	id: i32
+~
+~ 	drop: op
+~ 	{
+~ 	}
+~ }
+~
 total: fun(value: i32) -> i32 when debug => value
 
-keep: fun(own value: i32) when debug
+keep: fun(file: File) when debug
 {
 }
 
@@ -562,7 +571,7 @@ trace: fun(value: i32) when debug
 {
 }
 
-apply: fun(action: fun[i32]) => action(1)
+apply: fun(imm action: fun[i32]) => action(1)
 
 main: fun
 {
@@ -572,7 +581,7 @@ main: fun
 
 ```errors
 Cannot return values from 'when' functions
-Cannot take 'own' parameters in 'when' functions
+Cannot copy 'File'
 Cannot use 'when' functions as values
 ```
 

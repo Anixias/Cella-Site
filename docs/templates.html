@@ -37,7 +37,7 @@ try {
 <p>A template is a string with holes, handed to a function that writes it out. The language doesn't format anything itself. It gives the receiving function the literal pieces of the string, a format spec for each hole, and a borrow of each hole's value, and that function decides how to turn the values into text and where to put it.</p>
 <h2 id="a-first-template"><a class="anchor" href="#a-first-template">A first template</a></h2>
 <p>A parameter of type <code>fstr[K]</code> takes a template. <code>K</code> is a <a href="traits.html">trait</a> that every hole's value must implement, and it's how the receiving code works with values it knows nothing else about:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-730"></button><textarea hidden id="copy-730">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-724"></button><textarea hidden id="copy-724">mod example
 
 ext
 {
@@ -83,7 +83,7 @@ main: fun
 <p>An <code>fstr[K]</code> has four members:</p>
 <div class="table-wrap"><table><thead><tr><th>Member</th><th>Type</th><th>What it gives</th></tr></thead><tbody><tr><td><code>holes</code></td><td><code>usize</code></td><td>the number of holes</td></tr><tr><td><code>piece(i)</code></td><td><code>str</code></td><td>the literal text before hole <code>i</code>; <code>piece(holes)</code> is the text after the last hole</td></tr><tr><td><code>spec(i)</code></td><td><code>str</code></td><td>the format spec of hole <code>i</code>, empty when it has none</td></tr><tr><td><code>value(i)</code></td><td><code>imm[dyn[K]]</code></td><td>a read-only borrow of hole <code>i</code>'s value</td></tr></tbody></table></div>
 <p>There is always one more piece than there are holes, and a piece can be empty. This function prints a template's parts instead of its text:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-731"></button><textarea hidden id="copy-731">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-725"></button><textarea hidden id="copy-725">mod example
 
 ext
 {
@@ -127,7 +127,7 @@ main: fun
 2 holes: '' [] '' [] ''
 0 holes: 'no holes'</pre></div>
 <p>The indexes are <code>usize</code> values, and an index past the end panics like any other bounds check:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-732"></button><textarea hidden id="copy-732">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-726"></button><textarea hidden id="copy-726">mod example
 
 Display: trait
 {
@@ -142,7 +142,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">first</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>]) -&gt; <span class="c-type">usize</span> =&gt; <span class="c-parameter">text</span>.spec(<span class="c-literal">0</span>).<span class="c-field">byteLength</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">first</span>(<span class="c-literal">"no holes"</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>Panic at main.ce:8:45: index out of bounds</pre></div>
 <p>The members can't be assigned to:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-733"></button><textarea hidden id="copy-733">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-727"></button><textarea hidden id="copy-727">mod example
 
 Display: trait
 {
@@ -159,7 +159,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">clear</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="line">{</span><span class="line">	<span class="c-parameter">text</span>.<span class="c-field">holes</span> = <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign read-only properties</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h2 id="holes"><a class="anchor" href="#holes">Holes</a></h2>
 <p>A hole holds any expression: a name, arithmetic, a call, a comparison, a string literal or a <code>match</code>. Holes are evaluated left to right when the template is made, before the receiving function runs:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-734"></button><textarea hidden id="copy-734">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-728"></button><textarea hidden id="copy-728">mod example
 
 ext
 {
@@ -207,7 +207,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>1 2 2
 quoted 20</pre></div>
 <p>Every hole's type must implement the template's trait:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-735"></button><textarea hidden id="copy-735">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-729"></button><textarea hidden id="copy-729">mod example
 
 Display: trait
 {
@@ -239,7 +239,7 @@ main: fun
 <h2 id="format-specs"><a class="anchor" href="#format-specs">Format specs</a></h2>
 <p>A hole may end in a format spec: a <code>:</code> followed by any text up to the closing brace, as in <code>{price:.2}</code>. The spec is passed along as text through <code>spec(i)</code>, and what it means is up to the receiving code. Spaces are kept, and escape sequences work as in the rest of the string, so <code>\}</code> puts a brace in a spec. A hole without a <code>:</code>, or with nothing after it, has an empty spec.</p>
 <p>This <code>Display</code> takes the spec as a parameter, and <code>i32</code> prints in hex when the spec is <code>x</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-736"></button><textarea hidden id="copy-736">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-730"></button><textarea hidden id="copy-730">mod example
 
 ext
 {
@@ -286,7 +286,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>16753920 is ffa500 in hex</pre></div>
 <h2 id="strings-without-holes"><a class="anchor" href="#strings-without-holes">Strings without holes</a></h2>
 <p>A template parameter also takes a string literal without holes or a <code>str</code> value. Either becomes a template with no holes and one piece:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-737"></button><textarea hidden id="copy-737">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-731"></button><textarea hidden id="copy-731">mod example
 
 ext
 {
@@ -327,7 +327,7 @@ main: fun
 Ada
 Cella</pre></div>
 <p>Nothing else converts to a template, not even a <code>cstr</code>:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-738"></button><textarea hidden id="copy-738">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-732"></button><textarea hidden id="copy-732">mod example
 
 Display: trait
 {
@@ -346,7 +346,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">say</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> c: <span class="c-type">cstr</span> = <span class="c-literal">"x"</span></span><span class="line">	<span class="c-function">say</span>(c)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot convert type &#x27;cstr&#x27; to &#x27;fstr[Display]&#x27;</span></span><span class="line">	<span class="c-function">say</span>(<span class="c-literal">5</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot convert type &#x27;integer literal&#x27; to &#x27;fstr[Display]&#x27;</span></span><span class="line">}</span></code></pre></div>
 <p>Outside a template, a string with holes is a constant: every hole must be a constant string, and the compiler joins the pieces into one string (see <a href="text.html#interpolated-strings">Interpolated strings</a>).</p>
 <p>When a function is overloaded for <code>str</code> and for a template, a string without holes goes to the <code>str</code> overload, and a string with holes goes to the template, even when its holes are constants:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-739"></button><textarea hidden id="copy-739">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-733"></button><textarea hidden id="copy-733">mod example
 
 ext
 {
@@ -385,7 +385,7 @@ template, holes: 1
 template, holes: 2</pre></div>
 <h2 id="templates-and-traits"><a class="anchor" href="#templates-and-traits">Templates and traits</a></h2>
 <p><code>value(i)</code> gives each hole as a borrowed <a href="trait-objects.html">trait object</a>, so the receiving code can call the trait's members on it, and the members of the traits it requires. A record takes part by implementing the trait, and its implementation can use a template itself:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-740"></button><textarea hidden id="copy-740">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-734"></button><textarea hidden id="copy-734">mod example
 
 ext
 {
@@ -444,7 +444,7 @@ number: 5
 relayed (3, 4)</pre></div>
 <p>A hole can hold a generic value whose bound is the template's trait, as in <code>log</code>, or a <code>dyn</code> value of that trait, as in <code>relay</code>.</p>
 <p>The argument of <code>fstr</code> must be a trait, exactly one:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-741"></button><textarea hidden id="copy-741">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-735"></button><textarea hidden id="copy-735">mod example
 
 Display: trait
 {
@@ -465,9 +465,9 @@ c: fun(text: fstr[Display, Display])
 
 main: fun
 {
-}</textarea><pre><code><span class="line"><span class="c-function">a</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-type">i32</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:18ch">&#x27;i32&#x27; is not a trait</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">b</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:13ch">&#x27;fstr&#x27; takes one generic argument</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">c</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[Display, Display])</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:22ch"></span><span class="diagnostic-text" style="margin-left:13ch">&#x27;fstr&#x27; takes one generic argument</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-function">a</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: fstr[<span class="c-type">i32</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:18ch">&#x27;i32&#x27; is not a trait</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">b</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: fstr)</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:13ch">&#x27;fstr&#x27; takes one generic argument</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">c</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: fstr[Display, Display])</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:22ch"></span><span class="diagnostic-text" style="margin-left:13ch">&#x27;fstr&#x27; takes one generic argument</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>A generic function can leave the trait open with a <code>K: trait</code> parameter, written out at the call:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-742"></button><textarea hidden id="copy-742">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-736"></button><textarea hidden id="copy-736">mod example
 
 ext
 {
@@ -494,7 +494,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>3</pre></div>
 <h2 id="templates-as-values"><a class="anchor" href="#templates-as-values">Templates as values</a></h2>
 <p><code>fstr[K]</code> is an ordinary type. A template can be made explicitly with <code>fstr[Display](...)</code>, copied, passed on and returned:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-743"></button><textarea hidden id="copy-743">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-737"></button><textarea hidden id="copy-737">mod example
 
 ext
 {
@@ -547,7 +547,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>3 items
 message 3</pre></div>
 <p>A template borrows its hole values, so it follows the rules for <a href="borrows.html">borrows</a>. It can't outlive the values in its holes, a record that holds one must be a <code>ref rec</code>, and a module variable can't hold one:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-744"></button><textarea hidden id="copy-744">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-738"></button><textarea hidden id="copy-738">mod example
 
 Display: trait
 {
@@ -587,7 +587,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Holder</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot store borrows in records that aren&#x27;t &#x27;ref&#x27;<span class="diagnostic-note">Did you mean &#x27;Holder: ref rec&#x27;?</span></span></span><span class="line">}</span><span class="line"> </span><span class="line">saved: <span class="c-keyword">var</span> <span class="c-type">fstr</span>[<span class="c-trait">Display</span>] = <span class="c-literal">"x"</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot store borrows in module variables</span></span><span class="line"> </span><span class="line"><span class="c-function">make</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">fstr</span>[<span class="c-trait">Display</span>]</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> local = <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-literal">"{</span>local<span class="c-literal">}"</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot return borrows of local variables</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">compute</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">4</span></span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>])</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> later: <span class="c-type">fstr</span>[<span class="c-trait">Display</span>] = <span class="c-literal">"{</span><span class="c-function">compute</span>()<span class="c-literal">}"</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:33ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:33ch">Cannot borrow unstored values</span></span><span class="line">	<span class="c-function">show</span>(later)</span><span class="line">}</span></code></pre></div>
 <p>The last error is about <code>compute()</code>: its result is a temporary that ends with its statement, so a template that keeps it can't be used afterwards.</p>
 <p>Since a template holds borrows of Cella values, it can't appear in an <code>ext</code> signature:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-745"></button><textarea hidden id="copy-745">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-739"></button><textarea hidden id="copy-739">mod example
 
 Display: trait
 {

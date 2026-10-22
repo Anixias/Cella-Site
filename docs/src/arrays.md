@@ -527,7 +527,7 @@ main: fun
 3 6
 ```
 
-A destructor is a `drop: op` member that runs when a value is dropped ([Ownership and destructors](ownership.md) covers them). An array of values with a destructor can't be copied, since each element has one owner. It moves instead, with `own`, and its elements are dropped when the array is, last element first:
+A destructor is a `drop: op` member that runs when a value is dropped ([Ownership and destructors](ownership.md) covers them). An array of values with a destructor can't be copied, since each element has one owner. It moves instead, and its elements are dropped when the array is, last element first:
 
 ```cella
 ~ mod example
@@ -537,7 +537,7 @@ A destructor is a `drop: op` member that runs when a value is dropped ([Ownershi
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Name: rec
+Name: own rec
 {
 	id: i32
 
@@ -547,7 +547,7 @@ Name: rec
 	}
 }
 
-keep: fun(own names: array[Name, 3])
+keep: fun(names: array[Name, 3])
 {
 	printf("kept %d names\n", i32(names.length))
 }
@@ -555,7 +555,7 @@ keep: fun(own names: array[Name, 3])
 main: fun
 {
 	val names = [Name(1), Name(2), Name(3)]
-	keep(own names)
+	keep(names)
 	printf("back in main\n")
 }
 ```
@@ -568,34 +568,9 @@ drop 1
 back in main
 ```
 
-Without a mode, the parameter would copy the array, which isn't allowed:
+`keep` takes the array by value, so the array moves into it and is dropped when `keep` returns. A function that only reads the array takes it with `imm`.
 
-```cella error
-~ mod example
-~
-Name: rec
-{
-	id: i32
-
-	drop: op
-	{
-	}
-}
-
-show: fun(names: array[Name, 2])
-{
-}
-
-main: fun
-{
-}
-```
-
-```errors
-Cannot copy 'array[Name, 2]'
-```
-
-A single element can be moved out with `own`, as in `own names[1]`, when the index is a constant. The moved element is dropped by its new owner, and the rest of the array is still dropped when it goes out of scope:
+A single element can be moved out, as in `keepOne(names[1])`, when the index is a constant. The moved element is dropped by its new owner, and the rest of the array is still dropped when it goes out of scope:
 
 ```cella
 ~ mod example
@@ -605,7 +580,7 @@ A single element can be moved out with `own`, as in `own names[1]`, when the ind
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ Name: rec
+~ Name: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -615,7 +590,7 @@ A single element can be moved out with `own`, as in `own names[1]`, when the ind
 ~ 	}
 ~ }
 ~
-keepOne: fun(own name: Name)
+keepOne: fun(name: Name)
 {
 	printf("kept %d\n", name.id)
 }
@@ -623,7 +598,7 @@ keepOne: fun(own name: Name)
 main: fun
 {
 	val names = [Name(1), Name(2), Name(3)]
-	keepOne(own names[1])
+	keepOne(names[1])
 	printf("back in main\n")
 }
 ```
@@ -641,7 +616,7 @@ The other elements can still be used, but the array as a whole can't, since part
 ```cella error
 ~ mod example
 ~
-~ Name: rec
+~ Name: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -650,25 +625,25 @@ The other elements can still be used, but the array as a whole can't, since part
 ~ 	}
 ~ }
 ~
-keepOne: fun(own name: Name)
+keepOne: fun(name: Name)
 {
 }
 
-keepAll: fun(own names: array[Name, 3])
+keepAll: fun(names: array[Name, 3])
 {
 }
 
 pick: fun(index: usize)
 {
 	val names = [Name(1), Name(2), Name(3)]
-	keepOne(own names[index])
+	keepOne(names[index])
 }
 
 main: fun
 {
 	val names = [Name(1), Name(2), Name(3)]
-	keepOne(own names[1])
-	keepAll(own names)
+	keepOne(names[1])
+	keepAll(names)
 }
 ```
 
@@ -685,10 +660,9 @@ Cannot use partly moved values
 
 | Loop | The variable | Needs |
 | --- | --- | --- |
-| `for x in a` | a copy of the element | an element type that copies |
+| `for x in a` | the element by value: a copy, or the element moved out of the array | `a` can be moved, for elements that don't copy |
 | `for imm x in a` | a read-only borrow of the element | nothing |
 | `for mut x in a` | a mutable borrow of the element | `a` can be changed |
-| `for own x in a` | the element itself, moved out of the array | `a` can be moved |
 
 A copy is enough for plain data. `mut` changes the elements in place:
 
@@ -728,32 +702,7 @@ main: fun
 60 3 7
 ```
 
-Elements with a destructor can't be copied, so the loop needs `imm` to look at them:
-
-```cella error
-~ mod example
-~
-Name: rec
-{
-	id: i32
-
-	drop: op
-	{
-	}
-}
-
-main: fun
-{
-	val names = [Name(1), Name(2)]
-	for n in names
-	{
-	}
-}
-```
-
-```errors
-Cannot copy 'Name'
-```
+Elements with a destructor can't be copied, so `for n in names` would move them out of the array. To look at them, the loop takes them with `imm`:
 
 ```cella
 ~ mod example
@@ -763,7 +712,7 @@ Cannot copy 'Name'
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ Name: rec
+~ Name: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -796,7 +745,7 @@ drop 4
 
 ### Moving elements out
 
-`for own x in a` moves each element out of the array into the loop variable. An element that the body doesn't move on is dropped at the end of its pass. If the loop ends early with `break`, the elements it didn't reach are dropped when the loop ends:
+`for x in a` over elements that can't be copied moves each element out of the array into the loop variable. An element that the body doesn't move on is dropped at the end of its pass. If the loop ends early with `break`, the elements it didn't reach are dropped when the loop ends:
 
 ```cella
 ~ mod example
@@ -806,7 +755,7 @@ drop 4
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ Name: rec
+~ Name: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -816,7 +765,7 @@ drop 4
 ~ 	}
 ~ }
 ~
-keep: fun(own n: Name)
+keep: fun(n: Name)
 {
 	printf("keep %d\n", n.id)
 }
@@ -824,13 +773,13 @@ keep: fun(own n: Name)
 main: fun
 {
 	val names = [Name(1), Name(2), Name(3), Name(4)]
-	for own n in names
+	for n in names
 	{
 		if n.id == 3
 			break
 
 		if n.id == 1
-			keep(own n)
+			keep(n)
 	}
 
 	printf("after the loop\n")
@@ -846,7 +795,7 @@ drop 4
 after the loop
 ```
 
-After the loop the array has been moved and can't be used.
+After the loop the array has been moved and can't be used. An array the function doesn't own, such as an `imm` parameter, can't be moved out of, so a plain `for x in a` over it borrows each element instead, as `for imm x in a` would.
 
 ### Loops over temporaries
 
@@ -860,7 +809,7 @@ The array can be any expression, such as a call. A temporary array lives until t
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ Name: rec
+~ Name: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -902,16 +851,11 @@ main: fun
 	for c in mut counts
 	{
 	}
-
-	for c in own counts
-	{
-	}
 }
 ```
 
 ```errors
 Cannot use 'mut' on 'array[i32, 3]' loop sources
-Cannot use 'own' on 'array[i32, 3]' loop sources
 ```
 
 `for mut` changes the array, so the array must be a `var`:

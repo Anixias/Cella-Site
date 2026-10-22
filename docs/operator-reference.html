@@ -39,7 +39,7 @@ try {
 <p>From tightest to loosest. Operators in one item have the same precedence.</p>
 <ol><li>Postfix <code>.</code>, <code>()</code>, <code>[]</code> and <code>?</code>, left to right.</li><li>Prefix <code>-</code>, <code>+</code>, <code>!</code>, <code>~</code>, <code>*</code>, <code>@</code>, <code>own</code>, <code>mut</code>, <code>imm</code> and <code>atomic</code>, right to left.</li><li><code>*</code>, <code>/</code>, <code>%</code> and <code>*%</code>, left to right.</li><li><code>+</code>, <code>-</code>, <code>+%</code> and <code>-%</code>, left to right.</li><li><code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>&lt;&lt;&lt;</code> and <code>&gt;&gt;&gt;</code>, left to right.</li><li><code>&amp;</code>, left to right.</li><li><code>^</code>, left to right.</li><li><code>|</code>, left to right.</li><li><code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code> and <code>&gt;=</code>, chained.</li><li><code>is</code>, which doesn't chain.</li><li><code>==</code> and <code>!=</code>, chained.</li><li><code>&amp;&amp;</code>, left to right.</li><li><code>||</code>, left to right.</li><li><code>=</code> and the compound assignments, right to left.</li></ol>
 <p>Unlike C, the bitwise operators <code>&amp;</code>, <code>^</code> and <code>|</code> bind tighter than comparisons, so a mask test needs no parentheses. Shifts bind looser than <code>+</code> and <code>-</code>, as in C:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-914"></button><textarea hidden id="copy-914">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-908"></button><textarea hidden id="copy-908">mod example
 
 ext
 {
@@ -60,7 +60,7 @@ main: fun
 <p><code>flags &amp; mask == mask</code> is <code>(flags &amp; mask) == mask</code>, and <code>1 | 2 == 3</code> is <code>(1 | 2) == 3</code>.</p>
 <h3 id="chained-comparisons"><a class="anchor" href="#chained-comparisons">Chained comparisons</a></h3>
 <p>A run of <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code> and <code>&gt;=</code> is one chained comparison: <code>a &lt; b &lt;= c</code> means <code>a &lt; b &amp;&amp; b &lt;= c</code>, with <code>b</code> evaluated once. <code>==</code> and <code>!=</code> chain the same way among themselves. A chain stops at the first comparison that's false:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-915"></button><textarea hidden id="copy-915">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-909"></button><textarea hidden id="copy-909">mod example
 
 ext
 {
@@ -85,7 +85,7 @@ main: fun
 <p><a href="numbers.html#comparisons">Numbers</a> covers comparisons and their typing rules.</p>
 <h3 id="pattern-tests"><a class="anchor" href="#pattern-tests">Pattern tests</a></h3>
 <p><code>is</code> sits between the comparisons and the equality operators. Its left side can be a comparison or arithmetic, and the result can be compared with <code>==</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-916"></button><textarea hidden id="copy-916">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-910"></button><textarea hidden id="copy-910">mod example
 
 ext
 {
@@ -105,12 +105,12 @@ main: fun
 	val count = 4
 	printf(&quot;%d\n&quot;, a is circle(_) == b is circle(_))
 	printf(&quot;%d\n&quot;, count + 1 is 5)
-}</textarea><pre><code><span class="line"><span class="c-type">Shape</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">circle</span>(radius: <span class="c-type">f64</span>)</span><span class="line">	<span class="c-case">square</span>(side: <span class="c-type">f64</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-type">Shape</span>.<span class="c-case">circle</span>(<span class="c-literal">1.0</span>)</span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-type">Shape</span>.<span class="c-case">square</span>(<span class="c-literal">2.0</span>)</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">4</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, a <span class="c-keyword">is</span> circle(_) == b <span class="c-keyword">is</span> circle(_))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, count + <span class="c-literal">1</span> <span class="c-keyword">is</span> <span class="c-literal">5</span>)</span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-type">Shape</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">circle</span>(<span class="c-field">radius</span>: <span class="c-type">f64</span>)</span><span class="line">	<span class="c-case">square</span>(<span class="c-field">side</span>: <span class="c-type">f64</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-type">Shape</span>.<span class="c-case">circle</span>(<span class="c-literal">1.0</span>)</span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-type">Shape</span>.<span class="c-case">square</span>(<span class="c-literal">2.0</span>)</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">4</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, a <span class="c-keyword">is</span> <span class="c-case">circle</span>(_) == b <span class="c-keyword">is</span> <span class="c-case">circle</span>(_))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, count + <span class="c-literal">1</span> <span class="c-keyword">is</span> <span class="c-literal">5</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>0
 1</pre></div>
 <h3 id="assignment"><a class="anchor" href="#assignment">Assignment</a></h3>
 <p>Assignment binds loosest and groups right to left, so <code>a = b = 5</code> stores 5 in <code>b</code> and then in <code>a</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-917"></button><textarea hidden id="copy-917">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-911"></button><textarea hidden id="copy-911">mod example
 
 ext
 {
@@ -127,7 +127,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>5 5</pre></div>
 <h3 id="operators-and-line-breaks"><a class="anchor" href="#operators-and-line-breaks">Operators and line breaks</a></h3>
 <p>A new line ends an expression, so a line can't start with a binary operator, an assignment, <code>is</code>, <code>&amp;&amp;</code>, <code>||</code> or <code>=&gt;</code>. Break the line after the operator instead:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-918"></button><textarea hidden id="copy-918">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-912"></button><textarea hidden id="copy-912">mod example
 
 ready: fun(a: bool, b: bool) -&gt; bool
 {
@@ -139,7 +139,7 @@ ready: fun(a: bool, b: bool) -&gt; bool
 main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">ready</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">bool</span>, <span class="c-parameter">b</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">bool</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> both = a</span><span class="line">		&amp;&amp; b</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot start a line with &#x27;&amp;&amp;&#x27;</span></span><span class="line">	<span class="c-keyword">ret</span> both</span><span class="line">}</span></code></pre></div>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-919"></button><textarea hidden id="copy-919">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-913"></button><textarea hidden id="copy-913">mod example
 
 ready: fun(a: bool, b: bool) -&gt; bool
 {
@@ -152,7 +152,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">ready</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">bool</span>, <span class="c-parameter">b</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">bool</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> both = <span class="c-parameter">a</span> &amp;&amp;</span><span class="line">		<span class="c-parameter">b</span></span><span class="line">	<span class="c-keyword">ret</span> both</span><span class="line">}</span></code></pre></div>
 <p><code>-</code>, <code>+</code>, <code>*</code>, <code>!</code>, <code>~</code> and <code>@</code> can start a line, but there they are prefix operators that begin a new statement:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-920"></button><textarea hidden id="copy-920">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-914"></button><textarea hidden id="copy-914">mod example
 
 ext
 {
@@ -179,8 +179,8 @@ main: fun
 <p><a href="variables.html">Variables</a> covers assignment and <a href="numbers.html">Numbers</a> the compound forms. Records and enums can declare the compound assignments, but not <code>=</code>.</p>
 <ul><li><code>a = b</code>: assignment</li><li><code>a += b</code>, <code>a -= b</code>, <code>a *= b</code>, <code>a /= b</code>, <code>a %= b</code>: arithmetic and assign</li><li><code>a +%= b</code>, <code>a -%= b</code>, <code>a *%= b</code>: wrapping arithmetic and assign</li><li><code>a &amp;= b</code>, <code>a |= b</code>, <code>a ^= b</code>: bitwise operation and assign</li><li><code>a &lt;&lt;= b</code>, <code>a &gt;&gt;= b</code>, <code>a &lt;&lt;&lt;= b</code>, <code>a &gt;&gt;&gt;= b</code>: shift or rotate and assign</li></ul>
 <h2 id="memory-and-access"><a class="anchor" href="#memory-and-access">Memory and access</a></h2>
-<p>Records and enums can declare <code>*</code> as <code>*: op(self)</code> and indexing as <code>[]: op</code>, as <a href="operators.html#indexers">Operators</a> shows, and <code>?</code> as <code>?: op(own self)</code>. The rest can't be declared.</p>
-<ul><li><code>@a</code>: the address of <code>a</code> (<a href="pointers.html">Pointers</a>)</li><li><code>*a</code>: the value a pointer points to (<a href="pointers.html">Pointers</a>)</li><li><code>a.b</code>: member access, also through pointers (<a href="records.html">Records</a>)</li><li><code>a[i]</code>: indexing arrays, pointers and strings (<a href="arrays.html">Arrays</a>)</li><li><code>f(x)</code>: a call (<a href="functions.html">Functions</a>)</li><li><code>a?</code>: calls the type's <code>?: op</code> member, which gives a value or returns early from the function that uses <code>a?</code> (<a href="operators.html#the-operator">Operators</a>)</li><li><code>own a</code>: moves <code>a</code> (<a href="ownership.html">Ownership</a>)</li><li><code>mut a</code>, <code>imm a</code>: borrows <code>a</code> with or without writing (<a href="parameter-modes.html">Parameter modes</a>)</li><li><code>atomic ...</code>: an atomic load, store, update or fence (<a href="atomics.html">Atomics</a>)</li></ul>
+<p>Records and enums can declare <code>*</code> as <code>*: op(self)</code> and indexing as <code>[]: op</code>, as <a href="operators.html#indexers">Operators</a> shows, and <code>?</code> as <code>?: op(self)</code>. The rest can't be declared.</p>
+<ul><li><code>@a</code>: the address of <code>a</code> (<a href="pointers.html">Pointers</a>)</li><li><code>*a</code>: the value a pointer points to (<a href="pointers.html">Pointers</a>)</li><li><code>a.b</code>: member access, also through pointers (<a href="records.html">Records</a>)</li><li><code>a[i]</code>: indexing arrays, pointers and strings (<a href="arrays.html">Arrays</a>)</li><li><code>f(x)</code>: a call (<a href="functions.html">Functions</a>)</li><li><code>a?</code>: calls the type's <code>?: op</code> member, which gives a value or returns early from the function that uses <code>a?</code> (<a href="operators.html#the-operator">Operators</a>)</li><li><code>own a</code>: moves <code>a</code> where a plain use wouldn't, such as out of a <code>mut</code> parameter or a pointer (<a href="ownership.html#moving-values">Ownership</a>)</li><li><code>mut a</code>, <code>imm a</code>: borrows <code>a</code> with or without writing (<a href="parameter-modes.html">Parameter modes</a>)</li><li><code>atomic ...</code>: an atomic load, store, update or fence (<a href="atomics.html">Atomics</a>)</li></ul>
 <h2 id="other-symbols"><a class="anchor" href="#other-symbols">Other symbols</a></h2>
 <div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Meaning</th><th>Chapter</th></tr></thead><tbody><tr><td><code>a..b</code></td><td>The integers from <code>a</code> up to but not including <code>b</code>, in <code>for</code> loops and patterns</td><td><a href="control-flow.html">Control flow</a>, <a href="pattern-matching.html">Pattern matching</a></td></tr><tr><td><code>a..=b</code></td><td>The integers from <code>a</code> up to and including <code>b</code>, in <code>for</code> loops and patterns</td><td><a href="control-flow.html">Control flow</a>, <a href="pattern-matching.html">Pattern matching</a></td></tr><tr><td><code>...</code></td><td>Extra C arguments in an <code>ext</code> function, a typed variadic parameter, and spreading arguments</td><td><a href="variadics.html">Variadic functions</a></td></tr><tr><td><code>-&gt;</code></td><td>The result type of a function or function type</td><td><a href="functions.html">Functions</a></td></tr><tr><td><code>=&gt;</code></td><td>An expression body, a lambda body or a <code>match</code> arm</td><td><a href="functions.html">Functions</a>, <a href="pattern-matching.html">Pattern matching</a></td></tr><tr><td><code>:</code></td><td>Separates a name from what it declares, and a binding from its type</td><td><a href="lexical-structure.html">Lexical structure</a></td></tr><tr><td><code>,</code></td><td>Separates arguments, elements and members on one line</td><td><a href="lexical-structure.html">Lexical structure</a></td></tr><tr><td><code>{ }</code></td><td>A block or body, and a hole in an interpolated string</td><td><a href="control-flow.html">Control flow</a>, <a href="templates.html">String templates</a></td></tr><tr><td><code>[ ]</code></td><td>Array literals, type arguments and indexing</td><td><a href="arrays.html">Arrays</a>, <a href="generics.html">Generics</a></td></tr></tbody></table></div>
 <p>Ranges aren't values: <code>..</code> and <code>..=</code> appear only in <code>for</code> loops and patterns.</p>

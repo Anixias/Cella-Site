@@ -462,7 +462,7 @@ A constant needs a value, the value must be a constant, and its type can't have 
 ```cella error
 ~ mod example
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 

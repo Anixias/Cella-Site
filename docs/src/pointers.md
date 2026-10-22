@@ -36,7 +36,7 @@ Constants have no storage, so they have no address. Taking the address of a valu
 ```cella error
 ~ mod example
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 
@@ -465,7 +465,7 @@ Assigning through a pointer is an assignment like any other: `*p = v` drops the 
 ~ 	free: fun(memory: ptr)
 ~ }
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 
@@ -499,7 +499,7 @@ drop 2
 
 The compiler doesn't track what the memory holds. After `own *p` or `drop *p`, reading `*p` again, or forgetting to destroy what's there before `free`, isn't an error.
 
-The same forms work on fields and elements reached through a pointer, as in `own h.buffer = Buffer(4)` and `own items[0] = Buffer(5)`. `own` assignment only works through pointers, and never on compound assignments. Reading `*p` without `own` borrows the value, as any declaration of a value with a destructor does (see [Borrows](borrows.md)), so moving it needs `own`:
+The same forms work on fields and elements reached through a pointer, as in `own h.buffer = Buffer(4)` and `own items[0] = Buffer(5)`. `own` assignment only works through pointers, and never on compound assignments. Reading `*p` without `own` borrows the value, as a declaration does for any value the function doesn't own (see [Borrows](borrows.md)), so moving it needs `own`:
 
 ```cella error
 ~ mod example
@@ -509,7 +509,7 @@ The same forms work on fields and elements reached through a pointer, as in `own
 ~ 	malloc: fun(size: usize) -> ptr
 ~ }
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 
@@ -518,7 +518,7 @@ Buffer: rec
 	}
 }
 
-take: fun(own b: Buffer)
+take: fun(b: Buffer)
 {
 }
 

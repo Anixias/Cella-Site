@@ -337,10 +337,9 @@ Cannot convert type 'Fixed' to 'i32'
 
 The receiver of an outward conversion says how the value is taken, as for any method:
 
-- `self` copies the value and returns a new one.
+- `self` takes the value, a copy or the value itself, and returns a new one.
 - `imm self` borrows the value. It can return a borrow of part of it, `imm[T]`, or a type that borrows, such as `str`.
 - `mut self` borrows the value writably and returns `mut[T]`.
-- `own self` takes the value over and returns a new one.
 
 A type can give out a borrow of something it holds this way. `Slot` below converts to a `Sprite` by lending its own: a read-only borrow where a `Sprite` is read, a writable one where it's passed as `mut`.
 
@@ -396,7 +395,7 @@ A string type is a common case. It owns its bytes and lends them as a `str`, so 
 ~ 	memcpy: fun(target: ptr[u8], source: ptr[u8], size: usize) -> ptr[u8]
 ~ }
 ~
-String: rec
+String: own rec
 {
 	data: pvt ptr[u8]
 	length: pvt usize
@@ -445,7 +444,7 @@ The `str` borrows from `name`, so it follows the rules for borrows (see [Borrows
 ~ 	free: fun(memory: ptr[u8])
 ~ }
 ~
-~ String: rec
+~ String: own rec
 ~ {
 ~ 	data: pvt ptr[u8]
 ~ 	length: pvt usize
@@ -482,7 +481,7 @@ Cannot return borrows of local variables
 Cannot borrow unstored values
 ```
 
-An `own self` conversion consumes the value. A named variable then has to be passed with `own`, as for any move (see [Ownership and destructors](ownership.md)):
+A `self` conversion on a type that can't be copied consumes the value, so converting a named variable moves it, as any move does (see [Ownership and destructors](ownership.md)):
 
 ```cella
 ~ mod example
@@ -492,7 +491,7 @@ An `own self` conversion consumes the value. A named variable then has to be pas
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Buffer: rec
+Buffer: own rec
 {
 	size: i32
 
@@ -502,11 +501,11 @@ Buffer: rec
 	}
 }
 
-Text: rec
+Text: own rec
 {
 	size: i32
 
-	as: op(own self) -> Buffer => Buffer(self.size)
+	as: op(self) -> Buffer => Buffer(self.size)
 
 	drop: op
 	{
@@ -514,12 +513,12 @@ Text: rec
 	}
 }
 
-send: fun(own buffer: Buffer) => printf("send %d\n", buffer.size)
+send: fun(buffer: Buffer) => printf("send %d\n", buffer.size)
 
 main: fun
 {
 	val text = Text(1)
-	send(own text)
+	send(text)
 	send(Text(2))
 }
 ```
@@ -544,7 +543,6 @@ Text: rec
 
 	as: op(mut self) -> i32 => 1
 	as: op(self) -> mut[i32] => mut self.value
-	as: op(own self) -> imm[i32] => imm self.value
 }
 
 main: fun
@@ -555,7 +553,6 @@ main: fun
 ```errors
 Cannot return 'i32' from 'as' with 'mut self'
 Cannot return 'mut[i32]' from 'as' with 'self'
-Cannot return 'imm[i32]' from 'as' with 'own self'
 ```
 
 ## How conversions are used

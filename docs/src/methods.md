@@ -79,12 +79,11 @@ Members can be declared in any order, and a method can call methods declared aft
 
 | Receiver | `self` is | The method can |
 | --- | --- | --- |
-| `self` | a copy of the value | read it; only for types that copy |
+| `self` | the value itself: a copy, or the value moved into the method | read, change and consume it |
 | `imm self` | a read-only borrow of the value | read it |
 | `mut self` | a mutable borrow of the value | read and change it |
-| `own self` | the value itself, moved into the method | read, change and consume it |
 
-The call is written the same way for every receiver: `r.area()`, `r.grow(1)`. Unlike other arguments, the receiver never needs `imm`, `mut` or `own` at the call site. [Parameter modes](parameter-modes.md) explains the modes in general.
+The call is written the same way for every receiver: `r.area()`, `r.grow(1)`. Unlike other arguments, the receiver never needs `imm` or `mut` at the call site. [Parameter modes](parameter-modes.md) explains the modes in general.
 
 A `mut self` method changes the value it's called on, so the value must be something that can change, such as a `var`:
 
@@ -112,7 +111,7 @@ Cannot mutably borrow values
 
 It can't be called on a temporary either, such as `Rect(2, 3).grow(1)`, since the change would be lost; that is the error "Cannot mutably borrow unstored values". The other receivers work on temporaries.
 
-With `self` and `imm self`, the method can't change the value. Assigning to one of its fields is an error, even for a copy:
+With `imm self`, the method can't change the value. Assigning to one of its fields is an error:
 
 ```cella error
 ~ mod example
@@ -122,7 +121,7 @@ Rect: rec
 	width: i32
 	height: i32
 
-	reset: fun(self)
+	reset: fun(imm self)
 	{
 		self.width = 0
 	}
@@ -136,6 +135,8 @@ main: fun
 ```errors
 Cannot reassign read-only parameters
 ```
+
+A `self` method has the value to itself, so it can change it; for a type that copies, the caller's value stays as it was.
 
 ### Copy or borrow
 
@@ -181,34 +182,11 @@ main: fun
 1 99
 ```
 
-A type with a destructor can't be copied, so its methods take `imm self` instead of `self`:
-
-```cella error
-~ mod example
-~
-File: rec
-{
-	handle: i32
-
-	id: fun(self) -> i32 => self.handle
-
-	drop: op
-	{
-	}
-}
-
-main: fun
-{
-}
-```
-
-```errors
-Cannot copy 'File'
-```
+A type that can't be copied moves into a `self` method instead, so a method that only reads such a value takes `imm self`.
 
 ### Consuming the value
 
-An `own self` method takes the value over. The value is dropped at the end of the method unless the method moves it on, and the caller can't use it afterwards:
+A `self` method on a type that can't be copied takes the value over. The value is dropped at the end of the method unless the method moves it on, and the caller can't use it afterwards:
 
 ```cella
 ~ mod example
@@ -218,11 +196,11 @@ An `own self` method takes the value over. The value is dropped at the end of th
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Letter: rec
+Letter: own rec
 {
 	id: i32
 
-	send: fun(own self) -> i32
+	send: fun(self) -> i32
 	{
 		printf("sending %d\n", self.id)
 		ret self.id
@@ -256,11 +234,11 @@ sent 7
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ Letter: rec
+~ Letter: own rec
 ~ {
 ~ 	id: i32
 ~
-~ 	send: fun(own self) -> i32 => self.id
+~ 	send: fun(self) -> i32 => self.id
 ~
 ~ 	drop: op
 ~ 	{
@@ -279,16 +257,16 @@ main: fun
 Cannot use moved values
 ```
 
-Only a value the caller owns can be consumed. Through an `imm` or `mut` borrow, an `own self` method can't be called:
+Only a value the caller owns can be consumed. Through an `imm` or `mut` borrow, such a method can't be called:
 
 ```cella error
 ~ mod example
 ~
-~ Letter: rec
+~ Letter: own rec
 ~ {
 ~ 	id: i32
 ~
-~ 	send: fun(own self) -> i32 => self.id
+~ 	send: fun(self) -> i32 => self.id
 ~
 ~ 	drop: op
 ~ 	{
@@ -305,6 +283,59 @@ main: fun
 ```errors
 Cannot move read-only parameters
 ```
+
+A method that consumes a value with a destructor can take a field out of `self` with `own self.field`. The value then counts as taken apart: its destructor doesn't run at the end of the method, and only the fields left in it are destroyed. This is how a value hands over what it holds:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+~ Letter: own rec
+~ {
+~ 	id: i32
+~
+~ 	drop: op
+~ 	{
+~ 		printf("drop %d\n", self.id)
+~ 	}
+~ }
+~
+Envelope: own rec
+{
+	letter: Letter
+
+	drop: op
+	{
+		printf("drop envelope\n")
+	}
+
+	open: fun(self) -> Letter
+	{
+		val letter = own self.letter
+		printf("opened\n")
+		ret letter
+	}
+}
+
+main: fun
+{
+	val envelope = Envelope(Letter(3))
+	val letter = envelope.open()
+	printf("got %d\n", letter.id)
+}
+```
+
+```output
+opened
+got 3
+drop 3
+```
+
+Without `own`, `val letter = self.letter` would only look at the field, since a field of a value with a destructor can't be moved out any other way.
 
 ### Calling through pointers and borrows
 
@@ -702,7 +733,7 @@ One name has one form: two standalone accessors with the same name conflict, and
 
 ### Accessor rules
 
-Either accessor's receiver can be `self`, `imm self` or `mut self`, but not `own self`. A setter usually takes `mut self`, since it changes the value. A getter with `mut self` can change the value while it's read, so reading it needs a value that can change, as with a `mut self` method. Getters take no parameters, and setters take exactly one, which can't have a mode:
+Either accessor's receiver can be `self`, `imm self` or `mut self`, and `self` only for a type that copies. A setter usually takes `mut self`, since it changes the value. A getter with `mut self` can change the value while it's read, so reading it needs a value that can change, as with a `mut self` method. Getters take no parameters, and setters take exactly one, which can't have a mode:
 
 ```cella error
 ~ mod example

@@ -13,7 +13,7 @@ A function type lists the parameter types and the result type between brackets, 
 | `fun[-> bool]` | takes nothing and returns a `bool` |
 | `fun[]` | takes nothing and returns nothing |
 
-A parameter can have a mode, as in a declaration: `fun[mut i32, i32]` takes its first argument as a writable borrow, and `fun[own Text -> i32]` takes over its argument (see [Parameter modes](parameter-modes.md)).
+A parameter can have a mode, as in a declaration: `fun[mut i32, i32]` takes its first argument as a writable borrow, and `fun[imm Text -> i32]` borrows its argument to read it (see [Parameter modes](parameter-modes.md)).
 
 ## Functions as values
 
@@ -175,7 +175,7 @@ No overload of 'half' matches 'fun[i32 -> i64]'
 
 ### Modes in function types
 
-A function value with mode parameters is called the way the function is, with `mut` or `own` written at the call:
+A function value with mode parameters is called the way the function is, with `imm` or `mut` written at the call:
 
 ```cella
 ~ mod example
@@ -190,7 +190,7 @@ damage: fun(mut hp: i32, amount: i32)
 	hp -= amount
 }
 
-apply: fun(action: fun[mut i32, i32], mut target: i32)
+apply: fun(imm action: fun[mut i32, i32], mut target: i32)
 {
 	action(mut target, 4)
 }
@@ -277,11 +277,11 @@ A lambda is a function without a name, written where it's used: `fun`, the param
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-apply: fun(f: fun[i32 -> i32], x: i32) -> i32 => f(x)
+apply: fun(imm f: fun[i32 -> i32], x: i32) -> i32 => f(x)
 
-call: fun(f: fun[-> i32]) -> i32 => f()
+call: fun(imm f: fun[-> i32]) -> i32 => f()
 
-run: fun(f: fun[]) => f()
+run: fun(imm f: fun[]) => f()
 
 main: fun
 {
@@ -313,7 +313,7 @@ A lambda passed where a function type is expected, or stored in a variable of a 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-bumpAll: fun(mut values: array[i32, 3], bump: fun[mut i32])
+bumpAll: fun(mut values: array[i32, 3], imm bump: fun[mut i32])
 {
 	for mut value in values
 		bump(mut value)
@@ -344,7 +344,7 @@ A lambda that doesn't fit the expected type is an error:
 ```cella error
 ~ mod example
 ~
-apply: fun(f: fun[i32 -> i32], x: i32) -> i32 => f(x)
+apply: fun(imm f: fun[i32 -> i32], x: i32) -> i32 => f(x)
 
 main: fun
 {
@@ -428,7 +428,7 @@ In a call to a generic function, the other arguments settle the type parameters 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-transform[T: copy, U]: fun(value: T, f: fun[T -> U]) -> U => f(value)
+transform[T: copy, U]: fun(value: T, imm f: fun[T -> U]) -> U => f(value)
 
 main: fun
 {
@@ -448,7 +448,7 @@ A block body's result isn't used for inference, so it needs `-> R`:
 ```cella error
 ~ mod example
 ~
-transform[T: copy, U]: fun(value: T, f: fun[T -> U]) -> U => f(value)
+transform[T: copy, U]: fun(value: T, imm f: fun[T -> U]) -> U => f(value)
 
 main: fun
 {
@@ -472,7 +472,7 @@ A lambda can use the local variables and parameters of the function around it. I
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-each: fun(values: array[i32, 3], visit: fun[i32])
+each: fun(values: array[i32, 3], imm visit: fun[i32])
 {
 	for value in values
 		visit(value)
@@ -490,6 +490,8 @@ main: fun
 ```output
 36
 ```
+
+`each` takes its callback as `imm visit: fun[i32]`, which lends it a closure for the call; [Closure types](#closure-types) explains why a callback that may capture is taken with `imm`.
 
 A closure captures by reference: it refers to the variable itself, not a copy. It sees the variable as it is when the closure is called, and when the variable is a `var`, it can change it, as `total += ...` does above:
 
@@ -532,7 +534,7 @@ A closure can change only what its function could change: a `var`, a `mut` param
 ```cella error
 ~ mod example
 ~
-Text: rec
+Text: own rec
 {
 	id: i32
 
@@ -541,9 +543,9 @@ Text: rec
 	}
 }
 
-call: fun(f: fun[-> i32]) -> i32 => f()
+call: fun(imm f: fun[-> i32]) -> i32 => f()
 
-consume: fun(own text: Text)
+consume: fun(text: Text)
 {
 }
 
@@ -568,7 +570,7 @@ take: fun
 	val text = Text(1)
 	call(fun -> i32
 	{
-		consume(own text)
+		consume(text)
 		ret 0
 	})
 }
@@ -650,7 +652,7 @@ Cannot store borrows in module variables
 Cannot convert type 'ref fun[-> i32]' to 'fun[-> i32]'
 ```
 
-Parameters are never written as `ref fun`. Unlike other parameters without a mode, which take a copy (see [Parameter modes](parameter-modes.md)), a `fun[...]` parameter without a mode borrows its argument for the call, as `imm` does. That's why it accepts closures, and why the function can call it but can't keep it:
+Parameters are never written as `ref fun`. A parameter that takes a closure is written `imm f: fun[...]`: it borrows the closure for the call, as `imm` does for any value (see [Parameter modes](parameter-modes.md)). That's why it accepts closures that capture, and why the function can call it but can't keep it. A named closure is passed to it with `imm`, as in `apply(imm add, 1)`; a lambda written in the call needs nothing:
 
 ```cella error
 ~ mod example
@@ -659,11 +661,11 @@ zero: fun -> i32 => 0
 
 saved: var fun[-> i32] = zero
 
-visit: fun(f: ref fun[i32])
+visit: fun(imm f: ref fun[i32])
 {
 }
 
-keep: fun(f: fun[-> i32])
+keep: fun(imm f: fun[-> i32])
 {
 	saved = f
 }
@@ -685,7 +687,7 @@ Since a closure borrows its captures, it can't outlive them. It can't be returne
 ```cella error
 ~ mod example
 ~
-Text: rec
+Text: own rec
 {
 	id: i32
 
@@ -699,7 +701,7 @@ Holder: ref rec
 	run: ref fun[]
 }
 
-consume: fun(own text: Text)
+consume: fun(text: Text)
 {
 }
 
@@ -719,7 +721,7 @@ main: fun
 {
 	val text = Text(1)
 	val show = fun -> i32 => text.id
-	consume(own text)
+	consume(text)
 	show()
 }
 ```
@@ -730,7 +732,7 @@ Cannot store new borrows in 'mut' parameters
 Cannot use borrows of moved values
 ```
 
-A parameter with `own` keeps what it's given, so it accepts plain functions but no closures that capture. Neither does an `ext fun`, which has no room for captured data:
+A `fun[...]` parameter without a mode takes its argument by value and can keep it, so it accepts plain functions and lambdas that capture nothing, but no closures that capture. Neither does an `ext fun`, which has no room for captured data:
 
 ```cella error
 ~ mod example
@@ -740,7 +742,7 @@ A parameter with `own` keeps what it's given, so it accepts plain functions but 
 ~ 	qsort: fun(base: ptr, count: usize, size: usize, compare: ext fun[ptr[i32], ptr[i32] -> i32])
 ~ }
 ~
-store: fun(own f: fun[i32 -> i32])
+store: fun(f: fun[i32 -> i32])
 {
 }
 
@@ -772,7 +774,7 @@ A closure made in a loop's body can capture the loop's variable, and can be used
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-apply: fun(f: fun[-> i32]) -> i32 => f()
+apply: fun(imm f: fun[-> i32]) -> i32 => f()
 
 main: fun
 {
@@ -884,7 +886,7 @@ A captured value with a destructor lives as long as the closure:
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Texture: rec
+Texture: own rec
 {
 	id: i32
 
@@ -899,7 +901,7 @@ main: fun
 	val grass = Texture(7)
 	val show = own fun { printf("texture %d\n", grass.id) }
 	show()
-	val moved = own show
+	val moved = show
 	moved()
 	printf("end\n")
 }
@@ -912,7 +914,7 @@ end
 free texture 7
 ```
 
-An owned closure is moved like any value with a destructor, with `own`. Its type has no name: each `own fun` lambda has a type of its own, so two of them can't be stored in the same variable, and one doesn't convert to `fun`. It can be passed to a `fun[...]` parameter, which borrows it for the call:
+An owned closure is moved like any value with a destructor. Its type has no name: each `own fun` lambda has a type of its own, so two of them can't be stored in the same variable, and one doesn't convert to `fun`. It can be passed to an `imm f: fun[...]` parameter, which borrows it for the call:
 
 ```cella error
 ~ mod example
@@ -937,7 +939,7 @@ An owned closure copies or takes in its captures, so it can't change a captured 
 ```cella error
 ~ mod example
 ~
-Texture: rec
+Texture: own rec
 {
 	id: i32
 
@@ -1085,14 +1087,14 @@ This is how a box type that owns a closure on the heap is called like the closur
 ~ 	free: fun(memory: ptr)
 ~ }
 ~
-Boxed[K: trait]: rec
+Boxed[K: trait]: own rec
 {
 	object: pvt ptr[dyn[K]]
 
-	of[T: K + noref]: fun(own value: T) -> Boxed[K]
+	of[T: K + noref]: fun(value: T) -> Boxed[K]
 	{
 		val memory = ptr[T](malloc(sizeOf(T)))
-		own *memory = own value
+		own *memory = value
 		ret Boxed[K](memory)
 	}
 

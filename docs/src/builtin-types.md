@@ -172,7 +172,7 @@ Every built-in type other than `dyn[K]` and `never` can be copied, so they meet 
 ```cella error
 ~ mod example
 ~
-keep[T: noref]: fun(own value: T) -> T => value
+keep[T: noref]: fun(value: T) -> T => value
 
 main: fun
 {

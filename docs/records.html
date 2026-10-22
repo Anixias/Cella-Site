@@ -37,7 +37,7 @@ try {
 <p>A record groups named values, its fields, into one type, like a <code>struct</code> in C. This chapter covers declaring records, making values of them, constructors and how records are laid out in memory. Functions that belong to a record are in <a href="methods.html">Methods and properties</a>, and destructors are in <a href="ownership.html">Ownership and destructors</a>.</p>
 <h2 id="declaring-a-record"><a class="anchor" href="#declaring-a-record">Declaring a record</a></h2>
 <p>A record is declared with <code>rec</code>, and its fields go between braces, one per line, each with a name and a type:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-260"></button><textarea hidden id="copy-260">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-258"></button><textarea hidden id="copy-258">mod example
 
 ext
 {
@@ -60,7 +60,7 @@ main: fun
 <p><code>p.x</code> reads or writes the field <code>x</code> of <code>p</code>. Fields can be numbers, pointers, arrays, enums, function types and other records. A field that holds a borrow, such as a <code>str</code>, needs a <code>ref rec</code>, covered in <a href="borrows.html">Borrows</a>.</p>
 <p>Fields can also share one line, separated by commas, as in <code>Point: rec { x: i32, y: i32 }</code>. Either way works, but one body uses one style: <a href="lexical-structure.html">Lexical structure</a> has the rules.</p>
 <p>A field can't have an initial value of its own. Values come from constructors, described below:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-261"></button><textarea hidden id="copy-261">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-259"></button><textarea hidden id="copy-259">mod example
 
 Settings: rec
 {
@@ -71,7 +71,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-type">Settings</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	volume: i32 = <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot give fields initial values</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>Records can be declared in any order in a file, and a record can use a type declared after it. A record can't contain itself, directly or through an array, because its size would have no end. A pointer to itself is fine:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-262"></button><textarea hidden id="copy-262">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-260"></button><textarea hidden id="copy-260">mod example
 
 Node: rec
 {
@@ -90,7 +90,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Node</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">next</span>: <span class="c-type">Node</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:10ch">Field &#x27;next&#x27; of type &#x27;Node&#x27; causes a cycle in the memory layout</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Linked</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">next</span>: <span class="c-type">ptr</span>[<span class="c-type">Linked</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h3 id="empty-records"><a class="anchor" href="#empty-records">Empty records</a></h3>
 <p>A record can have no fields. It is written either with empty braces or with no body at all, and its values take no space:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-263"></button><textarea hidden id="copy-263">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-261"></button><textarea hidden id="copy-261">mod example
 
 ext
 {
@@ -112,7 +112,7 @@ main: fun
 <p>Without a body, the declaration must end its line.</p>
 <h2 id="creating-values"><a class="anchor" href="#creating-values">Creating values</a></h2>
 <p>A record with no declared constructors gets two ways to make a value. <code>Point(3, 4)</code> passes one argument for each field, in the order the fields are declared. <code>Point()</code> makes a value with every field zeroed:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-264"></button><textarea hidden id="copy-264">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-262"></button><textarea hidden id="copy-262">mod example
 
 ext
 {
@@ -137,7 +137,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>255 128 0 0.50
 0 0 0 0.00</pre></div>
 <p>The arguments convert to the field types as they would for a function's parameters, so <code>255</code> becomes a <code>u8</code> and <code>0.5</code> an <code>f32</code>. Any other number of arguments is an error, and the compiler lists the fields:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-265"></button><textarea hidden id="copy-265">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-263"></button><textarea hidden id="copy-263">mod example
 
 Point: rec
 {
@@ -153,7 +153,7 @@ main: fun
 <p>Arguments are matched to fields by position only.</p>
 <h3 id="declarations-without-a-value"><a class="anchor" href="#declarations-without-a-value">Declarations without a value</a></h3>
 <p>A variable of a record type declared without a value is the same as one set to <code>T()</code>: every field starts zeroed. Fields can then be set one at a time:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-266"></button><textarea hidden id="copy-266">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-264"></button><textarea hidden id="copy-264">mod example
 
 ext
 {
@@ -178,7 +178,7 @@ main: fun
 <h3 id="legal-defaults"><a class="anchor" href="#legal-defaults">Legal defaults</a></h3>
 <p>A type has a <em>legal default</em> when all-zero memory is a valid value of it. Numbers, <code>bool</code>, <code>char</code>, pointers and <code>str</code> have one. A record has one when all of its fields have one, it declares no constructor and it has no destructor. Only types with a legal default get the built-in <code>T()</code> and start zeroed.</p>
 <p>Some types have no legal default, such as function types. A record with a field like that has none either, so <code>T()</code> isn't available and only the field-by-field constructor is left:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-267"></button><textarea hidden id="copy-267">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-265"></button><textarea hidden id="copy-265">mod example
 
 Handler: rec
 {
@@ -191,7 +191,7 @@ main: fun
 	val h = Handler()
 }</textarea><pre><code><span class="line"><span class="c-type">Handler</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">callback</span>: <span class="c-keyword">fun</span>[<span class="c-type">i32</span> -&gt; <span class="c-type">i32</span>]</span><span class="line">	<span class="c-field">scale</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> h = <span class="c-type">Handler</span>()</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:12ch">No constructor for &#x27;Handler&#x27; accepts these arguments<span class="diagnostic-note">&#x27;Handler&#x27; takes one argument for each field: callback, scale</span></span></span><span class="line">}</span></code></pre></div>
 <p>A variable of such a type starts uninitialized instead of zeroed. Its fields that do have defaults are zeroed, and the others must be set before the whole value is used:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-268"></button><textarea hidden id="copy-268">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-266"></button><textarea hidden id="copy-266">mod example
 
 ext
 {
@@ -214,7 +214,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">double</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">n</span> * <span class="c-literal">2</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> h: <span class="c-type">Handler</span></span><span class="line">	h.<span class="c-field">callback</span> = <span class="c-function">double</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, h.<span class="c-field">callback</span>(h.<span class="c-field">scale</span> + <span class="c-literal">21</span>))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>42</pre></div>
 <p>Using the value before then is an error. A field that isn't set yet makes the record <em>partly initialized</em>:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-269"></button><textarea hidden id="copy-269">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-267"></button><textarea hidden id="copy-267">mod example
 
 Handler: rec
 {
@@ -232,7 +232,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">h</span>: <span class="c-type">Handler</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">h</span>.<span class="c-field">scale</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> h: <span class="c-type">Handler</span></span><span class="line">	h.<span class="c-field">scale</span> = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> n = <span class="c-function">describe</span>(h)</span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:21ch">Cannot use partly initialized values</span></span><span class="line">}</span></code></pre></div>
 <h2 id="required-fields"><a class="anchor" href="#required-fields">Required fields</a></h2>
 <p><code>req</code> before a field's type removes that field's default, even when its type has one. Every value of the record must then set it explicitly, which suits fields where zero is a mistake, such as a handle or an ID:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-270"></button><textarea hidden id="copy-270">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-268"></button><textarea hidden id="copy-268">mod example
 
 ext
 {
@@ -254,7 +254,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">File</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">handle</span>: <span class="c-keyword">req</span> <span class="c-type">i32</span></span><span class="line">	<span class="c-field">flags</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-type">File</span>(<span class="c-literal">7</span>, <span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">var</span> b: <span class="c-type">File</span></span><span class="line">	b.<span class="c-field">handle</span> = <span class="c-literal">5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, a.<span class="c-field">handle</span>, b.<span class="c-field">handle</span>, b.<span class="c-field">flags</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>7 5 0</pre></div>
 <p>Since the record no longer has a legal default, <code>File()</code> isn't available, and reading <code>b.handle</code> before it's set is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-271"></button><textarea hidden id="copy-271">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-269"></button><textarea hidden id="copy-269">mod example
 
 File: rec
 {
@@ -266,7 +266,7 @@ main: fun
 {
 	val a = File()
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-type">File</span>()</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:12ch">No constructor for &#x27;File&#x27; accepts these arguments<span class="diagnostic-note">&#x27;File&#x27; takes one argument for each field: handle, flags</span></span></span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-272"></button><textarea hidden id="copy-272">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-270"></button><textarea hidden id="copy-270">mod example
 
 File: rec
 {
@@ -283,7 +283,7 @@ main: fun
 <p>When a required field is itself a record, writing any of its fields counts as setting it, and its other fields keep their own defaults. Fields whose type has no default, such as function types, are already required, and <code>req</code> on them gets the hint "Redundant 'req'".</p>
 <h2 id="constructors"><a class="anchor" href="#constructors">Constructors</a></h2>
 <p>A record can declare its own constructors. A constructor is a member named <code>new</code>, declared as <code>op</code> with parameters and a block body. It's called with the record's name, like the built-in ones:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-273"></button><textarea hidden id="copy-273">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-271"></button><textarea hidden id="copy-271">mod example
 
 ext
 {
@@ -324,7 +324,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>3 4 | 2 0 | 1 1</pre></div>
 <p>A constructor with no parameters is written <code>new: op</code>, with no parentheses, as a function without parameters is.</p>
 <p>Declaring any constructor replaces both built-in ones. The record no longer has a field-by-field constructor, <code>T()</code> exists only if a constructor without parameters is declared, and the record loses its legal default:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-274"></button><textarea hidden id="copy-274">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-272"></button><textarea hidden id="copy-272">mod example
 
 Celsius: rec
 {
@@ -341,7 +341,7 @@ main: fun
 	val zero = Celsius()
 }</textarea><pre><code><span class="line"><span class="c-type">Celsius</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">degrees</span>: <span class="c-type">f64</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">degrees</span>: <span class="c-type">f64</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">degrees</span> = <span class="c-parameter">degrees</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> zero = <span class="c-type">Celsius</span>()</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:15ch">No constructor for &#x27;Celsius&#x27; accepts these arguments</span></span><span class="line">}</span></code></pre></div>
 <p>A variable declared without a value starts uninitialized:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-275"></button><textarea hidden id="copy-275">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-273"></button><textarea hidden id="copy-273">mod example
 
 Celsius: rec
 {
@@ -360,7 +360,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> t: <span class="c-type">Celsius</span></span><span class="line">	<span class="c-keyword">val</span> d = t.<span class="c-field">degrees</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use uninitialized values</span></span><span class="line">}</span></code></pre></div>
 <h3 id="what-self-is"><a class="anchor" href="#what-self-is">What <code>self</code> is</a></h3>
 <p>Inside a constructor, <code>self</code> is the value being built. Its fields that have a default start zeroed, so the constructor only has to set the others:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-276"></button><textarea hidden id="copy-276">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-274"></button><textarea hidden id="copy-274">mod example
 
 ext
 {
@@ -387,7 +387,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>count starts at 0
 0 5</pre></div>
 <p>A constructor must set every field without a default before it ends, on every path through it. An <code>if</code> that sets a field on only one branch isn't enough:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-277"></button><textarea hidden id="copy-277">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-275"></button><textarea hidden id="copy-275">mod example
 
 Account: rec
 {
@@ -406,7 +406,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Account</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-keyword">req</span> <span class="c-type">i32</span></span><span class="line">	<span class="c-field">balance</span>: <span class="c-type">i64</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>, <span class="c-parameter">flag</span>: <span class="c-type">bool</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot leave fields uninitialized<span class="diagnostic-note">&#x27;id&#x27; is uninitialized</span></span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> <span class="c-parameter">flag</span></span><span class="line">			<span class="c-keyword">self</span>.<span class="c-field">id</span> = <span class="c-parameter">id</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>The error's note names the field: "'id' is uninitialized".</p>
 <p><code>self</code> can't be used as a whole, for example passed to a function or used to call a method, while some field is still unset. Once every field is set, it can:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-278"></button><textarea hidden id="copy-278">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-276"></button><textarea hidden id="copy-276">mod example
 
 Account: rec
 {
@@ -426,7 +426,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-type">Account</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-keyword">req</span> <span class="c-type">i32</span></span><span class="line">	<span class="c-field">balance</span>: <span class="c-type">i64</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">balance</span> = <span class="c-function">describe</span>(<span class="c-keyword">self</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:32ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:32ch">Cannot use partly initialized values</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">id</span> = <span class="c-parameter">id</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">account</span>: <span class="c-type">Account</span>) -&gt; <span class="c-type">i64</span> =&gt; <span class="c-parameter">account</span>.<span class="c-field">balance</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>A constructor can end early with a bare <code>ret</code>, as long as every field is set by then. It can't return a value:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-279"></button><textarea hidden id="copy-279">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-277"></button><textarea hidden id="copy-277">mod example
 
 Score: rec
 {
@@ -440,11 +440,11 @@ Score: rec
 
 main: fun
 {
-}</textarea><pre><code><span class="line"><span class="c-type">Score</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; i32</span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:24ch">Constructors cannot return values</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.value = value</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-type">Score</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; i32</span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:24ch">Constructors cannot return values</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">value</span> = <span class="c-parameter">value</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>A constructor's body is always a block; the <code>=&gt;</code> form of functions isn't available for constructors.</p>
 <h3 id="assigning-to-self"><a class="anchor" href="#assigning-to-self">Assigning to <code>self</code></a></h3>
 <p>A constructor can set <code>self</code> as a whole, for example to reuse another constructor or a function that builds the value:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-280"></button><textarea hidden id="copy-280">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-278"></button><textarea hidden id="copy-278">mod example
 
 ext
 {
@@ -475,14 +475,14 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Range</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">low</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">high</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">low</span>: <span class="c-type">i32</span>, <span class="c-parameter">high</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">low</span> = <span class="c-parameter">low</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">high</span> = <span class="c-parameter">high</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">high</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span> = <span class="c-type">Range</span>(<span class="c-literal">0</span>, <span class="c-parameter">high</span>)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> r = <span class="c-type">Range</span>(<span class="c-literal">10</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d..%d\n"</span>, r.<span class="c-field">low</span>, r.<span class="c-field">high</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>0..10</pre></div>
 <p>Assigning to <code>self</code> replaces the value it held. If the record has a destructor and every field has a default, <code>self</code> starts as a whole all-zero value, so that value is dropped when it's replaced:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-281"></button><textarea hidden id="copy-281">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-279"></button><textarea hidden id="copy-279">mod example
 
 ext
 {
 	printf: fun(format: cstr, ...) -&gt; i32
 }
 
-Slot: rec
+Slot: own rec
 {
 	id: i32
 
@@ -508,14 +508,14 @@ main: fun
 {
 	val s = Slot(4)
 	printf(&quot;%d\n&quot;, s.id)
-}</textarea><pre><code><span class="line"><span class="c-type">Slot</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span> = <span class="c-type">Slot</span>.<span class="c-function">make</span>(<span class="c-parameter">id</span> * <span class="c-literal">10</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"drop %d\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">make</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Slot</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">var</span> s: <span class="c-type">Slot</span> = <span class="c-keyword">undef</span></span><span class="line">		s.<span class="c-field">id</span> = <span class="c-parameter">id</span></span><span class="line">		<span class="c-keyword">ret</span> s</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> s = <span class="c-type">Slot</span>(<span class="c-literal">4</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, s.<span class="c-field">id</span>)</span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-type">Slot</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span> = <span class="c-type">Slot</span>.<span class="c-function">make</span>(<span class="c-parameter">id</span> * <span class="c-literal">10</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"drop %d\n"</span>, <span class="c-keyword">self</span>.<span class="c-field">id</span>)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">make</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">id</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Slot</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">var</span> s: <span class="c-type">Slot</span> = <span class="c-keyword">undef</span></span><span class="line">		s.<span class="c-field">id</span> = <span class="c-parameter">id</span></span><span class="line">		<span class="c-keyword">ret</span> s</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> s = <span class="c-type">Slot</span>(<span class="c-literal">4</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, s.<span class="c-field">id</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>drop 0
 40
 drop 40</pre></div>
 <p><code>Slot.make</code> is a static function, covered in <a href="methods.html">Methods and properties</a>, and <code>undef</code> is covered in <a href="variables.html">Variables and constants</a>.</p>
 <h3 id="overloading-constructors"><a class="anchor" href="#overloading-constructors">Overloading constructors</a></h3>
 <p>A record can have any number of constructors, as long as no two can be called with the same arguments. The rules are the same as for overloaded functions (see <a href="functions.html">Functions</a>): constructors that differ only in parameter modes conflict, and so do constructors that accept the same arguments through default parameter values:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-282"></button><textarea hidden id="copy-282">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-280"></button><textarea hidden id="copy-280">mod example
 
 Meters: rec
 {
@@ -538,7 +538,7 @@ main: fun
 <p>A call picks the constructor whose parameters fit its arguments, as for functions.</p>
 <h3 id="restoring-the-default"><a class="anchor" href="#restoring-the-default">Restoring the default</a></h3>
 <p><code>new: op = default</code> declares a constructor without parameters that zeroes every field, and gives the record its legal default back. With it, <code>T()</code> works and declarations without a value start zeroed, alongside the record's other constructors:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-283"></button><textarea hidden id="copy-283">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-281"></button><textarea hidden id="copy-281">mod example
 
 ext
 {
@@ -569,7 +569,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Vec2</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">f32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">f32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span> = <span class="c-keyword">default</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">x</span>: <span class="c-type">f32</span>, <span class="c-parameter">y</span>: <span class="c-type">f32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">x</span> = <span class="c-parameter">x</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">y</span> = <span class="c-parameter">y</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> a: <span class="c-type">Vec2</span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-type">Vec2</span>()</span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-type">Vec2</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">var</span> points: <span class="c-type">array</span>[<span class="c-type">Vec2</span>, <span class="c-literal">3</span>]</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.0f %.0f %.0f %.0f\n"</span>, a.<span class="c-field">x</span>, b.<span class="c-field">y</span>, c.<span class="c-field">y</span>, points[<span class="c-literal">2</span>].<span class="c-field">y</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>0 0 2 0</pre></div>
 <p><code>= default</code> is allowed only on the constructor without parameters, and only when every field has a default:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-284"></button><textarea hidden id="copy-284">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-282"></button><textarea hidden id="copy-282">mod example
 
 Callback: rec
 {
@@ -593,7 +593,7 @@ main: fun
 <p>A record with a destructor has no legal default either. <code>new: op = default</code> is allowed there too, and gives it one.</p>
 <h2 id="nested-records"><a class="anchor" href="#nested-records">Nested records</a></h2>
 <p>A field can hold another record. A field chain such as <code>line.start.x</code> reaches inside, and nested values are made by passing records to the outer constructor:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-285"></button><textarea hidden id="copy-285">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-283"></button><textarea hidden id="copy-283">mod example
 
 ext
 {
@@ -624,7 +624,7 @@ main: fun
 <p><code>Line()</code> and zeroed declarations work here because <code>Point</code> has a legal default. An outer record has one only when every record inside it does.</p>
 <h2 id="copying-records"><a class="anchor" href="#copying-records">Copying records</a></h2>
 <p>A record whose fields can all be copied is copied whenever it's assigned, passed to a parameter without a mode or returned. The copy is independent of the original:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-286"></button><textarea hidden id="copy-286">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-284"></button><textarea hidden id="copy-284">mod example
 
 ext
 {
@@ -651,10 +651,10 @@ main: fun
 	printf(&quot;%d %d\n&quot;, a.x, b.x)
 }</textarea><pre><code><span class="line"><span class="c-function">moved</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">p</span>: <span class="c-type">Point</span>, <span class="c-parameter">dx</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Point</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> result = <span class="c-parameter">p</span></span><span class="line">	result.<span class="c-field">x</span> += <span class="c-parameter">dx</span></span><span class="line">	<span class="c-keyword">ret</span> result</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-function">moved</span>(a, <span class="c-literal">10</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, a.<span class="c-field">x</span>, b.<span class="c-field">x</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>1 11</pre></div>
-<p>A record copies however large it is. A record with a destructor, or with a field that can't be copied, isn't copied: it moves, and moving it is written <code>own</code>. <a href="ownership.html">Ownership and destructors</a> covers moves, and <a href="parameter-modes.html">Parameter modes</a> covers <code>imm</code> and <code>mut</code> parameters, which borrow a record instead of copying it.</p>
+<p>A record copies however large it is. A record with a destructor, or with a field that can't be copied, is declared <code>own rec</code> and isn't copied: it moves. <a href="ownership.html">Ownership and destructors</a> covers moves, and <a href="parameter-modes.html">Parameter modes</a> covers <code>imm</code> and <code>mut</code> parameters, which borrow a record instead of copying it.</p>
 <h3 id="own-rec"><a class="anchor" href="#own-rec"><code>own rec</code></a></h3>
-<p><code>own rec</code> declares a record that moves like one with a destructor, even when it has none. Use it for values that stand for something that must have exactly one owner, such as a ticket or a handle owned by other code:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-287"></button><textarea hidden id="copy-287">mod example
+<p><code>own rec</code> declares a record whose values move instead of copying. A record with a destructor, or with a field that owns a value, must be declared <code>own rec</code> (<a href="ownership.html#owning-types">Ownership and destructors</a>). It also works without a destructor, for values that stand for something that must have exactly one owner, such as a ticket or a handle owned by other code:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-285"></button><textarea hidden id="copy-285">mod example
 
 ext
 {
@@ -666,33 +666,34 @@ Ticket: own rec
 	id: i32
 }
 
-redeem: fun(own ticket: Ticket) -&gt; i32 =&gt; ticket.id
+redeem: fun(ticket: Ticket) -&gt; i32 =&gt; ticket.id
 
 main: fun
 {
 	val ticket = Ticket(7)
-	printf(&quot;%d\n&quot;, redeem(own ticket))
-}</textarea><pre><code><span class="line"><span class="c-type">Ticket</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">redeem</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">own</span> <span class="c-parameter">ticket</span>: <span class="c-type">Ticket</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">ticket</span>.<span class="c-field">id</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> ticket = <span class="c-type">Ticket</span>(<span class="c-literal">7</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">redeem</span>(<span class="c-keyword">own</span> ticket))</span><span class="line">}</span></code></pre></div>
+	printf(&quot;%d\n&quot;, redeem(ticket))
+}</textarea><pre><code><span class="line"><span class="c-type">Ticket</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">redeem</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">ticket</span>: <span class="c-type">Ticket</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">ticket</span>.<span class="c-field">id</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> ticket = <span class="c-type">Ticket</span>(<span class="c-literal">7</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">redeem</span>(ticket))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>7</pre></div>
-<p>A parameter without a mode would copy it, and a declaration without <code>own</code> would move it implicitly. Both are errors:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-288"></button><textarea hidden id="copy-288">mod example
+<p><code>redeem</code> takes the ticket over, and <code>main</code> can't use it afterwards:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-286"></button><textarea hidden id="copy-286">mod example
 
 Ticket: own rec
 {
 	id: i32
 }
 
-show: fun(ticket: Ticket) -&gt; i32 =&gt; ticket.id
+redeem: fun(ticket: Ticket) -&gt; i32 =&gt; ticket.id
 
 main: fun
 {
 	val ticket = Ticket(7)
-	val other: Ticket = ticket
-}</textarea><pre><code><span class="line"><span class="c-type">Ticket</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">ticket</span>: <span class="c-type">Ticket</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">ticket</span>.<span class="c-field">id</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot copy &#x27;Ticket&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> ticket = <span class="c-type">Ticket</span>(<span class="c-literal">7</span>)</span><span class="line">	<span class="c-keyword">val</span> other: <span class="c-type">Ticket</span> = ticket</span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot move &#x27;Ticket&#x27; values implicitly</span></span><span class="line">}</span></code></pre></div>
-<p>A record with an <code>own rec</code> field moves too.</p>
+	val first = redeem(ticket)
+	val second = redeem(ticket)
+}</textarea><pre><code><span class="line"><span class="c-type">Ticket</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">redeem</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">ticket</span>: <span class="c-type">Ticket</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">ticket</span>.<span class="c-field">id</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> ticket = <span class="c-type">Ticket</span>(<span class="c-literal">7</span>)</span><span class="line">	<span class="c-keyword">val</span> first = <span class="c-function">redeem</span>(ticket)</span><span class="line">	<span class="c-keyword">val</span> second = <span class="c-function">redeem</span>(ticket)</span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot use moved values<span class="diagnostic-note">Moved on line 13</span></span></span><span class="line">}</span></code></pre></div>
+<p>A record with an <code>own rec</code> field must be declared <code>own rec</code> too.</p>
 <h2 id="layout-and-size"><a class="anchor" href="#layout-and-size">Layout and size</a></h2>
 <p>A record's fields are laid out in memory in the order they're declared, the way a C compiler lays out a <code>struct</code>. Each field starts at a multiple of its alignment, with padding before it when needed, and the record's size is rounded up to a multiple of its largest alignment, so that records in an array stay aligned. <code>sizeOf(T)</code> gives a type's size in bytes and <code>alignOf(T)</code> its alignment; both are <code>usize</code>, and both also accept a value:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-289"></button><textarea hidden id="copy-289">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-287"></button><textarea hidden id="copy-287">mod example
 
 ext
 {

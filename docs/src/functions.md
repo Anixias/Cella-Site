@@ -85,17 +85,11 @@ main: fun
 2
 ```
 
-A parameter like these gets a copy of the argument, and the function can't change it; to work with a changing value, copy it into a `var`. Reassigning a parameter is an error, and so is using one name twice:
+A parameter like these gets its own copy of the argument. The function can change it, and the caller's value stays as it was. Using one name for two parameters is an error:
 
 ```cella error
 ~ mod example
 ~
-countdown: fun(n: i32) -> i32
-{
-	n -= 1
-	ret n
-}
-
 same: fun(a: i32, a: i32) -> i32
 {
 	ret a
@@ -107,12 +101,11 @@ same: fun(a: i32, a: i32) -> i32
 ```
 
 ```errors
-Cannot reassign read-only parameters
 Parameter 'a' is declared more than once
 Parameter 'a' is declared more than once
 ```
 
-A parameter can also borrow its argument or take ownership of it, with the modes `imm`, `mut` and `own` written before its name. [Parameter modes](parameter-modes.md) covers them.
+A parameter can also borrow its argument, with the modes `imm` and `mut` written before its name, and a parameter without a mode takes over a value that can't be copied. [Parameter modes](parameter-modes.md) covers them.
 
 ## Results and `ret`
 
@@ -432,7 +425,7 @@ No overload of 'scale' accepts these arguments
 
 ### Overloads that conflict
 
-Overloads must be told apart by the arguments of a call. Parameter names, result types and parameter modes don't count. Two overloads also conflict when defaults let one call reach both. Each of these is an error on every declaration involved:
+Overloads must be told apart by the arguments of a call. Parameter names and result types don't count; parameter modes do, through the call's marks ([Parameter modes](parameter-modes.md#overloads-and-modes)). Two overloads also conflict when defaults let one call reach both. Each of these is an error on every declaration involved:
 
 ```cella error
 ~ mod example
@@ -448,9 +441,6 @@ area: fun(w: i32, h: i32) -> i32 => w + h
 parse: fun(text: cstr) -> i32 => 0
 parse: fun(text: cstr) -> f64 => 0.0
 
-reset: fun(mut value: i32) => value = 0
-reset: fun(value: i32) => printf("%d\n", value)
-
 log: fun(level: i32 = 0) => printf("level %d\n", level)
 log: fun => printf("log\n")
 ~
@@ -464,8 +454,6 @@ log: fun => printf("log\n")
 'area' is declared more than once with the same signature
 'parse' overloads cannot differ only in return type
 'parse' overloads cannot differ only in return type
-'reset' overloads cannot differ only in parameter modes
-'reset' overloads cannot differ only in parameter modes
 'log' overloads cannot accept the same arguments
 'log' overloads cannot accept the same arguments
 ```
@@ -776,7 +764,7 @@ red green blue
 3 arguments, last blue
 ```
 
-A type with a destructor is taken with `imm` or `own`, as in `main: fun(own args: Arguments)`, and its destructor runs when `main` ends. [Records](records.md) covers constructors.
+A type with a destructor is taken by value or with `imm`, as in `main: fun(args: Arguments)`, and its destructor runs when `main` ends. [Records](records.md) covers constructors.
 
 ### Rules for `main`
 

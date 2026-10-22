@@ -252,7 +252,7 @@ Cannot use values as statements
 
 ## Memory and access
 
-Records and enums can declare `*` as `*: op(self)` and indexing as `[]: op`, as [Operators](operators.md#indexers) shows, and `?` as `?: op(own self)`. The rest can't be declared.
+Records and enums can declare `*` as `*: op(self)` and indexing as `[]: op`, as [Operators](operators.md#indexers) shows, and `?` as `?: op(self)`. The rest can't be declared.
 
 - `@a`: the address of `a` ([Pointers](pointers.md))
 - `*a`: the value a pointer points to ([Pointers](pointers.md))
@@ -260,7 +260,7 @@ Records and enums can declare `*` as `*: op(self)` and indexing as `[]: op`, as 
 - `a[i]`: indexing arrays, pointers and strings ([Arrays](arrays.md))
 - `f(x)`: a call ([Functions](functions.md))
 - `a?`: calls the type's `?: op` member, which gives a value or returns early from the function that uses `a?` ([Operators](operators.md#the-operator))
-- `own a`: moves `a` ([Ownership](ownership.md))
+- `own a`: moves `a` where a plain use wouldn't, such as out of a `mut` parameter or a pointer ([Ownership](ownership.md#moving-values))
 - `mut a`, `imm a`: borrows `a` with or without writing ([Parameter modes](parameter-modes.md))
 - `atomic ...`: an atomic load, store, update or fence ([Atomics](atomics.md))
 

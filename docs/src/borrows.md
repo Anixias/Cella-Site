@@ -217,7 +217,7 @@ Cannot use borrow types for parameters
 Cannot use borrow types for parameters
 ```
 
-The first error has the hint "Did you mean 'mut counter: i32'?"; the second says "'value: i32' is already a read-only borrow".
+The first error has the hint "Did you mean 'mut counter: i32'?", and the second "Did you mean 'imm value: i32'?".
 
 A borrow has no default, since it can't be null. A borrow variable declared without a value must be assigned before it's used, and a record with a borrow field has no `T()`:
 
@@ -293,7 +293,7 @@ Cannot reassign values
 
 ## Borrowing declarations
 
-Plain data copies, so `val b = a` makes a copy when `a` is an `i32` or a record of numbers. A value whose type moves instead, such as a record with a destructor, can't be copied (see [Ownership and destructors](ownership.md#copying-and-moving)). For these, a declaration without `own` borrows instead: `val b = a` makes `b` an `imm` borrow of `a`, and `val b = own a` moves `a` into `b`.
+Plain data copies, so `val b = a` makes a copy when `a` is an `i32` or a record of numbers. A value whose type moves instead, such as a record with a destructor, can't be copied (see [Ownership and destructors](ownership.md#copying-and-moving)), so `val b = a` moves `a` into `b`. To borrow it instead, write `val b = imm a`:
 
 ```cella
 ~ mod example
@@ -303,7 +303,7 @@ Plain data copies, so `val b = a` makes a copy when `a` is an `i32` or a record 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Texture: rec
+Texture: own rec
 {
 	id: i32
 
@@ -316,9 +316,9 @@ Texture: rec
 main: fun
 {
 	val texture = Texture(1)
-	val same = texture
+	val same = imm texture
 	printf("borrowed %d\n", same.id)
-	val moved = own texture
+	val moved = texture
 	printf("moved %d\n", moved.id)
 }
 ```
@@ -331,14 +331,14 @@ free 1
 
 The texture is freed once, when `moved` goes out of scope. `same` never owned it.
 
-Writing `imm` in such a declaration changes nothing, and the compiler gives the hint "Redundant 'imm'". The same rule applies wherever a value is bound without `own`: elements in `for` loops (see [Arrays](arrays.md)), `val` bindings in patterns (see [Pattern matching](pattern-matching.md)), and values reached through `*` and `[]` operators (see [Operators](operators.md)).
+A declaration moves only out of a place the function owns. A value it can't take, such as one behind an `imm` or `mut` parameter, a loop variable or a value reached through another borrow, is borrowed instead, so `val b = a` there makes `b` an `imm` borrow. Writing `imm` in such a declaration changes nothing, and the compiler gives the hint "Redundant 'imm'". The same rule applies wherever a value is bound: elements in `for` loops (see [Arrays](arrays.md)), `val` bindings in patterns (see [Pattern matching](pattern-matching.md)), and values reached through `*` and `[]` operators (see [Operators](operators.md)).
 
 A borrowing declaration is a read-only borrow, so it can't be moved out of or written through, even when it's declared with `var`:
 
 ```cella error
 ~ mod example
 ~
-Texture: rec
+Texture: own rec
 {
 	id: i32
 
@@ -347,16 +347,16 @@ Texture: rec
 	}
 }
 
-take: fun(own texture: Texture)
+take: fun(texture: Texture)
 {
 }
 
 main: fun
 {
 	var texture = Texture(1)
-	var same = texture
+	var same = imm texture
 	same.id = 5
-	take(own same)
+	take(same)
 	val copy: Texture = same
 }
 ```
@@ -373,7 +373,7 @@ Cannot move borrowed values
 
 The compiler follows every borrow from where it's made to each place it's used. A use is an error when, on some path to it, the value the borrow came from has been:
 
-- moved, with `own` or by passing it to an `own` parameter;
+- moved, by passing it to a parameter that takes it by value or by any other move;
 - dropped at the end of its scope, including a scope inside a loop that ended in an earlier pass;
 - reassigned, when its type has a destructor, since that drops the old value.
 
@@ -385,7 +385,7 @@ The compiler follows every borrow from where it's made to each place it's used. 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 
@@ -397,8 +397,8 @@ Buffer: rec
 moved: fun
 {
 	val buffer = Buffer(1)
-	val view = buffer
-	val taken = own buffer
+	val view = imm buffer
+	val taken = buffer
 	printf("%d\n", view.id)
 }
 
@@ -417,7 +417,7 @@ dropped: fun
 reassigned: fun
 {
 	var buffer = Buffer(1)
-	val first = buffer
+	val first = imm buffer
 	buffer = Buffer(2)
 	printf("%d\n", first.id)
 }
@@ -488,7 +488,7 @@ The check follows fields and elements separately. A borrow of one field stays va
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 
@@ -498,7 +498,7 @@ Buffer: rec
 	}
 }
 
-Pair: rec
+Pair: own rec
 {
 	first: Buffer
 	second: Buffer
@@ -507,8 +507,8 @@ Pair: rec
 main: fun
 {
 	val pair = Pair(Buffer(1), Buffer(2))
-	val first = pair.first
-	val second = own pair.second
+	val first = imm pair.first
+	val second = pair.second
 	printf("%d %d\n", first.id, second.id)
 }
 ```
@@ -599,12 +599,12 @@ main: fun
 
 A call that returns a `mut[T]` is a place: it can be assigned to, as in `kills(mut bat) += 2`, or borrowed again with `mut`.
 
-Every other source is an error, since the value would be gone once the function returns. A parameter with no mode is the function's own copy, and an `own` parameter is the function's to destroy, so neither outlives the call:
+Every other source is an error, since the value would be gone once the function returns. A parameter with no mode is the function's own value, a copy or a value moved in for the function to destroy, so it doesn't outlive the call:
 
 ```cella error
 ~ mod example
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 
@@ -626,7 +626,7 @@ local: fun -> imm[i32]
 	ret imm x
 }
 
-owned: fun(own buffer: Buffer) -> imm[Buffer] => imm buffer
+owned: fun(buffer: Buffer) -> imm[Buffer] => imm buffer
 
 copied: fun(a: i32) -> imm[i32] => imm a
 
@@ -639,8 +639,8 @@ temporary: fun -> Holder => Holder(make(3))
 
 ```errors
 Cannot return borrows of local variables
-Cannot return borrows of 'own' parameters
-Cannot return borrows of copied parameters
+Cannot return borrows of by-value parameters
+Cannot return borrows of by-value parameters
 Cannot return borrows of unstored values
 ```
 
@@ -688,7 +688,7 @@ The caller's side follows the same rules as any other borrow. Here `leader` borr
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Name: rec
+Name: own rec
 {
 	id: i32
 
@@ -697,7 +697,7 @@ Name: rec
 	}
 }
 
-Referee: rec
+Referee: own rec
 {
 	best: Name
 
@@ -833,7 +833,7 @@ A `ref` value borrows whatever its fields borrow, so it follows the rule of the 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Scope: ref rec
+Scope: own ref rec
 {
 	depth: mut[i32]
 
@@ -871,12 +871,12 @@ main: fun
 1 2 1 0
 ```
 
-The destructor counts as a use, so moving `depth` away while a `Scope` still borrows it is an error where the scope's destructor runs. Building a `ref` value from a temporary is an error too, since the temporary is gone at the end of the statement:
+The destructor counts as a use, so the value a `Scope` borrows must still be there when the scope's destructor runs. Building a `ref` value from a temporary is an error, since the temporary is gone at the end of the statement:
 
 ```cella error
 ~ mod example
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 
@@ -890,29 +890,7 @@ Holder: ref rec
 	buffer: imm[Buffer]
 }
 
-Scope: ref rec
-{
-	depth: mut[i32]
-
-	new: op(mut depth: i32)
-	{
-		self.depth = mut depth
-	}
-
-	drop: op
-	{
-		self.depth -= 1
-	}
-}
-
 make: fun(id: i32) -> Buffer => Buffer(id)
-
-early: fun
-{
-	var depth = 0
-	val scope = Scope(mut depth)
-	val moved = own depth
-}
 
 temporary: fun -> i32
 {
@@ -926,7 +904,6 @@ temporary: fun -> i32
 ```
 
 ```errors
-Cannot use borrows of moved values
 Cannot borrow unstored values
 ```
 
@@ -1049,7 +1026,7 @@ A `ref rec` with a field that can't be copied, such as a field whose type has a 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Guard: rec
+Guard: own rec
 {
 	drop: op
 	{
@@ -1057,7 +1034,7 @@ Guard: rec
 	}
 }
 
-Counter: ref rec
+Counter: own ref rec
 {
 	items: imm[array[i32, 3]]
 	count: i32
@@ -1173,12 +1150,12 @@ Cannot store new borrows in 'mut' parameters
 Cannot store borrows through borrows from parameters
 ```
 
-A constructor's `self` is checked like a result. It can store borrows of `imm` and `mut` parameters, and borrows that its parameters hold, like a `str` parameter's bytes. Borrows of locals, copied parameters and `own` parameters would end when the constructor returns:
+A constructor's `self` is checked like a result. It can store borrows of `imm` and `mut` parameters, and borrows that its parameters hold, like a `str` parameter's bytes. Borrows of locals and by-value parameters would end when the constructor returns:
 
 ```cella error
 ~ mod example
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 
@@ -1212,7 +1189,7 @@ Viewer: ref rec
 {
 	view: imm[Buffer]
 
-	new: op(own buffer: Buffer)
+	new: op(buffer: Buffer)
 	{
 		self.view = imm buffer
 	}
@@ -1225,8 +1202,8 @@ Viewer: ref rec
 
 ```errors
 Cannot store borrows of local variables in 'self'
-Cannot store borrows of copied parameters in 'self'
-Cannot store borrows of 'own' parameters in 'self'
+Cannot store borrows of by-value parameters in 'self'
+Cannot store borrows of by-value parameters in 'self'
 ```
 
 A destructor can't store new borrows in `self` either: "Cannot store new borrows in 'self'".

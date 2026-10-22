@@ -217,7 +217,7 @@ Cannot borrow unstored values
 
 ## What can be called through one
 
-Through a `dyn[Shape]`, code can call the trait's methods and use its properties, default bodies included. A read-only trait object allows only members that take `imm self` or `self`, as with any read-only borrow. Some members can't go through the table at all: static functions, which have no value to look up; members that take or return `Self` in other places, since the type is unknown; generic methods, which have no single compiled copy; and members that take `own self`, since a trait object doesn't own its value:
+Through a `dyn[Shape]`, code can call the trait's methods and use its properties, default bodies included. A read-only trait object allows only members that take `imm self` or `self`, as with any read-only borrow. Some members can't go through the table at all: static functions, which have no value to look up; members that take or return `Self` in other places, since the type is unknown; generic methods, which have no single compiled copy; and members that take `self`, since a trait object doesn't own its value, unless the trait requires `Self: copy` with `req copy` and the call can take a copy:
 
 ```cella error
 ~ mod example
@@ -227,8 +227,8 @@ Shape: trait
 	area: fun(imm self) -> f64
 	label: fun -> i32
 	same: fun(imm self, imm other: Self) -> bool
-	map[T]: fun(imm self, own value: T) -> T
-	take: fun(own self) -> i32
+	map[T]: fun(imm self, value: T) -> T
+	take: fun(self) -> i32
 }
 
 describe: fun(imm shape: dyn[Shape])
@@ -735,14 +735,14 @@ Cannot use 'dyn[Shape]' by value
 ~ 	free: fun(memory: ptr)
 ~ }
 ~
-Boxed[K: trait]: rec
+Boxed[K: trait]: own rec
 {
 	object: pvt ptr[dyn[K]]
 
-	of[T: K]: fun(own value: T) -> Boxed[K]
+	of[T: K]: fun(value: T) -> Boxed[K]
 	{
 		val memory = ptr[T](malloc(sizeOf(T)))
-		own *memory = own value
+		own *memory = value
 		ret Boxed[K](memory)
 	}
 
@@ -770,7 +770,7 @@ Circle: rec impl Shape
 	area: fun(imm self) -> f64 => self.radius * self.radius * 3.0
 }
 
-Label: rec
+Label: own rec
 {
 	id: i32
 
@@ -780,7 +780,7 @@ Label: rec
 	}
 }
 
-Tagged: rec impl Shape
+Tagged: own rec impl Shape
 {
 	label: Label
 	side: f64

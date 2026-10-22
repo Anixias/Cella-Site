@@ -440,7 +440,7 @@ empty:
 
 ### Values with destructors
 
-The temporary array lives until the end of the statement that made the call. Arguments with [destructors](ownership.md) are moved into it, so a named one needs `own`, and the array drops its elements, last first, when the statement ends:
+The temporary array lives until the end of the statement that made the call. Arguments with [destructors](ownership.md) are moved into it, and the array drops its elements, last first, when the statement ends:
 
 ```cella
 ~ mod example
@@ -456,7 +456,7 @@ The temporary array lives until the end of the statement that made the call. Arg
 ~ 	length: usize
 ~ }
 ~
-Name: rec
+Name: own rec
 {
 	id: i32
 
@@ -472,7 +472,7 @@ main: fun
 {
 	val first = Name(1)
 	printf("%zu\n", count(Name(2), Name(3)))
-	printf("%zu\n", count(own first))
+	printf("%zu\n", count(first))
 	printf("done\n")
 }
 ```
@@ -486,7 +486,7 @@ drop 1
 done
 ```
 
-Without `own`, the call would have to move `first` implicitly:
+A named argument moves into the array too, so it can't be used after the call:
 
 ```cella error
 ~ mod example
@@ -497,7 +497,7 @@ Without `own`, the call would have to move `first` implicitly:
 ~ 	length: usize
 ~ }
 ~
-~ Name: rec
+~ Name: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -512,11 +512,12 @@ main: fun
 {
 	val first = Name(1)
 	count(first)
+	count(first)
 }
 ```
 
 ```errors
-Cannot move 'Name' values implicitly
+Cannot use moved values
 ```
 
 Because the array is gone after the statement, a function can return its variadic parameter, but the caller can't keep the result:
@@ -569,10 +570,6 @@ writes: fun(mut ...values: View[i32])
 {
 }
 
-owns: fun(own ...values: View[i32])
-{
-}
-
 main: fun
 {
 }
@@ -581,7 +578,6 @@ main: fun
 ```errors
 Cannot take parameters after variadic parameters
 Cannot take 'mut' variadic parameters
-Cannot take 'own' variadic parameters
 ```
 
 Operators can't be variadic, and neither can `ext` functions, whether written in Cella or declared in `ext` blocks, which take C's `...` instead:

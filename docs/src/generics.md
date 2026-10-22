@@ -14,7 +14,7 @@ Type parameters go in brackets after the function's name. Inside the function, a
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-pick[T]: fun(useFirst: bool, own a: T, own b: T) -> T
+pick[T]: fun(useFirst: bool, a: T, b: T) -> T
 {
 	if useFirst
 		ret a
@@ -35,23 +35,7 @@ main: fun
 1 2.5 yes
 ```
 
-`pick` takes its values with `own`. A parameter with no mode is a copy, and generic code can only copy a `T` when the type parameter says every `T` can be copied (see [Constraints](#constraints)). Without that, the parameter needs a mode:
-
-```cella error
-~ mod example
-~
-first[T]: fun(value: T) -> T => value
-~
-~ main: fun
-~ {
-~ }
-```
-
-```errors
-Cannot copy 'T'
-```
-
-See [Parameter modes](parameter-modes.md) for what `imm`, `mut` and `own` mean.
+`pick` takes its values without a mode, so it gets them by value: a copy for a `T` that copies, and the value itself for one that has to move. Generic code that keeps using a `T` after passing it on needs every `T` to be copyable, which the type parameter says with `T: copy` (see [Constraints](#constraints)). See [Parameter modes](parameter-modes.md) for what `imm` and `mut` mean.
 
 ## Type arguments
 
@@ -65,7 +49,7 @@ A call can write its type arguments in brackets, as `pick[cstr]` does above. Usu
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-identity[T]: fun(own value: T) -> T => value
+identity[T]: fun(value: T) -> T => value
 
 main: fun
 {
@@ -90,7 +74,7 @@ When several arguments share a type parameter, the type they all convert to wins
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ pick[T]: fun(useFirst: bool, own a: T, own b: T) -> T
+~ pick[T]: fun(useFirst: bool, a: T, b: T) -> T
 ~ {
 ~ 	if useFirst
 ~ 		ret a
@@ -119,7 +103,7 @@ Here `wide` is an `i64` and `mixed` is an `f64`. When nothing settles a type par
 ~
 make[T]: fun -> usize => sizeOf(T)
 
-same[T]: fun(own a: T, own b: T) -> i32 => 0
+same[T]: fun(a: T, b: T) -> i32 => 0
 
 main: fun
 {
@@ -166,12 +150,12 @@ Box[T]: rec
 	value: T
 }
 
-nest[T]: fun(own value: T, depth: i32) -> i32
+nest[T]: fun(value: T, depth: i32) -> i32
 {
 	if depth == 0
 		ret 0
 
-	ret nest(Box(own value), depth - 1)
+	ret nest(Box(value), depth - 1)
 }
 
 main: fun
@@ -246,7 +230,7 @@ Pair[A, B]: rec
 	first: A
 	second: B
 
-	swapped: fun(own self) -> Pair[B, A] => Pair(own self.second, own self.first)
+	swapped: fun(self) -> Pair[B, A] => Pair(self.second, self.first)
 }
 
 main: fun
@@ -281,9 +265,9 @@ Counted[T]: rec
 	value: T
 	made: var i32 = 0
 
-	new: op(own value: T)
+	new: op(value: T)
 	{
-		self.value = own value
+		self.value = value
 		made += 1
 	}
 }
@@ -317,10 +301,10 @@ Cell[T]: rec
 {
 	value: T
 
-	map[U]: fun(own self, change: fun[own T -> U]) -> Cell[U] => Cell(change(own self.value))
+	map[U]: fun(self, imm change: fun[T -> U]) -> Cell[U] => Cell(change(self.value))
 }
 
-half: fun(own value: i32) -> f64 => f64(value) / 2.0
+half: fun(value: i32) -> f64 => f64(value) / 2.0
 
 main: fun
 {
@@ -434,7 +418,7 @@ A type argument that doesn't meet a constraint is an error where it's used. Insi
 ```cella error
 ~ mod example
 ~
-Token: rec
+Token: own rec
 {
 	id: i32
 
@@ -498,7 +482,7 @@ The constraints are:
 
 ### copy
 
-A type can be copied when it has no destructor, isn't declared `own`, and everything it holds can be copied (see [Ownership and destructors](ownership.md)). `T: copy` lets a parameter take a `T` with no mode, lets a `val` copy one, and lets the code use a `T` after passing it on.
+A type can be copied when it isn't declared `own` and everything it holds can be copied (see [Ownership and destructors](ownership.md)). `T: copy` lets a `val` copy a `T` and lets the code use a `T` after passing it on.
 
 ### noref
 
@@ -544,7 +528,7 @@ main: fun
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Text: rec
+Text: own rec
 {
 	id: i32
 
@@ -554,13 +538,13 @@ Text: rec
 	}
 }
 
-Labeled: rec
+Labeled: own rec
 {
 	text: Text
 	count: i32
 }
 
-hold[T: drop]: fun(own value: T)
+hold[T: drop]: fun(value: T)
 {
 	printf("holding\n")
 }
@@ -582,7 +566,7 @@ drop 2
 ```cella error
 ~ mod example
 ~
-hold[T: drop]: fun(own value: T)
+hold[T: drop]: fun(value: T)
 {
 }
 
@@ -719,7 +703,7 @@ main: fun
 16 64 0 64.0
 ```
 
-The parameter list can name several types and give each one a mode, as in `new(i32, i32)`, `new(imm T)` or `new(own Text, mut i32)`. Calls pass arguments the way the modes say. A type that has no such constructor doesn't meet the constraint:
+The parameter list can name several types and give each one a mode, as in `new(i32, i32)`, `new(imm T)` or `new(Text, mut i32)`. Calls pass arguments the way the modes say. A type that has no such constructor doesn't meet the constraint:
 
 ```cella error
 ~ mod example
@@ -857,9 +841,9 @@ Stack[T: noref, N: const usize]: rec
 	items: array[T, N]
 	count: usize
 
-	push: fun(mut self, own value: T)
+	push: fun(mut self, value: T)
 	{
-		self.items[self.count] = own value
+		self.items[self.count] = value
 		self.count += 1
 	}
 
@@ -965,7 +949,7 @@ Inside `Pair[T: copy]: impl`, the body knows `T: copy`, so `self` can be copied.
 ```cella error
 ~ mod example
 ~
-Token: rec
+Token: own rec
 {
 	id: i32
 

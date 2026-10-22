@@ -557,7 +557,7 @@ A value that can be accessed atomically can always be copied, so `T: atomic` can
 ```cella error
 ~ mod example
 ~
-keep[T: atomic + drop]: fun(own value: T)
+keep[T: atomic + drop]: fun(value: T)
 {
 }
 

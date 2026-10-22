@@ -14,7 +14,7 @@ A local variable owns the value stored in it. When the variable's scope ends, th
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-File: rec
+File: own rec
 {
 	id: i32
 
@@ -63,7 +63,7 @@ ext
 	free: fun(memory: ptr)
 }
 
-Buffer: rec
+Buffer: own rec
 {
 	data: ptr
 	size: usize
@@ -100,7 +100,7 @@ A destructor can't take parameters:
 ```cella error
 ~ mod example
 ~
-File: rec
+File: own rec
 {
 	id: i32
 
@@ -123,7 +123,7 @@ It can't replace `self` or move it away, since the value is being destroyed and 
 ```cella error
 ~ mod example
 ~
-Counter: rec
+Counter: own rec
 {
 	count: i32
 
@@ -145,17 +145,17 @@ Cannot reassign 'self' in destructors
 ```cella error
 ~ mod example
 ~
-Counter: rec
+Counter: own rec
 {
 	count: i32
 
 	drop: op
 	{
-		keep(own self)
+		keep(self)
 	}
 }
 
-keep: fun(own counter: Counter)
+keep: fun(counter: Counter)
 {
 }
 
@@ -184,7 +184,7 @@ The values a scope owns are destroyed when it ends, in the reverse of the order 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -220,7 +220,7 @@ A scope can end in other ways than reaching its closing brace. `ret`, `break` an
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -270,7 +270,7 @@ A value that contains other values destroys them along with itself. A record run
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -280,7 +280,7 @@ A value that contains other values destroys them along with itself. A record run
 ~ 	}
 ~ }
 ~
-Log: rec
+Log: own rec
 {
 	primary: File
 	backup: File
@@ -291,7 +291,7 @@ Log: rec
 	}
 }
 
-Slot: enum
+Slot: own enum
 {
 	empty
 	full(file: File)
@@ -314,7 +314,7 @@ close 2
 close 1
 ```
 
-A record doesn't need a destructor of its own for this. A record without `drop: op` whose fields have destructors still destroys those fields when it's destroyed.
+A record doesn't need a destructor of its own for this. A record without `drop: op` whose fields have destructors still destroys those fields when it's destroyed; it's declared `own rec` because of them.
 
 ### Module variables
 
@@ -328,7 +328,7 @@ A module variable is owned by the program. Module variables are destroyed after 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -362,9 +362,9 @@ These types copy:
 - Numbers, `bool` and `char`.
 - `str`, `cstr` and pointers (`ptr[T]`). Copying a pointer copies the address, not what it points to.
 - Function values with a plain function type, such as `fun[i32 -> i32]`.
-- Records, arrays and enums whose fields, elements or payloads all copy, as long as the record has no destructor.
+- Records, arrays and enums whose fields, elements or payloads all copy, unless they're declared `own`.
 
-Everything else moves: a record with a destructor, any record, array or enum that holds a value with a destructor, and the records and enums declared `own rec` and `own enum`, which move although they have no destructor (see [Records](records.md)).
+Everything else moves: the records and enums declared `own rec` and `own enum`, and any array or generic record that holds one of them.
 
 A record of plain data copies, so changing the copy leaves the original alone:
 
@@ -395,11 +395,53 @@ main: fun
 1 5
 ```
 
-A value with a destructor can't be copied, since two copies would both run the destructor and, for the `Buffer` above, free the same memory twice. Cella moves it instead, and makes you say so.
+A value with a destructor can't be copied, since two copies would both run the destructor and, for the `Buffer` above, free the same memory twice. Cella moves it instead.
 
-## Moving with `own`
+### Owning types
 
-`own` in front of a named value moves it. A parameter declared `own` takes ownership of its argument, and the call site writes `own` too:
+A type whose values must move says so in its declaration. A record with a destructor is declared `own rec`, like `File`, and so is a record or enum that holds an owning value, since destroying it destroys that value too. Leaving out `own` is an error:
+
+```cella error
+~ mod example
+~
+Handle: rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Folder: rec
+{
+	handle: Handle
+}
+
+Message: enum
+{
+	opened(handle: Handle)
+	closed
+}
+
+main: fun
+{
+}
+```
+
+```errors
+Cannot declare 'drop' in records that aren't 'own'
+Cannot store owning values in records that aren't 'own'
+Cannot store owning values in enums that aren't 'own'
+```
+
+An `own rec` doesn't need a destructor. Its values still move instead of copying, which suits a value that stands for something unique, like a ticket that must be used once.
+
+A generic record whose fields have its type parameters' types needs no `own`; each use follows its type arguments. `Pair[A, B]` with fields of types `A` and `B` copies as `Pair[i32, i32]` and moves as `Pair[File, File]`. A field whose type owns whatever the arguments are, such as an `Option[File]` or a field of another `own` type, still needs `own`. A record that both holds borrows and owns a value is declared `own ref rec` ([Borrows](borrows.md)).
+
+## Moving values
+
+A value that can't be copied moves wherever it's taken by value: into a parameter without a mode, into a constructor or an enum payload, into an element of an array literal, into the left side of an assignment, or into a new variable. Nothing extra is written at the move:
 
 ```cella
 ~ mod example
@@ -409,7 +451,7 @@ A value with a destructor can't be copied, since two copies would both run the d
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -419,7 +461,7 @@ A value with a destructor can't be copied, since two copies would both run the d
 ~ 	}
 ~ }
 ~
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 	printf("archiving %d\n", file.id)
 }
@@ -428,7 +470,7 @@ main: fun
 {
 	val report = File(1)
 	val notes = File(2)
-	archive(own report)
+	archive(report)
 	printf("back in main\n")
 }
 ```
@@ -442,36 +484,7 @@ close 2
 
 `archive` owns the file once it's called, so the file is closed when `archive` returns, not at the end of `main`. `main` no longer owns it, so it doesn't close it a second time.
 
-Leaving out `own` where a value with a destructor would move is an error. The move then shows in the code wherever it happens:
-
-```cella error
-~ mod example
-~
-~ File: rec
-~ {
-~ 	id: i32
-~
-~ 	drop: op
-~ 	{
-~ 	}
-~ }
-~
-archive: fun(own file: File)
-{
-}
-
-main: fun
-{
-	val report = File(1)
-	archive(report)
-}
-```
-
-```errors
-Cannot move 'File' values implicitly
-```
-
-Every move out of a named place is written `own`: arguments to `own` parameters, arguments to constructors, enum payloads, elements of an array literal, the right side of an assignment, and a declaration that names its type. `val b = own a` moves `a` into a new variable `b`:
+Constructors, assignments and declarations move the same way:
 
 ```cella
 ~ mod example
@@ -481,7 +494,7 @@ Every move out of a named place is written `own`: arguments to `own` parameters,
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -491,7 +504,7 @@ Every move out of a named place is written `own`: arguments to `own` parameters,
 ~ 	}
 ~ }
 ~
-Pair: rec
+Pair: own rec
 {
 	left: File
 	right: File
@@ -501,11 +514,11 @@ main: fun
 {
 	val a = File(1)
 	val b = File(2)
-	val pair = Pair(own a, own b)
+	val pair = Pair(a, b)
 	var current = File(3)
 	val next = File(4)
-	current = own next
-	val kept: File = own current
+	current = next
+	val kept = current
 	printf("%d %d %d\n", pair.left.id, pair.right.id, kept.id)
 }
 ```
@@ -518,9 +531,11 @@ close 2
 close 1
 ```
 
-`current = own next` destroys `File(3)`, the value `current` held, before the new one is stored; [assignment](#assignment-destroys-the-old-value) is covered below.
+`current = next` destroys `File(3)`, the value `current` held, before the new one is stored; [assignment](#assignment-destroys-the-old-value) is covered below.
 
-A declaration without a type and without `own`, such as `val view = report`, doesn't move or copy a value with a destructor. It borrows it, which [Borrows](borrows.md) explains.
+A declaration moves only out of a place the function owns: a local variable, a parameter taken by value, or a field or element of one. Anywhere else, such as an `imm` or `mut` parameter or a value reached through a borrow, `val view = report` borrows the value instead, which [Borrows](borrows.md) explains. To borrow a value the function does own, write `val view = imm report`.
+
+The keyword `own` marks a move only where a plain use wouldn't move: taking a value out of a `mut` parameter ([Parameter modes](parameter-modes.md)), out of memory behind a [pointer](pointers.md), and out of a field of `self` in a method that consumes a value with a destructor ([Methods](methods.md)).
 
 ### Using a moved value
 
@@ -529,7 +544,7 @@ After a move, the old place holds nothing, and using it is an error. The message
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -538,15 +553,15 @@ After a move, the old place holds nothing, and using it is an error. The message
 ~ 	}
 ~ }
 ~
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 }
 
 main: fun
 {
 	val report = File(1)
-	archive(own report)
-	archive(own report)
+	archive(report)
+	archive(report)
 }
 ```
 
@@ -564,7 +579,7 @@ A moved variable declared with `var` can be given a new value, and is usable aga
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -574,7 +589,7 @@ A moved variable declared with `var` can be given a new value, and is usable aga
 ~ 	}
 ~ }
 ~
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 	printf("archiving %d\n", file.id)
 }
@@ -582,7 +597,7 @@ archive: fun(own file: File)
 main: fun
 {
 	var current = File(1)
-	archive(own current)
+	archive(current)
 	current = File(2)
 	printf("current %d\n", current.id)
 }
@@ -595,44 +610,16 @@ current 2
 close 2
 ```
 
-`own` also works on plain data. The value is copied as usual, and the source still counts as moved afterwards, so the same errors apply.
+A type that copies is copied in all these places, and the source stays usable.
 
 ### What can't be moved
 
-Only a stored value can be moved. `own` in front of a call, a literal or any other value that isn't stored anywhere is an error, since such a value has no owner to take it from; pass it without `own` instead:
+A module variable can't be moved out of, since the program owns it until it exits:
 
 ```cella error
 ~ mod example
 ~
-~ File: rec
-~ {
-~ 	id: i32
-~
-~ 	drop: op
-~ 	{
-~ 	}
-~ }
-~
-archive: fun(own file: File)
-{
-}
-
-main: fun
-{
-	archive(own File(1))
-}
-```
-
-```errors
-Cannot move unstored values
-```
-
-A module variable can't be moved out of either, since the program owns it until it exits:
-
-```cella error
-~ mod example
-~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -643,13 +630,13 @@ A module variable can't be moved out of either, since the program owns it until 
 ~
 current: var File = File(1)
 
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 }
 
 main: fun
 {
-	archive(own current)
+	archive(current)
 }
 ```
 
@@ -659,7 +646,7 @@ Cannot move module variables
 
 ## Returning values
 
-`ret` moves the value it returns to the caller, without `own`. A function can create a value and hand it out:
+`ret` moves the value it returns to the caller. A function can create a value and hand it out:
 
 ```cella
 ~ mod example
@@ -669,7 +656,7 @@ Cannot move module variables
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -699,7 +686,7 @@ using 7
 close 7
 ```
 
-The file isn't closed when `open` returns, because `open` no longer owns it. Writing `ret own file` is accepted, but the compiler points out the `own` with the hint "Redundant 'own'".
+The file isn't closed when `open` returns, because `open` no longer owns it. Writing `ret own file` is accepted, but the compiler points out the `own` with the hint "Redundant 'own'", as it does for `own` anywhere a value would move anyway.
 
 Returning a field moves just that field. The rest of the value is destroyed when the function ends:
 
@@ -711,7 +698,7 @@ Returning a field moves just that field. The rest of the value is destroyed when
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -721,13 +708,13 @@ Returning a field moves just that field. The rest of the value is destroyed when
 ~ 	}
 ~ }
 ~
-Pair: rec
+Pair: own rec
 {
 	left: File
 	right: File
 }
 
-leftOf: fun(own pair: Pair) -> File
+leftOf: fun(pair: Pair) -> File
 {
 	ret pair.left
 }
@@ -757,7 +744,7 @@ A value that isn't stored in a variable is a temporary: the result of a call use
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -787,7 +774,7 @@ end
 
 A call whose result is thrown away, like `open(3)` on its own line, destroys the result right away.
 
-A temporary passed to an `own` parameter isn't destroyed at the end of the statement. It moves into the function, which then owns it.
+A temporary passed to a parameter that takes it by value isn't destroyed at the end of the statement. It moves into the function, which then owns it.
 
 A temporary in the condition of an `if`, `while` or `do ... while` is destroyed after the condition is checked, before the body runs. When an `is` pattern in the condition binds part of the temporary, it lives until the end of the body instead, so the binding stays valid:
 
@@ -799,7 +786,7 @@ A temporary in the condition of an `if`, `while` or `do ... while` is destroyed 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -809,7 +796,7 @@ A temporary in the condition of an `if`, `while` or `do ... while` is destroyed 
 ~ 	}
 ~ }
 ~
-Slot: enum
+Slot: own enum
 {
 	empty
 	full(file: File)
@@ -849,7 +836,7 @@ Assigning to a place that already holds a value destroys the old value. The righ
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -859,7 +846,7 @@ Assigning to a place that already holds a value destroys the old value. The righ
 ~ 	}
 ~ }
 ~
-Log: rec
+Log: own rec
 {
 	file: File
 	lines: i32
@@ -895,7 +882,7 @@ The same holds for fields, array elements and places reached through a `mut` par
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -915,7 +902,7 @@ main: fun
 Cannot use 'drop' except through pointers
 ```
 
-To destroy a variable's value before the end of its scope, put the variable in a block of its own, assign it a new value, or move it into a function that takes it with `own`.
+To destroy a variable's value before the end of its scope, put the variable in a block of its own, assign it a new value, or move it into a function that takes it by value.
 
 ## Values moved on only some paths
 
@@ -929,7 +916,7 @@ A value can be moved on one path through a function and kept on another. The pro
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -939,7 +926,7 @@ A value can be moved on one path through a function and kept on another. The pro
 ~ 	}
 ~ }
 ~
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 	printf("archiving %d\n", file.id)
 }
@@ -948,7 +935,7 @@ handle: fun(important: bool)
 {
 	val file = File(1)
 	if important
-		archive(own file)
+		archive(file)
 
 	printf("handled\n")
 }
@@ -973,7 +960,7 @@ After the `if`, `file` might be moved, so the code after it can't use it. The er
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -982,7 +969,7 @@ After the `if`, `file` might be moved, so the code after it can't use it. The er
 ~ 	}
 ~ }
 ~
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 }
 
@@ -990,7 +977,7 @@ handle: fun(important: bool) -> i32
 {
 	val file = File(1)
 	if important
-		archive(own file)
+		archive(file)
 
 	ret file.id
 }
@@ -1009,7 +996,7 @@ In a loop, a move in one iteration leaves the value moved for the next one:
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1018,7 +1005,7 @@ In a loop, a move in one iteration leaves the value moved for the next one:
 ~ 	}
 ~ }
 ~
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 }
 
@@ -1026,7 +1013,7 @@ main: fun
 {
 	val file = File(1)
 	for i in 0..3
-		archive(own file)
+		archive(file)
 }
 ```
 
@@ -1044,7 +1031,7 @@ The message adds "Moved here in an earlier iteration". Giving the variable a new
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1054,7 +1041,7 @@ The message adds "Moved here in an earlier iteration". Giving the variable a new
 ~ 	}
 ~ }
 ~
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 	printf("archiving %d\n", file.id)
 }
@@ -1064,7 +1051,7 @@ main: fun
 	var file = File(1)
 	for i in 2..4
 	{
-		archive(own file)
+		archive(file)
 		file = File(i)
 	}
 
@@ -1093,7 +1080,7 @@ A field can be moved out of a record on its own. The record is then partly moved
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1103,7 +1090,7 @@ A field can be moved out of a record on its own. The record is then partly moved
 ~ 	}
 ~ }
 ~
-Pair: rec
+Pair: own rec
 {
 	left: File
 	right: File
@@ -1117,7 +1104,7 @@ show: fun(imm pair: Pair)
 main: fun
 {
 	var pair = Pair(File(1), File(2))
-	val left = own pair.left
+	val left = pair.left
 	printf("right is still %d\n", pair.right.id)
 	pair.left = File(left.id + 10)
 	show(imm pair)
@@ -1137,7 +1124,7 @@ close 11
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1146,7 +1133,7 @@ close 11
 ~ 	}
 ~ }
 ~
-Pair: rec
+Pair: own rec
 {
 	left: File
 	right: File
@@ -1159,7 +1146,7 @@ show: fun(imm pair: Pair)
 main: fun
 {
 	val pair = Pair(File(1), File(2))
-	val left = own pair.left
+	val left = pair.left
 	show(imm pair)
 }
 ```
@@ -1173,7 +1160,7 @@ A field can't be moved out of a record that has its own destructor, because the 
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1182,7 +1169,7 @@ A field can't be moved out of a record that has its own destructor, because the 
 ~ 	}
 ~ }
 ~
-Log: rec
+Log: own rec
 {
 	file: File
 	lines: i32
@@ -1192,10 +1179,14 @@ Log: rec
 	}
 }
 
+archive: fun(file: File)
+{
+}
+
 main: fun
 {
 	val log = Log(File(1), 0)
-	val file = own log.file
+	archive(log.file)
 }
 ```
 
@@ -1217,7 +1208,7 @@ The one place where fields can be moved out of a record with a destructor is tha
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1227,12 +1218,12 @@ The one place where fields can be moved out of a record with a destructor is tha
 ~ 	}
 ~ }
 ~
-archive: fun(own file: File)
+archive: fun(file: File)
 {
 	printf("archiving %d\n", file.id)
 }
 
-Log: rec
+Log: own rec
 {
 	file: File
 	keep: bool
@@ -1241,7 +1232,7 @@ Log: rec
 	{
 		printf("log ends\n")
 		if self.keep
-			archive(own self.file)
+			archive(self.file)
 	}
 }
 
@@ -1274,7 +1265,7 @@ A variable must hold a value before it's read. The compiler follows every path t
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1311,7 +1302,7 @@ A `val` declared without a value can be given one later, once on each path:
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1348,7 +1339,7 @@ A record can also be filled one field at a time. It counts as a whole value once
 ```cella error
 ~ mod example
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1357,7 +1348,7 @@ A record can also be filled one field at a time. It counts as a whole value once
 ~ 	}
 ~ }
 ~
-Pair: rec
+Pair: own rec
 {
 	left: File
 	right: File
@@ -1390,7 +1381,7 @@ The destructors follow the same tracking. Only what was given a value is destroy
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ File: rec
+~ File: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1400,7 +1391,7 @@ The destructors follow the same tracking. Only what was given a value is destroy
 ~ 	}
 ~ }
 ~
-Pair: rec
+Pair: own rec
 {
 	left: File
 	right: File

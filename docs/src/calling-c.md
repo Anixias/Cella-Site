@@ -697,7 +697,7 @@ A type that can't cross into C can't be the type argument:
 ```cella error
 ~ mod example
 ~
-Token: rec
+Token: own rec
 {
 	id: i32
 
@@ -733,7 +733,7 @@ C knows nothing about Cella's ownership, borrows, traits or closures, so types t
 ```cella error
 ~ mod example
 ~
-Buffer: rec
+Buffer: own rec
 {
 	data: ptr
 
@@ -742,7 +742,7 @@ Buffer: rec
 	}
 }
 
-Holder: rec
+Holder: own rec
 {
 	buffer: Buffer
 	count: i32
@@ -760,7 +760,7 @@ ext
 	release: fun(buffer: Buffer)
 	keep: fun(holder: Holder)
 	pick: fun -> Team
-	sort: fun(compare: fun[i32, i32 -> i32])
+	sort: fun(imm compare: fun[i32, i32 -> i32])
 	fill: fun(values: array[i32, 4])
 }
 

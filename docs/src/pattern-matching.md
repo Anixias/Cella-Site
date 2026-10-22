@@ -719,10 +719,9 @@ Expected a case of 'Hit'
 
 A binding gives a name to a part of the value. It starts with a keyword:
 
-- `val name` reads the part. A part that can be copied is copied; any other part is borrowed read-only.
-- `var name` makes a copy that the arm can change. The change doesn't reach the matched value. Under [match own](#match-own), it takes the part instead of copying it.
+- `val name` reads the part. A part that can be copied is copied. Any other part is moved out when the match takes its input, and borrowed read-only when it only looks at it; see [Moving parts out](#moving-parts-out).
+- `var name` makes a copy that the arm can change. The change doesn't reach the matched value. When the match takes its input, it takes the part instead of copying it.
 - `mut name` borrows the part mutably, so changing it changes the matched value.
-- `own name` moves the part out of the value; see [match own](#match-own).
 
 ```cella
 ~ mod example
@@ -1051,7 +1050,7 @@ An arm with a guard doesn't count toward covering every value, since its conditi
 ```cella error
 ~ mod example
 ~
-~ Buffer: rec
+~ Buffer: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1066,7 +1065,7 @@ Hit: enum
 	hit(amount: i32)
 }
 
-Slot: enum
+Slot: own enum
 {
 	empty
 	held(buffer: Buffer)
@@ -1078,7 +1077,7 @@ score: fun(h: Hit) -> i32 => match h
 	miss => 0
 }
 
-size: fun(own slot: Slot) -> i32 => match own slot
+size: fun(slot: Slot) -> i32 => match slot
 {
 	held(val b) if b.id > 0 => 1
 	else => 0
@@ -1300,7 +1299,7 @@ Cannot use types as values
 
 ## match mut
 
-By default, a match reads its input: `val` bindings copy or borrow read-only. `match mut` borrows the input mutably instead, so every binding, `val` ones included, refers to the part inside the input, and assigning to a binding changes the input. `is` takes the same `mut`:
+By default, a match takes its input or looks at it, as [Moving parts out](#moving-parts-out) explains. `match mut` borrows the input mutably instead, so every binding, `val` ones included, refers to the part inside the input, and assigning to a binding changes the input. `is` takes the same `mut`:
 
 ```cella
 ~ mod example
@@ -1368,7 +1367,7 @@ Effect: enum
 
 make: fun -> Effect => Effect.hit(1)
 
-readOnly: fun(e: Effect)
+readOnly: fun(imm e: Effect)
 {
 	if mut e is hit(val n)
 		n = 1
@@ -1397,9 +1396,9 @@ Cannot mutably borrow values
 Cannot mutably borrow unstored values
 ```
 
-## match own
+## Moving parts out
 
-A value whose type has a destructor can't be copied, so a `val` binding of one borrows it. To take a part out and keep it, write `match own`. It moves the input into the match, and `val`, `var` and `own` bindings then own the parts they bind. Parts that aren't bound are dropped at the end of the arm. [Ownership and destructors](ownership.md) explains moves and destructors.
+A match takes its input the way a declaration does. When the input is a value the function owns, such as a local variable, a parameter taken by value or a temporary, `val` and `var` bindings take the parts they bind: a part that can be copied is copied, and one that can't is moved out, which moves the whole input into the match. Parts that aren't bound are dropped at the end of the arm. [Ownership and destructors](ownership.md) explains moves and destructors.
 
 ```cella
 ~ mod example
@@ -1409,7 +1408,7 @@ A value whose type has a destructor can't be copied, so a `val` binding of one b
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 
@@ -1419,23 +1418,23 @@ Buffer: rec
 	}
 }
 
-Slot: enum
+Slot: own enum
 {
 	empty
 	held(buffer: Buffer)
 }
 
-keep: fun(own buffer: Buffer) -> i32 => buffer.id
+keep: fun(buffer: Buffer) -> i32 => buffer.id
 
 main: fun
 {
 	val slot = Slot.held(Buffer(4))
-	match own slot
+	match slot
 	{
 		held(var buffer) =>
 		{
 			buffer.id += 10
-			printf("kept %d\n", keep(own buffer))
+			printf("kept %d\n", keep(buffer))
 		}
 		empty => {}
 	}
@@ -1450,12 +1449,12 @@ kept 14
 end
 ```
 
-After `match own`, the input has been moved and can't be used. Moving needs a value the code owns, so a read-only parameter can't be matched with `own`, and `own` and `mut` can't be combined:
+After such a match, the input has been moved and can't be used. To look at a value without taking it, match `imm` of it, as in `match imm slot`; its bindings then borrow the parts. A value the function doesn't own, such as an `imm` or `mut` parameter, is only looked at the same way, so its bindings can't be moved on:
 
 ```cella error
 ~ mod example
 ~
-Buffer: rec
+Buffer: own rec
 {
 	id: i32
 
@@ -1464,39 +1463,30 @@ Buffer: rec
 	}
 }
 
-Slot: enum
+Slot: own enum
 {
 	empty
 	held(buffer: Buffer)
 }
 
-take: fun(own buffer: Buffer) -> i32 => buffer.id
+take: fun(buffer: Buffer) -> i32 => buffer.id
 
 used: fun -> i32
 {
 	val slot = Slot.held(Buffer(1))
-	match own slot
+	match slot
 	{
-		held(val buffer) => take(own buffer)
+		held(val buffer) => take(buffer)
 		else => {}
 	}
 
 	ret match slot { held(val buffer) => buffer.id, else => 0 }
 }
 
-parameter: fun(imm slot: Slot) -> i32 => match own slot
+parameter: fun(imm slot: Slot) -> i32 => match slot
 {
-	held(own buffer) => take(own buffer)
+	held(val buffer) => take(buffer)
 	else => 0
-}
-
-both: fun
-{
-	var slot = Slot.empty
-	match own mut slot
-	{
-		else => {}
-	}
 }
 
 main: fun
@@ -1506,46 +1496,10 @@ main: fun
 
 ```errors
 Cannot use moved values
-Cannot move read-only parameters
-Cannot combine 'own' and 'mut'
+Cannot move pattern bindings
 ```
 
-Without `match own`, an `own` or `var` binding of a payload value that can't be copied would move the input implicitly, which is an error:
-
-```cella error
-~ mod example
-~
-Buffer: rec
-{
-	id: i32
-
-	drop: op
-	{
-	}
-}
-
-Slot: enum
-{
-	empty
-	held(buffer: Buffer)
-}
-
-main: fun
-{
-	val slot = Slot.held(Buffer(5))
-	match slot
-	{
-		held(var buffer) => buffer.id += 10
-		else => {}
-	}
-}
-```
-
-```errors
-Cannot move 'Slot' values implicitly
-```
-
-A temporary, such as the result of a call, already belongs to the match, so it needs no `own`:
+`match imm` keeps the input for later:
 
 ```cella
 ~ mod example
@@ -1555,7 +1509,7 @@ A temporary, such as the result of a call, already belongs to the match, so it n
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ Buffer: rec
+~ Buffer: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1565,7 +1519,56 @@ A temporary, such as the result of a call, already belongs to the match, so it n
 ~ 	}
 ~ }
 ~
-Slot: enum
+Slot: own enum
+{
+	empty
+	held(buffer: Buffer)
+}
+
+main: fun
+{
+	val slot = Slot.held(Buffer(3))
+	match imm slot
+	{
+		held(val buffer) => printf("looked at %d\n", buffer.id)
+		empty => {}
+	}
+
+	if imm slot is held(val buffer)
+		printf("still %d\n", buffer.id)
+
+	printf("end\n")
+}
+```
+
+```output
+looked at 3
+still 3
+end
+drop 3
+```
+
+A temporary, such as the result of a call, belongs to the match the same way:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+~ Buffer: own rec
+~ {
+~ 	id: i32
+~
+~ 	drop: op
+~ 	{
+~ 		printf("drop %d\n", self.id)
+~ 	}
+~ }
+~
+Slot: own enum
 {
 	empty
 	held(buffer: Buffer)
@@ -1573,13 +1576,13 @@ Slot: enum
 
 make: fun(id: i32) -> Slot => Slot.held(Buffer(id))
 
-take: fun(own buffer: Buffer) -> i32 => buffer.id
+take: fun(buffer: Buffer) -> i32 => buffer.id
 
 main: fun
 {
 	val id = match make(7)
 	{
-		held(val buffer) => take(own buffer)
+		held(val buffer) => take(buffer)
 		empty => 0
 	}
 
@@ -1592,7 +1595,7 @@ drop 7
 7
 ```
 
-In a record pattern, an `own` binding moves that field out of a local record even without `match own`, leaving the rest of the record in place. The record can't be used as a whole afterwards, and a record with its own destructor can't have fields moved out of it:
+Record patterns work the same way: a `val` binding moves its field out of a record the match takes, and the fields that aren't bound are dropped at the end of the arm. A record with its own destructor can't have fields moved out of it, so bindings of its fields borrow them:
 
 ```cella
 ~ mod example
@@ -1602,7 +1605,7 @@ In a record pattern, an `own` binding moves that field out of a local record eve
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-~ Name: rec
+~ Name: own rec
 ~ {
 ~ 	id: i32
 ~
@@ -1612,7 +1615,7 @@ In a record pattern, an `own` binding moves that field out of a local record eve
 ~ 	}
 ~ }
 ~
-Pair: rec
+Pair: own rec
 {
 	first: Name
 	second: Name
@@ -1623,7 +1626,7 @@ main: fun
 	val pair = Pair(Name(1), Name(2))
 	match pair
 	{
-		Pair(own first) => printf("moved %d\n", first.id)
+		Pair(val first) => printf("moved %d\n", first.id)
 	}
 
 	printf("end\n")
@@ -1632,9 +1635,9 @@ main: fun
 
 ```output
 moved 1
+drop 2
 drop 1
 end
-drop 2
 ```
 
 ## when arms

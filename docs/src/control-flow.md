@@ -469,7 +469,7 @@ main: fun
 17
 ```
 
-[Arrays](arrays.md) covers the rest: borrowing elements with `for imm x` and `for mut x`, and taking them with `for own x`. Types can also define their own `for` loops; [Operators](operators.md) shows how.
+[Arrays](arrays.md) covers the rest: borrowing elements with `for imm x` and `for mut x`, and how `for x` takes elements that can't be copied. Types can also define their own `for` loops; [Operators](operators.md) shows how.
 
 ## `break` and `cont`
 

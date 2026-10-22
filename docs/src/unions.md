@@ -352,7 +352,7 @@ A union holds only plain data: integers, floats, `bool`, `char`, pointers, `cstr
 ```cella error
 ~ mod example
 ~
-Name: rec
+Name: own rec
 {
 	id: i32
 

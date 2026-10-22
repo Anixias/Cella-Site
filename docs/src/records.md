@@ -628,7 +628,7 @@ Assigning to `self` replaces the value it held. If the record has a destructor a
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-Slot: rec
+Slot: own rec
 {
 	id: i32
 
@@ -850,11 +850,11 @@ main: fun
 1 11
 ```
 
-A record copies however large it is. A record with a destructor, or with a field that can't be copied, isn't copied: it moves, and moving it is written `own`. [Ownership and destructors](ownership.md) covers moves, and [Parameter modes](parameter-modes.md) covers `imm` and `mut` parameters, which borrow a record instead of copying it.
+A record copies however large it is. A record with a destructor, or with a field that can't be copied, is declared `own rec` and isn't copied: it moves. [Ownership and destructors](ownership.md) covers moves, and [Parameter modes](parameter-modes.md) covers `imm` and `mut` parameters, which borrow a record instead of copying it.
 
 ### `own rec`
 
-`own rec` declares a record that moves like one with a destructor, even when it has none. Use it for values that stand for something that must have exactly one owner, such as a ticket or a handle owned by other code:
+`own rec` declares a record whose values move instead of copying. A record with a destructor, or with a field that owns a value, must be declared `own rec` ([Ownership and destructors](ownership.md#owning-types)). It also works without a destructor, for values that stand for something that must have exactly one owner, such as a ticket or a handle owned by other code:
 
 ```cella
 ~ mod example
@@ -869,12 +869,12 @@ Ticket: own rec
 	id: i32
 }
 
-redeem: fun(own ticket: Ticket) -> i32 => ticket.id
+redeem: fun(ticket: Ticket) -> i32 => ticket.id
 
 main: fun
 {
 	val ticket = Ticket(7)
-	printf("%d\n", redeem(own ticket))
+	printf("%d\n", redeem(ticket))
 }
 ```
 
@@ -882,7 +882,7 @@ main: fun
 7
 ```
 
-A parameter without a mode would copy it, and a declaration without `own` would move it implicitly. Both are errors:
+`redeem` takes the ticket over, and `main` can't use it afterwards:
 
 ```cella error
 ~ mod example
@@ -892,21 +892,21 @@ Ticket: own rec
 	id: i32
 }
 
-show: fun(ticket: Ticket) -> i32 => ticket.id
+redeem: fun(ticket: Ticket) -> i32 => ticket.id
 
 main: fun
 {
 	val ticket = Ticket(7)
-	val other: Ticket = ticket
+	val first = redeem(ticket)
+	val second = redeem(ticket)
 }
 ```
 
 ```errors
-Cannot copy 'Ticket'
-Cannot move 'Ticket' values implicitly
+Cannot use moved values
 ```
 
-A record with an `own rec` field moves too.
+A record with an `own rec` field must be declared `own rec` too.
 
 ## Layout and size
 

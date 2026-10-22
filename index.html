@@ -223,7 +223,7 @@
             </div>
             <br/><br/>
             <div class="subtitle">Ownership:</div>
-            <p class="description"><code>Areas</code> owns memory from <code>malloc</code> and frees it in its <code>drop</code> operator when <code>main</code> ends. Calls name how each argument is passed: <code>mut</code> and <code>imm</code> borrow it, no mode copies it.</p>
+            <p class="description"><code>Areas</code> owns memory from <code>malloc</code> and frees it in its <code>drop</code> operator when <code>main</code> ends. Calls name how each argument is passed: <code>mut</code> and <code>imm</code> borrow it, no mode takes it by value.</p>
             <div class="code-block">
               <img class="copy-button icon-button tooltip" onclick="copyText('shapes')" src="img/copy.svg">
               <span class="tooltiptext">Copy Code</span>
@@ -314,7 +314,7 @@
 	<span class="cella-function">rect</span>(<span class="cella-keyword">val</span> w, <span class="cella-keyword">val</span> h) =&gt; w * h
 }
 
-<span class="cella-type">Areas</span>: <span class="cella-keyword">rec</span>
+<span class="cella-type">Areas</span>: <span class="cella-keyword">own</span> <span class="cella-keyword">rec</span>
 {
 	data: <span class="cella-type">ptr</span>[<span class="cella-type">f64</span>]
 	count: <span class="cella-type">usize</span>
