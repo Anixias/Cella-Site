@@ -37,7 +37,7 @@ try {
 <p>Cella's control flow is close to C's: <code>if</code> and <code>else</code>, <code>while</code>, <code>do ... while</code>, an endless <code>loop</code>, and <code>for</code> over ranges and arrays, with <code>break</code> and <code>cont</code> to leave or restart a loop. Conditions need no parentheses, and a body is a single statement or a block. This chapter covers each form, labels, jumps used as expressions, and blocks.</p>
 <h2 id="if-and-else"><a class="anchor" href="#if-and-else"><code>if</code> and <code>else</code></a></h2>
 <p><code>if</code> takes a condition and a body. The condition is any <code>bool</code> expression, written without parentheses. The body is the next statement: one statement, usually on the next line and indented, or a block in braces. <code>else</code> adds a statement that runs when the condition is false:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-207"></button><textarea hidden id="copy-207">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-1"></button><textarea hidden id="copy-1">mod example
 
 ext
 {
@@ -65,7 +65,7 @@ not cold</pre></div>
 <p>When one branch needs braces, the usual style gives every branch braces, as above.</p>
 <h3 id="else-if"><a class="anchor" href="#else-if"><code>else if</code></a></h3>
 <p>There is no separate <code>elif</code> keyword. <code>else if</code> is an <code>else</code> whose statement is another <code>if</code>, so chains read as they do in C:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-208"></button><textarea hidden id="copy-208">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-2"></button><textarea hidden id="copy-2">mod example
 
 ext
 {
@@ -97,7 +97,7 @@ main: fun
 300 is large</pre></div>
 <h3 id="conditions"><a class="anchor" href="#conditions">Conditions</a></h3>
 <p>A condition must be a <code>bool</code>. Numbers and pointers don't count as true or false on their own, so compare them explicitly:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-209"></button><textarea hidden id="copy-209">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-3"></button><textarea hidden id="copy-3">mod example
 
 ext
 {
@@ -112,11 +112,11 @@ main: fun
 
 	while 1
 		printf(&quot;forever\n&quot;)
-}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">if</span> count</span><span class="diagnostic"><span class="squiggle" style="margin-left:7ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:7ch">Cannot convert type &#x27;i32&#x27; to &#x27;bool&#x27;</span></span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"some\n"</span>)</span><span class="line"> </span><span class="line">	<span class="c-keyword">while</span> <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot convert type &#x27;integer literal&#x27; to &#x27;bool&#x27;</span></span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"forever\n"</span>)</span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">if</span> count</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"some\n"</span>)</span><span class="line"> </span><span class="line">	<span class="c-keyword">while</span> <span class="c-literal">1</span></span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"forever\n"</span>)</span><span class="line">}</span></code></pre></div>
 <p><code>&amp;&amp;</code> and <code>||</code> combine conditions, and the right side runs only when it's needed; <a href="text.html">Bool, char and strings</a> covers them. An <code>is</code> test, as in <code>if shape is circle(val r)</code>, checks an enum's case and can bind its payload; <a href="pattern-matching.html">Pattern matching</a> covers it.</p>
 <h3 id="if-is-a-statement"><a class="anchor" href="#if-is-a-statement"><code>if</code> is a statement</a></h3>
 <p><code>if</code> doesn't produce a value, and Cella has no <code>?:</code> operator. For a value that depends on a condition, use a <code>match</code> on the condition:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-210"></button><textarea hidden id="copy-210">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-4"></button><textarea hidden id="copy-4">mod example
 
 ext
 {
@@ -132,17 +132,17 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-literal">4</span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-literal">9</span></span><span class="line">	<span class="c-keyword">val</span> larger = <span class="c-keyword">match</span> a &gt; b { <span class="c-keyword">true</span> =&gt; a, <span class="c-keyword">else</span> =&gt; b }</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, larger)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>9</pre></div>
 <p>A body that is a single statement can't be a declaration, since the name would end with the body. Use a block instead:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-211"></button><textarea hidden id="copy-211">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-5"></button><textarea hidden id="copy-5">mod example
 
 main: fun
 {
 	val ready = true
 	if ready
 		val message = &quot;go&quot;
-}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> ready = <span class="c-keyword">true</span></span><span class="line">	<span class="c-keyword">if</span> ready</span><span class="line">		<span class="c-keyword">val</span> message = <span class="c-literal">"go"</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:18ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot use declarations as whole bodies</span></span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> ready = <span class="c-keyword">true</span></span><span class="line">	<span class="c-keyword">if</span> ready</span><span class="line">		<span class="c-keyword">val</span> message = <span class="c-literal">"go"</span></span><span class="line">}</span></code></pre></div>
 <h2 id="while"><a class="anchor" href="#while"><code>while</code></a></h2>
 <p><code>while</code> runs its body as long as its condition is true. The condition is checked before each pass, so the body may not run at all:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-212"></button><textarea hidden id="copy-212">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-6"></button><textarea hidden id="copy-6">mod example
 
 ext
 {
@@ -168,7 +168,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>111 steps</pre></div>
 <h2 id="do-while"><a class="anchor" href="#do-while"><code>do ... while</code></a></h2>
 <p><code>do</code> runs its body first and checks the condition after each pass, so the body always runs at least once. <code>while</code> and the condition follow the body:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-213"></button><textarea hidden id="copy-213">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-7"></button><textarea hidden id="copy-7">mod example
 
 ext
 {
@@ -196,7 +196,7 @@ main: fun
 <p>After a block, the usual style puts <code>while</code> on the closing brace's line. After a single statement, it goes on its own line.</p>
 <h2 id="loop"><a class="anchor" href="#loop"><code>loop</code></a></h2>
 <p><code>loop</code> repeats its body forever. A <code>break</code> leaves it, and a <code>ret</code> leaves the whole function:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-214"></button><textarea hidden id="copy-214">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-8"></button><textarea hidden id="copy-8">mod example
 
 ext
 {
@@ -231,7 +231,7 @@ main: fun
 <p>A <code>loop</code> with no <code>break</code> never finishes, so the compiler knows the end of <code>firstPositive</code> can't be reached, and the function needs no <code>ret</code> after it. The same holds for <code>while true</code>.</p>
 <h2 id="for-over-ranges"><a class="anchor" href="#for-over-ranges"><code>for</code> over ranges</a></h2>
 <p><code>for</code> with a range runs its body once for each integer in the range. <code>a..b</code> counts from <code>a</code> up to but not including <code>b</code>, and <code>a..=b</code> includes <code>b</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-215"></button><textarea hidden id="copy-215">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-9"></button><textarea hidden id="copy-9">mod example
 
 ext
 {
@@ -256,7 +256,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>0 1 2 3 | 1 2 3 | |</pre></div>
 <p>A range whose start is past its end, like <code>5..2</code>, is empty, and the body doesn't run. Ranges only count up, one at a time.</p>
 <p>Both bounds run once, before the first pass. Changing a variable used as a bound doesn't change how many times the loop runs:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-216"></button><textarea hidden id="copy-216">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-10"></button><textarea hidden id="copy-10">mod example
 
 ext
 {
@@ -277,7 +277,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>0 1 2 | 6</pre></div>
 <h3 id="the-loop-variable"><a class="anchor" href="#the-loop-variable">The loop variable</a></h3>
 <p>The loop variable is new on each pass and only exists inside the body. Its type comes from the bounds, as the type of <code>a + b</code> would: <code>0..count</code> with a <code>usize</code> count counts in <code>usize</code>. <code>..=</code> can count up to the largest value of its type without overflowing:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-217"></button><textarea hidden id="copy-217">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-11"></button><textarea hidden id="copy-11">mod example
 
 ext
 {
@@ -298,7 +298,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count: <span class="c-type">usize</span> = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..count</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%zu "</span>, i)</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"|"</span>)</span><span class="line">	<span class="c-keyword">for</span> b <span class="c-keyword">in</span> <span class="c-literal">253u8</span>..=<span class="c-literal">255u8</span></span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">" %d"</span>, b)</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"\n"</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>0 1 2 | 253 254 255</pre></div>
 <p>Name the variable <code>_</code> when the body doesn't use it:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-218"></button><textarea hidden id="copy-218">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-12"></button><textarea hidden id="copy-12">mod example
 
 ext
 {
@@ -314,7 +314,7 @@ main: fun
 hello
 hello</pre></div>
 <p>Bounds can also be <code>char</code> values, which step through the characters in order:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-219"></button><textarea hidden id="copy-219">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-13"></button><textarea hidden id="copy-13">mod example
 
 ext
 {
@@ -330,15 +330,15 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> c <span class="c-keyword">in</span> <span class="c-literal">'a'</span>..=<span class="c-literal">'e'</span></span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%c"</span>, <span class="c-type">u32</span>(c))</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"\n"</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>abcde</pre></div>
 <p>The loop variable is read-only:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-220"></button><textarea hidden id="copy-220">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-14"></button><textarea hidden id="copy-14">mod example
 
 main: fun
 {
 	for i in 0..3
 		i = 2
-}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">3</span></span><span class="line">		i = <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot reassign read-only loop variables</span></span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">3</span></span><span class="line">		i = <span class="c-literal">2</span></span><span class="line">}</span></code></pre></div>
 <p>Floats can't be range bounds, and the variable of a range loop can't take a mode such as <code>mut</code>:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-221"></button><textarea hidden id="copy-221">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-15"></button><textarea hidden id="copy-15">mod example
 
 main: fun
 {
@@ -349,10 +349,10 @@ main: fun
 	for mut i in 0..3
 	{
 	}
-}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> f <span class="c-keyword">in</span> <span class="c-literal">0.0</span>..<span class="c-literal">1.5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:13ch">Cannot use &#x27;f64&#x27; as a range bound</span></span><span class="line">	{</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">for</span> <span class="c-keyword">mut</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">3</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot iterate over ranges with &#x27;mut&#x27;</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> f <span class="c-keyword">in</span> <span class="c-literal">0.0</span>..<span class="c-literal">1.5</span></span><span class="line">	{</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">for</span> <span class="c-keyword">mut</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">3</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
 <h2 id="for-over-arrays"><a class="anchor" href="#for-over-arrays"><code>for</code> over arrays</a></h2>
 <p><code>for</code> over an array walks its elements in order:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-222"></button><textarea hidden id="copy-222">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-16"></button><textarea hidden id="copy-16">mod example
 
 ext
 {
@@ -370,9 +370,40 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> primes = [<span class="c-literal">2</span>, <span class="c-literal">3</span>, <span class="c-literal">5</span>, <span class="c-literal">7</span>]</span><span class="line">	<span class="c-keyword">var</span> sum = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">for</span> p <span class="c-keyword">in</span> primes</span><span class="line">		sum += p</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, sum)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>17</pre></div>
 <p><a href="arrays.html">Arrays</a> covers the rest: borrowing elements with <code>for imm x</code> and <code>for mut x</code>, and how <code>for x</code> takes elements that can't be copied. Types can also define their own <code>for</code> loops; <a href="operators.html">Operators</a> shows how.</p>
+<h2 id="counting-passes"><a class="anchor" href="#counting-passes">Counting passes</a></h2>
+<p>A second name after a comma counts the passes, starting at 0. <code>for x, i in xs</code> gives each element along with its position. It works with every kind of <code>for</code>, and it counts every pass, including ones that <code>cont</code> cuts short:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-17"></button><textarea hidden id="copy-17">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+main: fun
+{
+	val scores = [90, 75, 60]
+	var tens = [0, 0, 0]
+	for score, i in scores
+		tens[i] = score / 10
+
+	for score, i in scores
+		printf(&quot;%d:%d &quot;, i, score)
+
+	for n, i in 10..14
+	{
+		if n == 11
+			cont
+
+		printf(&quot;%d@%d &quot;, n, i)
+	}
+
+	printf(&quot;| %d %d %d\n&quot;, tens[0], tens[1], tens[2])
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> scores = [<span class="c-literal">90</span>, <span class="c-literal">75</span>, <span class="c-literal">60</span>]</span><span class="line">	<span class="c-keyword">var</span> tens = [<span class="c-literal">0</span>, <span class="c-literal">0</span>, <span class="c-literal">0</span>]</span><span class="line">	<span class="c-keyword">for</span> score, i <span class="c-keyword">in</span> scores</span><span class="line">		tens[i] = score / <span class="c-literal">10</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">for</span> score, i <span class="c-keyword">in</span> scores</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d:%d "</span>, i, score)</span><span class="line"> </span><span class="line">	<span class="c-keyword">for</span> n, i <span class="c-keyword">in</span> <span class="c-literal">10</span>..<span class="c-literal">14</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> n == <span class="c-literal">11</span></span><span class="line">			<span class="c-keyword">cont</span></span><span class="line"> </span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d@%d "</span>, n, i)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"| %d %d %d\n"</span>, tens[<span class="c-literal">0</span>], tens[<span class="c-literal">1</span>], tens[<span class="c-literal">2</span>])</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>0:90 1:75 2:60 10@0 12@2 13@3 | 9 7 6</pre></div>
+<p>The count's type comes from how it's used, as with <code>var count = 0</code>. Indexing <code>tens</code> with it makes the first loop's <code>i</code> a <code>usize</code>, while the second loop's <code>i</code> is an <code>i32</code>, since nothing there settles it. Counting past the largest value of its type is an overflow, the same as <code>count += 1</code>. Like the loop variable, the count is new on each pass and can't be assigned.</p>
 <h2 id="break-and-cont"><a class="anchor" href="#break-and-cont"><code>break</code> and <code>cont</code></a></h2>
 <p><code>break</code> leaves a loop at once. <code>cont</code> skips the rest of the body and goes on with the next pass: in a <code>for</code> loop, to the next value; in <code>while</code> and <code>do ... while</code>, to the condition. Both act on the innermost loop around them:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-223"></button><textarea hidden id="copy-223">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-18"></button><textarea hidden id="copy-18">mod example
 
 ext
 {
@@ -396,15 +427,15 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">10</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> i % <span class="c-literal">2</span> == <span class="c-literal">0</span></span><span class="line">			<span class="c-keyword">cont</span></span><span class="line"> </span><span class="line">		<span class="c-keyword">if</span> i &gt; <span class="c-literal">7</span></span><span class="line">			<span class="c-keyword">break</span></span><span class="line"> </span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d "</span>, i)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"done\n"</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>1 3 5 7 done</pre></div>
 <p><code>break</code> and <code>cont</code> outside a loop are errors:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-224"></button><textarea hidden id="copy-224">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-19"></button><textarea hidden id="copy-19">mod example
 
 main: fun
 {
 	break
-}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">break</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot use &#x27;break&#x27; outside loops</span></span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">break</span></span><span class="line">}</span></code></pre></div>
 <h2 id="labels"><a class="anchor" href="#labels">Labels</a></h2>
 <p>A label names a loop, so that <code>break</code> and <code>cont</code> can act on a loop further out than the innermost one. It's written before the loop keyword, with a colon, and the jump names it:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-225"></button><textarea hidden id="copy-225">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-20"></button><textarea hidden id="copy-20">mod example
 
 ext
 {
@@ -446,7 +477,7 @@ row sum 6
 row sum 24</pre></div>
 <p><code>break search</code> leaves both loops as soon as a pair is found. <code>cont rows</code> leaves the inner loop and goes on with the next row, so a row with a negative value prints nothing.</p>
 <p>Every loop form takes a label: <code>for</code>, <code>while</code>, <code>do</code> and <code>loop</code>. Labels can't go on other statements, and a jump must name a label:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-226"></button><textarea hidden id="copy-226">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-21"></button><textarea hidden id="copy-21">mod example
 
 main: fun
 {
@@ -469,11 +500,11 @@ main: fun
 	start: if x &gt; 0
 	{
 	}
-}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> x = <span class="c-literal">0</span></span><span class="line">	outer: <span class="c-keyword">while</span> x &lt; <span class="c-literal">10</span></span><span class="line">	{</span><span class="line">		x += <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">if</span> x == <span class="c-literal">1</span></span><span class="line">			<span class="c-keyword">break</span> <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:18ch">Expected a label</span></span><span class="line"> </span><span class="line">		<span class="c-keyword">if</span> x == <span class="c-literal">3</span></span><span class="line">			<span class="c-keyword">break</span> x</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:18ch">&#x27;x&#x27; is not a label</span></span><span class="line"> </span><span class="line">		<span class="c-keyword">if</span> x == <span class="c-literal">4</span></span><span class="line">			<span class="c-keyword">cont</span> outr</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:17ch">Symbol &#x27;outr&#x27; not found in this scope<span class="diagnostic-note">Did you mean &#x27;outer&#x27;?</span></span></span><span class="line"> </span><span class="line">		<span class="c-keyword">break</span> outer</span><span class="line">	}</span><span class="line"> </span><span class="line">	start: <span class="c-keyword">if</span> x &gt; <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:11ch">Expected a loop</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> x = <span class="c-literal">0</span></span><span class="line">	outer: <span class="c-keyword">while</span> x &lt; <span class="c-literal">10</span></span><span class="line">	{</span><span class="line">		x += <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">if</span> x == <span class="c-literal">1</span></span><span class="line">			<span class="c-keyword">break</span> <span class="c-literal">5</span></span><span class="line"> </span><span class="line">		<span class="c-keyword">if</span> x == <span class="c-literal">3</span></span><span class="line">			<span class="c-keyword">break</span> x</span><span class="line"> </span><span class="line">		<span class="c-keyword">if</span> x == <span class="c-literal">4</span></span><span class="line">			<span class="c-keyword">cont</span> outr</span><span class="line"> </span><span class="line">		<span class="c-keyword">break</span> outer</span><span class="line">	}</span><span class="line"> </span><span class="line">	start: <span class="c-keyword">if</span> x &gt; <span class="c-literal">0</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
 <p>Labels have their own names, apart from variables, so a label can share a name with a variable without hiding it.</p>
 <h2 id="jumps-as-expressions"><a class="anchor" href="#jumps-as-expressions">Jumps as expressions</a></h2>
 <p><code>ret</code>, <code>break</code> and <code>cont</code> are expressions as well as statements. They never produce a value, since control leaves before one is needed, so they fit anywhere a value of any type is expected. This makes them useful in <code>match</code> arms and on the right of <code>&amp;&amp;</code> and <code>||</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-227"></button><textarea hidden id="copy-227">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-22"></button><textarea hidden id="copy-22">mod example
 
 ext
 {
@@ -507,7 +538,7 @@ main: fun
 <nav class="pager"><a class="previous" href="functions.html"><span>Previous</span>Functions</a><a class="next" href="arrays.html"><span>Next</span>Arrays</a></nav>
 </main>
 <aside class="toc">
-<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#if-and-else">if and else</a></li><li class="level-3"><a href="#else-if">else if</a></li><li class="level-3"><a href="#conditions">Conditions</a></li><li class="level-3"><a href="#if-is-a-statement">if is a statement</a></li><li class="level-2"><a href="#while">while</a></li><li class="level-2"><a href="#do-while">do ... while</a></li><li class="level-2"><a href="#loop">loop</a></li><li class="level-2"><a href="#for-over-ranges">for over ranges</a></li><li class="level-3"><a href="#the-loop-variable">The loop variable</a></li><li class="level-2"><a href="#for-over-arrays">for over arrays</a></li><li class="level-2"><a href="#break-and-cont">break and cont</a></li><li class="level-2"><a href="#labels">Labels</a></li><li class="level-2"><a href="#jumps-as-expressions">Jumps as expressions</a></li><li class="level-2"><a href="#blocks-and-scopes">Blocks and scopes</a></li><li class="level-2"><a href="#match-and-when">match and when</a></li></ul>
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#if-and-else">if and else</a></li><li class="level-3"><a href="#else-if">else if</a></li><li class="level-3"><a href="#conditions">Conditions</a></li><li class="level-3"><a href="#if-is-a-statement">if is a statement</a></li><li class="level-2"><a href="#while">while</a></li><li class="level-2"><a href="#do-while">do ... while</a></li><li class="level-2"><a href="#loop">loop</a></li><li class="level-2"><a href="#for-over-ranges">for over ranges</a></li><li class="level-3"><a href="#the-loop-variable">The loop variable</a></li><li class="level-2"><a href="#for-over-arrays">for over arrays</a></li><li class="level-2"><a href="#counting-passes">Counting passes</a></li><li class="level-2"><a href="#break-and-cont">break and cont</a></li><li class="level-2"><a href="#labels">Labels</a></li><li class="level-2"><a href="#jumps-as-expressions">Jumps as expressions</a></li><li class="level-2"><a href="#blocks-and-scopes">Blocks and scopes</a></li><li class="level-2"><a href="#match-and-when">match and when</a></li></ul>
 </aside>
 </div>
 <div id="message"></div>

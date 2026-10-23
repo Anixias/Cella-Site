@@ -471,6 +471,46 @@ main: fun
 
 [Arrays](arrays.md) covers the rest: borrowing elements with `for imm x` and `for mut x`, and how `for x` takes elements that can't be copied. Types can also define their own `for` loops; [Operators](operators.md) shows how.
 
+## Counting passes
+
+A second name after a comma counts the passes, starting at 0. `for x, i in xs` gives each element along with its position. It works with every kind of `for`, and it counts every pass, including ones that `cont` cuts short:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+main: fun
+{
+	val scores = [90, 75, 60]
+	var tens = [0, 0, 0]
+	for score, i in scores
+		tens[i] = score / 10
+
+	for score, i in scores
+		printf("%d:%d ", i, score)
+
+	for n, i in 10..14
+	{
+		if n == 11
+			cont
+
+		printf("%d@%d ", n, i)
+	}
+
+	printf("| %d %d %d\n", tens[0], tens[1], tens[2])
+}
+```
+
+```output
+0:90 1:75 2:60 10@0 12@2 13@3 | 9 7 6
+```
+
+The count's type comes from how it's used, as with `var count = 0`. Indexing `tens` with it makes the first loop's `i` a `usize`, while the second loop's `i` is an `i32`, since nothing there settles it. Counting past the largest value of its type is an overflow, the same as `count += 1`. Like the loop variable, the count is new on each pass and can't be assigned.
+
 ## `break` and `cont`
 
 `break` leaves a loop at once. `cont` skips the rest of the body and goes on with the next pass: in a `for` loop, to the next value; in `while` and `do ... while`, to the condition. Both act on the innermost loop around them:
