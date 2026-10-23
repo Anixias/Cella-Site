@@ -1077,6 +1077,88 @@ first[T, U = i32]: fun(value: T) -> i32 => 2
 'first' overloads cannot accept the same arguments
 ```
 
+## Types with the same name
+
+Types can share a name when their parameter lists differ, either in how many arguments they take or in whether an argument is a type or a value. The same goes for traits. A type and a trait can't share a name.
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Size: rec
+{
+	value: i32
+}
+
+Size[T]: rec
+{
+	value: T
+}
+
+Grid[T]: rec
+{
+	cell: T
+}
+
+Grid[count: const usize]: rec
+{
+	cells: array[i32, count]
+}
+
+main: fun
+{
+	val plain = Size(1)
+	val typed = Size[u8](2)
+	val cell = Grid[bool](true)
+	val cells = Grid[3]([1, 2, 3])
+	printf("%d %d %zu %zu\n", plain.value, i32(typed.value), sizeOf(cell), sizeOf(cells))
+}
+```
+
+```output
+1 2 1 12
+```
+
+The arguments pick the declaration: `Grid[bool]` is the one that takes a type and `Grid[3]` the one that takes a value. The name alone means the declaration that takes no arguments, counting one whose parameters all have defaults. With no such declaration, the name needs arguments, even where only one declaration could fit. An impl block picks its type the same way, so `Size: impl Shape` and `Size[T]: impl Shape` implement it for different types. Importing a name brings in every declaration with that name.
+
+Two declarations that could take the same arguments are an error, whether they have the same parameters or only overlap through defaults:
+
+```cella error
+~ mod example
+~
+Pair[A]: rec
+{
+	first: A
+}
+
+Pair[A, B]: rec
+{
+	first: A
+	second: B
+}
+
+Box[T]: rec
+
+Box[T, Tag = i32]: rec
+
+main: fun
+{
+	val one = Pair(1)
+	val many = Pair[i32, i32, i32](1, 2, 3)
+}
+```
+
+```errors
+'Box' declarations cannot take the same generic arguments
+'Box' declarations cannot take the same generic arguments
+'Pair' needs generic arguments
+No 'Pair' takes 3 generic arguments
+```
+
 ## Adding members under bounds
 
 An `impl` block on a generic type with stronger constraints adds members that exist only for the instantiations that meet them. A block can also name a concrete instantiation, so its members exist only for that one type:
