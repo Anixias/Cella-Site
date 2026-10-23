@@ -829,6 +829,8 @@ A string literal with holes can't take a suffix: `"a{x}"u8` is "Cannot use 'u8' 
 
 `nameOf(x)` is a constant string holding the name of `x` as it's written in the code, without its qualifiers: `nameOf(geometry.area)` is `"area"`. It takes anything with a name, such as a type, function, module, variable, parameter, field, method, enum case or label, and checks that the name exists. Like a string literal, it's usable as a `str` or a `cstr`.
 
+`nameOf` only looks the name up. Inside a type, its fields, methods and cases can be named on their own, as in `nameOf(unwrap)` or `nameOf(none)`, even where using them would need a receiver or a known type. Type arguments pick the type or function and aren't part of the name: `nameOf(Option[i32].none)` is `"none"`.
+
 ```cella
 ~ mod example
 ~
@@ -847,6 +849,14 @@ Team: enum
 {
 	red
 	blue
+
+	favorite: fun -> cstr => nameOf(blue)
+}
+~
+Option[T]: enum
+{
+	none
+	some(value: T)
 }
 ~
 describe: fun(count: i32) -> cstr => nameOf(count)
@@ -856,6 +866,7 @@ main: fun
 	val point = Point(1, 2)
 	printf("%s %s %s\n", nameOf(point), nameOf(point.y), nameOf(Point.x))
 	printf("%s %s %s %s\n", nameOf(Team), nameOf(Team.blue), nameOf(describe), describe(1))
+	printf("%s %s\n", Team.favorite(), nameOf(Option[i32].none))
 	val text = nameOf(Point)
 	printf("%zu\n", text.byteLength)
 }
@@ -864,6 +875,7 @@ main: fun
 ```output
 point y x
 Team blue describe count
+blue none
 5
 ```
 

@@ -37,7 +37,7 @@ try {
 <p>This chapter covers <code>bool</code>, <code>char</code> for single characters, and the two string types: <code>str</code>, a pointer and a length, and <code>cstr</code>, a C string. It also covers string literals, their escape sequences and suffixes, interpolated strings with constant holes, and <code>nameOf</code>.</p>
 <h2 id="bool"><a class="anchor" href="#bool"><code>bool</code></a></h2>
 <p>A <code>bool</code> is <code>true</code> or <code>false</code> and takes one byte. <code>!</code> negates it, and <code>&amp;&amp;</code> and <code>||</code> are logical and and or. They stop as soon as the result is known, so the right side runs only when it's needed. <code>&amp;</code>, <code>|</code> and <code>^</code> also work on <code>bool</code>s and always evaluate both sides; <code>^</code> is true when exactly one side is. <code>==</code> and <code>!=</code> compare two <code>bool</code>s.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-117"></button><textarea hidden id="copy-117">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-1"></button><textarea hidden id="copy-1">mod example
 
 ext
 {
@@ -62,7 +62,7 @@ main: fun
 first second -&gt; 0
 1 1 1</pre></div>
 <p><code>&amp;=</code>, <code>|=</code> and <code>^=</code> assign the result back. <code>bool</code>s have no ordering, and no arithmetic.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-118"></button><textarea hidden id="copy-118">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-2"></button><textarea hidden id="copy-2">mod example
 
 ext
 {
@@ -79,7 +79,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> ready = <span class="c-keyword">true</span></span><span class="line">	<span class="c-keyword">val</span> failed = <span class="c-keyword">false</span></span><span class="line">	ready &amp;= !failed</span><span class="line">	ready ^= <span class="c-keyword">true</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, ready)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>0</pre></div>
 <p>Conditions in <code>if</code>, <code>while</code> and the other control-flow forms must be <code>bool</code>s. Integers aren't true or false on their own; compare them instead, as in <code>count != 0</code>. A <code>bool</code> converts to an integer with <code>i32(flag)</code>, as 0 or 1, but nothing converts to <code>bool</code>.</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-119"></button><textarea hidden id="copy-119">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-3"></button><textarea hidden id="copy-3">mod example
 
 main: fun
 {
@@ -91,7 +91,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> flag: <span class="c-type">bool</span> = <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:21ch">Cannot convert type &#x27;integer literal&#x27; to &#x27;bool&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> made = <span class="c-type">bool</span>(count)</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:15ch">No constructor for &#x27;bool&#x27; accepts argument of type &#x27;i32&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> inverted = !count</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:19ch">Operator &#x27;!&#x27; cannot be applied to &#x27;i32&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> ordered = <span class="c-keyword">true</span> &lt; <span class="c-keyword">false</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:12ch"></span><span class="diagnostic-text" style="margin-left:18ch">No operation defined for &#x27;&lt;&#x27; between &#x27;bool&#x27; and &#x27;bool&#x27;</span></span><span class="line">}</span></code></pre></div>
 <h2 id="char"><a class="anchor" href="#char"><code>char</code></a></h2>
 <p>A <code>char</code> is one Unicode character, stored as its code point in 4 bytes. Any code point from U+0000 to U+10FFFF is a valid <code>char</code> except the surrogates U+D800 to U+DFFF. A <code>char</code> literal is a character in single quotes, and the source file's UTF-8 can hold any character directly:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-120"></button><textarea hidden id="copy-120">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-4"></button><textarea hidden id="copy-4">mod example
 
 ext
 {
@@ -107,7 +107,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> letter = <span class="c-literal">'a'</span></span><span class="line">	<span class="c-keyword">val</span> accented = <span class="c-literal">'é'</span></span><span class="line">	<span class="c-keyword">val</span> emoji = <span class="c-literal">'😀'</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%u %u %u %zu\n"</span>, <span class="c-type">u32</span>(letter), <span class="c-type">u32</span>(accented), <span class="c-type">u32</span>(emoji), <span class="c-keyword">sizeOf</span>(letter))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>97 233 128512 4</pre></div>
 <p>A literal holds exactly one character, or one <a href="#escape-sequences">escape sequence</a>:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-121"></button><textarea hidden id="copy-121">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-5"></button><textarea hidden id="copy-5">mod example
 
 main: fun
 {
@@ -117,7 +117,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> empty = <span class="c-literal">''</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:16ch">Invalid character literal</span></span><span class="line">	<span class="c-keyword">val</span> two = <span class="c-literal">'ab'</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:14ch">Invalid character literal</span></span><span class="line">	<span class="c-keyword">val</span> unknown = <span class="c-literal">'\q'</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:18ch">Invalid character literal</span></span><span class="line">}</span></code></pre></div>
 <h3 id="operations-on-char"><a class="anchor" href="#operations-on-char">Operations on <code>char</code></a></h3>
 <p>Adding an integer to a <code>char</code>, or subtracting one, gives another <code>char</code>. Subtracting two <code>char</code>s gives the distance between them as an <code>i32</code>. <code>char</code>s compare by code point, and a <code>for</code> loop can walk a range of them, as <a href="control-flow.html#for-over-ranges">Control flow</a> shows.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-122"></button><textarea hidden id="copy-122">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-6"></button><textarea hidden id="copy-6">mod example
 
 ext
 {
@@ -136,7 +136,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>d a 2
 1 1</pre></div>
 <p>A <code>char</code> isn't an integer: other arithmetic, the bitwise operators and mixing a <code>char</code> with an integer type are errors.</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-123"></button><textarea hidden id="copy-123">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-7"></button><textarea hidden id="copy-7">mod example
 
 main: fun
 {
@@ -150,7 +150,7 @@ main: fun
 <p>A step past U+10FFFF or into the surrogates is checked like integer overflow. With constants it's a compile error, "Addition overflows 'char'", and at run time a panic with "char overflow" in builds with overflow checks.</p>
 <h3 id="converting-chars"><a class="anchor" href="#converting-chars">Converting <code>char</code>s</a></h3>
 <p>A <code>char</code> converts to any integer type with <code>T(c)</code>, giving its code point, and an integer converts to a <code>char</code> with <code>char(n)</code>. Neither conversion happens implicitly. Both are checked: a code point that doesn't fit the integer type, or an integer that isn't a valid <code>char</code>, is an error for a constant and a "conversion overflow" panic at run time.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-124"></button><textarea hidden id="copy-124">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-8"></button><textarea hidden id="copy-8">mod example
 
 ext
 {
@@ -167,7 +167,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">toChar</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">code</span>: <span class="c-type">u32</span>) -&gt; <span class="c-type">char</span> =&gt; <span class="c-type">char</span>(<span class="c-parameter">code</span>)</span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> code = <span class="c-type">u32</span>(<span class="c-literal">'A'</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%u %c\n"</span>, code, <span class="c-function">toChar</span>(code + <span class="c-literal">1</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%c\n"</span>, <span class="c-function">toChar</span>(<span class="c-literal">55296</span>))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>65 B
 Panic at main.ce:8:35: conversion overflow</pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-125"></button><textarea hidden id="copy-125">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-9"></button><textarea hidden id="copy-9">mod example
 
 implicit: fun(letter: char) -&gt; u32 =&gt; letter
 narrow: fun -&gt; u8 =&gt; u8(&#x27;€&#x27;)
@@ -178,7 +178,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">implicit</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">letter</span>: <span class="c-type">char</span>) -&gt; <span class="c-type">u32</span> =&gt; <span class="c-parameter">letter</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:38ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:38ch">Cannot convert type &#x27;char&#x27; to &#x27;u32&#x27;</span></span><span class="line"><span class="c-function">narrow</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">u8</span> =&gt; <span class="c-type">u8</span>(<span class="c-literal">'€'</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:21ch">&#x27;8364&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line"><span class="c-function">surrogate</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">char</span> =&gt; <span class="c-type">char</span>(<span class="c-literal">55296</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:26ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:26ch">&#x27;55296&#x27; doesn&#x27;t fit in &#x27;char&#x27;</span></span></code></pre></div>
 <h3 id="character-literals-with-a-suffix"><a class="anchor" href="#character-literals-with-a-suffix">Character literals with a suffix</a></h3>
 <p>An integer type suffix after a <code>char</code> literal makes it an integer holding the code point, as in <code>'a'u8</code>. This is how byte-oriented code compares bytes with characters, since a <code>u8</code> and a <code>char</code> don't mix. The code point must fit the type.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-126"></button><textarea hidden id="copy-126">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-10"></button><textarea hidden id="copy-10">mod example
 
 ext
 {
@@ -196,7 +196,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">isDigit</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">byte</span>: <span class="c-type">u8</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">byte</span> &gt;= <span class="c-literal">'0'u8</span> &amp;&amp; <span class="c-parameter">byte</span> &lt;= <span class="c-literal">'9'u8</span></span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> text: <span class="c-type">str</span> = <span class="c-literal">"a7b"</span></span><span class="line">	<span class="c-keyword">val</span> digit = text[<span class="c-literal">1</span>] - <span class="c-literal">'0'u8</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">isDigit</span>(text[<span class="c-literal">0</span>]), <span class="c-function">isDigit</span>(text[<span class="c-literal">1</span>]), digit)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-literal">'€'u16</span>, <span class="c-literal">'\n'i32</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>0 1 7
 8364 10</pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-127"></button><textarea hidden id="copy-127">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-11"></button><textarea hidden id="copy-11">mod example
 
 main: fun
 {
@@ -207,7 +207,7 @@ main: fun
 <p><code>char</code> and string literals share these escape sequences:</p>
 <div class="table-wrap"><table><thead><tr><th>Escape</th><th>Meaning</th></tr></thead><tbody><tr><td><code>\n</code>, <code>\r</code>, <code>\t</code></td><td>new line, carriage return, tab</td></tr><tr><td><code>\0</code></td><td>the zero character</td></tr><tr><td><code>\\</code>, <code>\'</code>, <code>\"</code></td><td>a backslash, a single quote, a double quote</td></tr><tr><td><code>\a</code>, <code>\b</code>, <code>\f</code>, <code>\v</code></td><td>bell, backspace, form feed, vertical tab</td></tr><tr><td><code>\xHH</code></td><td>the character with hex code <code>HH</code>, from <code>00</code> to <code>7F</code></td></tr><tr><td><code>\oNNN</code></td><td>the character with octal code <code>NNN</code>, from <code>000</code> to <code>177</code></td></tr><tr><td><code>\uXXXX</code></td><td>the code point <code>XXXX</code>, exactly four hex digits</td></tr><tr><td><code>\UXXXXXXXX</code></td><td>the code point <code>XXXXXXXX</code>, exactly eight hex digits</td></tr></tbody></table></div>
 <p>Strings also take <code>\{</code> and <code>\}</code> for braces, which <a href="#interpolated-strings">interpolated strings</a> otherwise use. <code>\0</code> always means the zero character, so <code>"\012"</code> is a zero followed by the characters <code>1</code> and <code>2</code>; octal codes are written with <code>\o</code>. <code>\x</code> and <code>\o</code> cover only the ASCII range. <code>\u</code> and <code>\U</code> take any code point that is a valid <code>char</code>, and a string stores it as its two to four UTF-8 bytes.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-128"></button><textarea hidden id="copy-128">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-12"></button><textarea hidden id="copy-12">mod example
 
 ext
 {
@@ -236,7 +236,7 @@ main: fun
  63 61 66 c3 a9 20 f0 9f 98 80
  00 31 32</pre></div>
 <p>Any other backslash sequence, or one with the wrong digits, is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-129"></button><textarea hidden id="copy-129">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-13"></button><textarea hidden id="copy-13">mod example
 
 main: fun
 {
@@ -248,7 +248,7 @@ main: fun
 <h2 id="str"><a class="anchor" href="#str"><code>str</code></a></h2>
 <p>A <code>str</code> is a read-only view of UTF-8 text: a pointer to its first byte and the number of bytes, 16 bytes in all on a 64-bit target. The two parts are its read-only properties <code>data</code>, a <code>ptr[u8]</code>, and <code>byteLength</code>, a <code>usize</code>. A <code>str</code> doesn't own its bytes, and nothing guarantees a zero byte after them.</p>
 <p>The length counts bytes, not characters: a character outside ASCII takes two to four bytes.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-130"></button><textarea hidden id="copy-130">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-14"></button><textarea hidden id="copy-14">mod example
 
 ext
 {
@@ -264,7 +264,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> plain: <span class="c-type">str</span> = <span class="c-literal">"hello"</span></span><span class="line">	<span class="c-keyword">val</span> accented: <span class="c-type">str</span> = <span class="c-literal">"héllo"</span></span><span class="line">	<span class="c-keyword">val</span> emoji: <span class="c-type">str</span> = <span class="c-literal">"😀"</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu %zu\n"</span>, plain.<span class="c-field">byteLength</span>, accented.<span class="c-field">byteLength</span>, emoji.<span class="c-field">byteLength</span>, <span class="c-keyword">sizeOf</span>(plain))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>5 6 4 16</pre></div>
 <p>C's <code>printf</code> prints a <code>str</code> with <code>%.*s</code>, which takes the length as an <code>int</code> and then the pointer:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-131"></button><textarea hidden id="copy-131">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-15"></button><textarea hidden id="copy-15">mod example
 
 ext
 {
@@ -282,7 +282,7 @@ main: fun
 []</pre></div>
 <h3 id="indexing-bytes"><a class="anchor" href="#indexing-bytes">Indexing bytes</a></h3>
 <p><code>text[i]</code> reads the byte at index <code>i</code> as a <code>u8</code>. The index is a <code>usize</code>, or a type that converts to one implicitly, and it's checked against <code>byteLength</code>: reading past the end stops the program with "index out of bounds".</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-132"></button><textarea hidden id="copy-132">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-16"></button><textarea hidden id="copy-16">mod example
 
 ext
 {
@@ -304,7 +304,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>c 294
 Panic at main.ce:8:47: index out of bounds</pre></div>
 <p>A <code>str</code> can't be changed through: its bytes and its properties are read-only.</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-133"></button><textarea hidden id="copy-133">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-17"></button><textarea hidden id="copy-17">mod example
 
 main: fun
 {
@@ -314,7 +314,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> text: <span class="c-type">str</span> = <span class="c-literal">"hello"</span></span><span class="line">	text[<span class="c-literal">0</span>] = <span class="c-literal">72</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot write through &#x27;str&#x27;</span></span><span class="line">	text.<span class="c-field">byteLength</span> = <span class="c-literal">3</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:15ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign read-only properties</span></span><span class="line">}</span></code></pre></div>
 <h3 id="building-a-str"><a class="anchor" href="#building-a-str">Building a <code>str</code></a></h3>
 <p><code>str(data, byteLength)</code> makes a <code>str</code> from a <code>ptr[u8]</code> and a length, the reverse of its two properties. This is how code takes part of a string, or views bytes from elsewhere as text, such as a buffer or a C string. <code>str()</code> is the empty string. Below, <code>text.data + start</code> points <code>start</code> bytes further on; <a href="pointers.html#pointer-arithmetic">Pointers and raw memory</a> covers pointer arithmetic.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-134"></button><textarea hidden id="copy-134">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-18"></button><textarea hidden id="copy-18">mod example
 
 ext
 {
@@ -343,7 +343,7 @@ main: fun
 [from C]
 0</pre></div>
 <p>The compiler doesn't check that the pointer and length describe valid UTF-8. A <code>str</code> built from a pointer borrows whatever the pointer came from, so one built from a local buffer can't be returned; <a href="borrows.html">Borrows</a> covers the rules.</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-135"></button><textarea hidden id="copy-135">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-19"></button><textarea hidden id="copy-19">mod example
 
 local: fun -&gt; str
 {
@@ -358,7 +358,7 @@ main: fun
 <p><code>==</code> and <code>+</code> don't work on <code>str</code> values. <code>+</code> works only on constant strings, described <a href="#constant-strings">below</a>.</p>
 <h2 id="cstr"><a class="anchor" href="#cstr"><code>cstr</code></a></h2>
 <p>A <code>cstr</code> is a pointer to a zero-terminated string, which is what C functions take and return. It's 8 bytes on a 64-bit target and has no length; C functions such as <code>strlen</code> find the end by looking for the zero byte. <code>c[i]</code> reads byte <code>i</code> as a <code>u8</code>; with no length to compare against, the index isn't checked. A <code>cstr</code> can be <code>null</code>, and it converts implicitly to a plain <code>ptr</code>, the untyped pointer described in <a href="pointers.html#the-untyped-pointer-ptr">Pointers and raw memory</a>.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-136"></button><textarea hidden id="copy-136">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-20"></button><textarea hidden id="copy-20">mod example
 
 ext
 {
@@ -380,7 +380,7 @@ main: fun
 1
 0 8</pre></div>
 <p>A <code>str</code> doesn't convert to a <code>cstr</code>, since its bytes need not be followed by a zero, and a <code>cstr</code> has no arithmetic.</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-137"></button><textarea hidden id="copy-137">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-21"></button><textarea hidden id="copy-21">mod example
 
 ext
 {
@@ -396,7 +396,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> text: <span class="c-type">str</span> = <span class="c-literal">"hello"</span></span><span class="line">	<span class="c-function">puts</span>(text)</span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:9ch">Cannot convert type &#x27;str&#x27; to &#x27;cstr&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> word: <span class="c-type">cstr</span> = <span class="c-literal">"world"</span></span><span class="line">	<span class="c-keyword">val</span> rest = word + <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:15ch">No operation defined for &#x27;+&#x27; between &#x27;cstr&#x27; and &#x27;integer literal&#x27;</span></span><span class="line">}</span></code></pre></div>
 <h2 id="string-literals"><a class="anchor" href="#string-literals">String literals</a></h2>
 <p>A string literal in double quotes has no type of its own, like a number. It becomes a <code>str</code> or a <code>cstr</code> where it's used. As a <code>cstr</code>, its bytes are followed by a zero; the zero isn't counted in a <code>str</code>'s <code>byteLength</code>. A literal's <code>byteLength</code> and <code>data</code> can be read directly, and <code>byteLength</code> is a constant.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-138"></button><textarea hidden id="copy-138">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-22"></button><textarea hidden id="copy-22">mod example
 
 ext
 {
@@ -417,7 +417,7 @@ main: fun
 as a cstr
 6 3</pre></div>
 <p>A local declared from a literal takes its type from how the function uses it, and is a <code>str</code> when nothing decides. A literal used both ways needs two literals, or an explicit type:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-139"></button><textarea hidden id="copy-139">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-23"></button><textarea hidden id="copy-23">mod example
 
 ext
 {
@@ -437,7 +437,7 @@ main: fun
 <p>A string literal must end on the line it starts on, and two literals next to each other don't join; <code>+</code> joins <a href="#constant-strings">constant strings</a>.</p>
 <h3 id="string-literal-suffixes"><a class="anchor" href="#string-literal-suffixes">String literal suffixes</a></h3>
 <p>A suffix of <code>u8</code>, <code>u16</code> or <code>u32</code> turns a string literal into an array of its encoded text, with no zero at the end: <code>u8</code> gives the UTF-8 bytes, <code>u16</code> the UTF-16 code units and <code>u32</code> the code points. This is useful for byte signatures and for APIs that take UTF-16.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-140"></button><textarea hidden id="copy-140">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-24"></button><textarea hidden id="copy-24">mod example
 
 ext
 {
@@ -460,7 +460,7 @@ main: fun
 2 104 233
 2 104 128512</pre></div>
 <p><code>magic</code> is an <code>array[u8, 6]</code>; <a href="arrays.html">Arrays</a> covers arrays. Other suffixes are errors:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-141"></button><textarea hidden id="copy-141">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-25"></button><textarea hidden id="copy-25">mod example
 
 main: fun
 {
@@ -469,7 +469,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-literal">"abc"i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use &#x27;i32&#x27; on string literals</span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-literal">"abc"</span>f64</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use &#x27;f64&#x27; on string literals</span></span><span class="line">}</span></code></pre></div>
 <h3 id="constant-strings"><a class="anchor" href="#constant-strings">Constant strings</a></h3>
 <p>String literals, <code>const</code> declarations of type <code>str</code> or <code>cstr</code>, and the results of <code>nameOf</code> are constant strings. A <code>val</code> isn't one, even at the top level of a module. <code>+</code> joins constant strings into a new one, at compile time. A <code>str</code> constant and a <code>cstr</code> constant don't join with each other.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-142"></button><textarea hidden id="copy-142">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-26"></button><textarea hidden id="copy-26">mod example
 
 ext
 {
@@ -493,7 +493,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>Cella language
 1.0-beta
 xyz</pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-143"></button><textarea hidden id="copy-143">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-27"></button><textarea hidden id="copy-27">mod example
 
 title: const str = &quot;Cella&quot;
 label: const cstr = &quot;c&quot;
@@ -507,7 +507,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-constant">title</span>: <span class="c-keyword">const</span> <span class="c-type">str</span> = <span class="c-literal">"Cella"</span></span><span class="line"><span class="c-constant">label</span>: <span class="c-keyword">const</span> <span class="c-type">cstr</span> = <span class="c-literal">"c"</span></span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> name = <span class="c-literal">"world"</span></span><span class="line">	<span class="c-keyword">val</span> joined = <span class="c-constant">title</span> + name</span><span class="diagnostic"><span class="squiggle" style="margin-left:25ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:25ch">&#x27;name&#x27; isn&#x27;t a constant</span></span><span class="line">	<span class="c-keyword">val</span> mixed = <span class="c-constant">title</span> + <span class="c-constant">label</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:16ch">No operation defined for &#x27;+&#x27; between &#x27;str&#x27; and &#x27;cstr&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> number = <span class="c-literal">"a"</span> + <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:17ch">No operation defined for &#x27;+&#x27; between &#x27;string literal&#x27; and &#x27;integer literal&#x27;</span></span><span class="line">}</span></code></pre></div>
 <h2 id="interpolated-strings"><a class="anchor" href="#interpolated-strings">Interpolated strings</a></h2>
 <p>A string literal can contain holes in braces, as in <code>"{title} v{version}"</code>. Outside a template, an interpolated string is a constant string: every hole must hold a constant string, and the compiler joins the pieces. The result is a string literal, usable as a <code>str</code> or a <code>cstr</code>. Holes can hold <code>str</code> and <code>cstr</code> constants alike, <code>nameOf</code>, <code>+</code> of constant strings, and other string literals, including interpolated ones.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-144"></button><textarea hidden id="copy-144">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-28"></button><textarea hidden id="copy-28">mod example
 
 ext
 {
@@ -532,7 +532,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>Cella v1.0!
 Hello, world! Point ab [Cella]</pre></div>
 <p>A hole with a value that isn't a constant string is an error. Holes that hold numbers or other run-time values, and holes with format specs like <code>{price:.2}</code>, belong to <a href="templates.html">string templates</a>, where a function receives the pieces and the values and decides how to write them.</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-145"></button><textarea hidden id="copy-145">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-29"></button><textarea hidden id="copy-29">mod example
 
 ext
 {
@@ -551,7 +551,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-constant">title</span>: <span class="c-keyword">const</span> <span class="c-type">str</span> = <span class="c-literal">"Cella"</span></span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> count = <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">val</span> name: <span class="c-type">str</span> = <span class="c-literal">"world"</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"count = {</span>count<span class="c-literal">}\n"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:21ch">&#x27;i32&#x27; is not a string</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"hello {</span>name<span class="c-literal">}\n"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:19ch">&#x27;name&#x27; isn&#x27;t a constant</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"spec {</span>title<span class="c-literal">:x}\n"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot use format specs in constant strings</span></span><span class="line">}</span></code></pre></div>
 <h3 id="braces-in-strings"><a class="anchor" href="#braces-in-strings">Braces in strings</a></h3>
 <p>A <code>{</code> in any string starts a hole, so a literal brace is written <code>\{</code>. A <code>}</code> on its own is an ordinary character, and <code>\}</code> is accepted too. This matters for C format strings and for text like code or JSON:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-146"></button><textarea hidden id="copy-146">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-30"></button><textarea hidden id="copy-30">mod example
 
 ext
 {
@@ -565,7 +565,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"\{%d}\n"</span>, <span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"struct \{ int x; }\n"</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>{5}
 struct { int x; }</pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-147"></button><textarea hidden id="copy-147">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-31"></button><textarea hidden id="copy-31">mod example
 
 ext
 {
@@ -580,7 +580,8 @@ main: fun
 <p>A string literal with holes can't take a suffix: <code>"a{x}"u8</code> is "Cannot use 'u8' on interpolated strings".</p>
 <h2 id="nameof"><a class="anchor" href="#nameof"><code>nameOf</code></a></h2>
 <p><code>nameOf(x)</code> is a constant string holding the name of <code>x</code> as it's written in the code, without its qualifiers: <code>nameOf(geometry.area)</code> is <code>"area"</code>. It takes anything with a name, such as a type, function, module, variable, parameter, field, method, enum case or label, and checks that the name exists. Like a string literal, it's usable as a <code>str</code> or a <code>cstr</code>.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-148"></button><textarea hidden id="copy-148">mod example
+<p><code>nameOf</code> only looks the name up. Inside a type, its fields, methods and cases can be named on their own, as in <code>nameOf(unwrap)</code> or <code>nameOf(none)</code>, even where using them would need a receiver or a known type. Type arguments pick the type or function and aren't part of the name: <code>nameOf(Option[i32].none)</code> is <code>"none"</code>.</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-32"></button><textarea hidden id="copy-32">mod example
 
 ext
 {
@@ -597,6 +598,14 @@ Team: enum
 {
 	red
 	blue
+
+	favorite: fun -&gt; cstr =&gt; nameOf(blue)
+}
+
+Option[T]: enum
+{
+	none
+	some(value: T)
 }
 
 describe: fun(count: i32) -&gt; cstr =&gt; nameOf(count)
@@ -606,14 +615,16 @@ main: fun
 	val point = Point(1, 2)
 	printf(&quot;%s %s %s\n&quot;, nameOf(point), nameOf(point.y), nameOf(Point.x))
 	printf(&quot;%s %s %s %s\n&quot;, nameOf(Team), nameOf(Team.blue), nameOf(describe), describe(1))
+	printf(&quot;%s %s\n&quot;, Team.favorite(), nameOf(Option[i32].none))
 	val text = nameOf(Point)
 	printf(&quot;%zu\n&quot;, text.byteLength)
-}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"><span class="c-type">Team</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">red</span></span><span class="line">	<span class="c-case">blue</span></span><span class="line">}</span><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">count</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-keyword">nameOf</span>(<span class="c-parameter">count</span>)</span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> point = <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s %s %s\n"</span>, <span class="c-keyword">nameOf</span>(point), <span class="c-keyword">nameOf</span>(point.<span class="c-field">y</span>), <span class="c-keyword">nameOf</span>(<span class="c-type">Point</span>.<span class="c-field">x</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s %s %s %s\n"</span>, <span class="c-keyword">nameOf</span>(<span class="c-type">Team</span>), <span class="c-keyword">nameOf</span>(<span class="c-type">Team</span>.<span class="c-case">blue</span>), <span class="c-keyword">nameOf</span>(<span class="c-function">describe</span>), <span class="c-function">describe</span>(<span class="c-literal">1</span>))</span><span class="line">	<span class="c-keyword">val</span> text = <span class="c-keyword">nameOf</span>(<span class="c-type">Point</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu\n"</span>, text.<span class="c-field">byteLength</span>)</span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"><span class="c-type">Team</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">red</span></span><span class="line">	<span class="c-case">blue</span></span><span class="line"> </span><span class="line">	<span class="c-function">favorite</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-keyword">nameOf</span>(<span class="c-case">blue</span>)</span><span class="line">}</span><span class="line"><span class="c-type">Option</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">none</span></span><span class="line">	<span class="c-case">some</span>(<span class="c-field">value</span>: <span class="c-typeparam">T</span>)</span><span class="line">}</span><span class="line"><span class="c-function">describe</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">count</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">cstr</span> =&gt; <span class="c-keyword">nameOf</span>(<span class="c-parameter">count</span>)</span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> point = <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s %s %s\n"</span>, <span class="c-keyword">nameOf</span>(point), <span class="c-keyword">nameOf</span>(point.<span class="c-field">y</span>), <span class="c-keyword">nameOf</span>(<span class="c-type">Point</span>.<span class="c-field">x</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s %s %s %s\n"</span>, <span class="c-keyword">nameOf</span>(<span class="c-type">Team</span>), <span class="c-keyword">nameOf</span>(<span class="c-type">Team</span>.<span class="c-case">blue</span>), <span class="c-keyword">nameOf</span>(<span class="c-function">describe</span>), <span class="c-function">describe</span>(<span class="c-literal">1</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%s %s\n"</span>, <span class="c-type">Team</span>.<span class="c-function">favorite</span>(), <span class="c-keyword">nameOf</span>(<span class="c-type">Option</span>[<span class="c-type">i32</span>].<span class="c-case">none</span>))</span><span class="line">	<span class="c-keyword">val</span> text = <span class="c-keyword">nameOf</span>(<span class="c-type">Point</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu\n"</span>, text.<span class="c-field">byteLength</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>point y x
 Team blue describe count
+blue none
 5</pre></div>
 <p>A name that doesn't exist is reported as usual, and anything other than a name is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-149"></button><textarea hidden id="copy-149">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-33"></button><textarea hidden id="copy-33">mod example
 
 Point: rec
 {
