@@ -66,11 +66,11 @@ try {
 <p><code>Imports</code> lists imports that apply to every source file in the project, written as they would be after <code>use</code>. <code>Prelude</code> lists imports that apply to every project that references this one. <a href="modules.html#project-imports">Modules and visibility</a> covers both.</p>
 <h2 id="flags"><a class="anchor" href="#flags">Flags</a></h2>
 <p><code>[Flags]</code> declares the project's own flags, each set to <code>true</code> or <code>false</code>. Code tests them with <code>when</code>:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-927"></button><textarea hidden id="copy-927">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-936"></button><textarea hidden id="copy-936">OutputType = &quot;Executable&quot;
 
 [Flags]
 verbose = true</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[Flags]</span></span><span class="line"><span class="c-field">verbose </span>= <span class="c-literal">true</span></span></code></pre></div>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-928"></button><textarea hidden id="copy-928">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-937"></button><textarea hidden id="copy-937">mod example
 
 ext
 {
@@ -93,12 +93,12 @@ done</pre></div>
 <div class="table-wrap"><table><thead><tr><th>Flag</th><th>True when</th></tr></thead><tbody><tr><td><code>windows</code>, <code>linux</code>, <code>macos</code></td><td>building for that operating system</td></tr><tr><td><code>x64</code>, <code>x86</code>, <code>arm64</code>, <code>wasm64</code></td><td>building for that processor</td></tr><tr><td><code>debug</code></td><td>building without <code>--release</code></td></tr><tr><td><code>release</code></td><td>building with <code>--release</code></td></tr><tr><td><code>boundsChecks</code></td><td>bounds checks are on</td></tr><tr><td><code>overflowChecks</code></td><td>overflow checks are on</td></tr></tbody></table></div>
 <h2 id="lints"><a class="anchor" href="#lints">Lints</a></h2>
 <p>Some of the compiler's hints and warnings come from lints, checks for code that works but is likely a mistake or could be simpler. <code>[Lints]</code> sets how each is reported: <code>"Off"</code> drops it, and <code>"Hint"</code>, <code>"Warning"</code> and <code>"Error"</code> report it at that level. An error from a lint stops the build like any other:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-929"></button><textarea hidden id="copy-929">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-938"></button><textarea hidden id="copy-938">OutputType = &quot;Executable&quot;
 
 [Lints]
 UnusedLocal = &quot;Error&quot;
 NeverChanged = &quot;Off&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[Lints]</span></span><span class="line"><span class="c-field">UnusedLocal </span>= <span class="c-literal">"Error"</span></span><span class="line"><span class="c-field">NeverChanged </span>= <span class="c-literal">"Off"</span></span></code></pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-930"></button><textarea hidden id="copy-930">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-939"></button><textarea hidden id="copy-939">mod example
 
 main: fun -&gt; i32
 {
@@ -107,16 +107,16 @@ main: fun -&gt; i32
 	ret count
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> spare = count * <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:8ch">&#x27;spare&#x27; is never used</span></span><span class="line">	<span class="c-keyword">ret</span> count</span><span class="line">}</span></code></pre></div>
 <p><code>count</code> is a <code>var</code> that never changes, which would get a hint, but <code>NeverChanged</code> is off. The lints and their usual levels:</p>
-<div class="table-wrap"><table><thead><tr><th>Lint</th><th>Reports</th><th>Level</th></tr></thead><tbody><tr><td><code>Redundant</code></td><td>marks that change nothing, such as an <code>imm</code> where a value is borrowed anyway</td><td>hint</td></tr><tr><td><code>RedundantImport</code></td><td>imports of names the file can already use</td><td>hint</td></tr><tr><td><code>NeverChanged</code></td><td><code>var</code> variables that are never changed</td><td>hint</td></tr><tr><td><code>UnusedLocal</code></td><td>local variables that are never used</td><td>hint</td></tr><tr><td><code>UnusedDeclaration</code></td><td>functions and globals that nothing uses</td><td>hint</td></tr><tr><td><code>Naming</code></td><td>names that don't follow the [<code>[Naming]</code>](#naming) rules</td><td>hint</td></tr><tr><td><code>UnreachableCode</code></td><td>code that can never run</td><td>warning</td></tr><tr><td><code>FloatPattern</code></td><td>patterns that compare floats</td><td>warning</td></tr><tr><td><code>SelfConversion</code></td><td>conversions that call themselves</td><td>warning</td></tr><tr><td><code>EndlessRecursion</code></td><td>functions that call themselves on every path</td><td>warning</td></tr></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>Lint</th><th>Reports</th><th>Level</th></tr></thead><tbody><tr><td><code>Redundant</code></td><td>marks that change nothing, such as an <code>imm</code> where a value is borrowed anyway</td><td>hint</td></tr><tr><td><code>RedundantImport</code></td><td>imports of names the file can already use</td><td>hint</td></tr><tr><td><code>NeverChanged</code></td><td><code>var</code> variables that are never changed</td><td>hint</td></tr><tr><td><code>UnusedLocal</code></td><td>local variables that are never used</td><td>hint</td></tr><tr><td><code>UnusedDeclaration</code></td><td>functions and globals that nothing uses</td><td>hint</td></tr><tr><td><code>UnusedImport</code></td><td>imports that the file never uses</td><td>hint</td></tr><tr><td><code>Naming</code></td><td>names that don't follow the [<code>[Naming]</code>](#naming) rules</td><td>hint</td></tr><tr><td><code>UnreachableCode</code></td><td>code that can never run</td><td>warning</td></tr><tr><td><code>FloatPattern</code></td><td>patterns that compare floats</td><td>warning</td></tr><tr><td><code>SelfConversion</code></td><td>conversions that call themselves</td><td>warning</td></tr><tr><td><code>EndlessRecursion</code></td><td>functions that call themselves on every path</td><td>warning</td></tr></tbody></table></div>
 <p><code>UnusedDeclaration</code> leaves out <code>pub</code> declarations, <code>main</code>, operators and <code>ext</code> functions. Hints are shown only in builds given <code>--hints</code> (see <a href="projects.html#hints">Projects and building</a>). <code>[When."condition".Lints]</code> tables change single lints in some builds, so <code>[When.release.Lints]</code> with <code>UnusedLocal = "Warning"</code> would keep release builds going.</p>
 <h2 id="naming"><a class="anchor" href="#naming">Naming</a></h2>
 <p>The <code>Naming</code> lint checks every name a project declares against a pattern for its kind. <code>[Naming]</code> replaces the pattern for some kinds:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-931"></button><textarea hidden id="copy-931">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-940"></button><textarea hidden id="copy-940">OutputType = &quot;Executable&quot;
 
 [Naming]
 Constants = &quot;{SCREAMING_CASE}&quot;
 Types = &quot;{PascalCase}|C{PascalCase}&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[Naming]</span></span><span class="line"><span class="c-field">Constants </span>= <span class="c-literal">"{SCREAMING_CASE}"</span></span><span class="line"><span class="c-field">Types </span>= <span class="c-literal">"{PascalCase}|C{PascalCase}"</span></span></code></pre></div>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-932"></button><textarea hidden id="copy-932">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-941"></button><textarea hidden id="copy-941">mod example
 
 ext
 {
@@ -143,16 +143,16 @@ main: fun
 <p>Each <code>[[ProjectReferences]]</code> table makes the project use another one, usually a library. It has two settings:</p>
 <div class="table-wrap"><table><thead><tr><th>Setting</th><th>Meaning</th></tr></thead><tbody><tr><td><code>Path</code></td><td>The other project's <code>.celp</code> file, relative to this project's folder. Required.</td></tr><tr><td><code>Alias</code></td><td>A name to reach the other project's modules through. Optional.</td></tr></tbody></table></div>
 <p>Without an alias, the other project's modules are reached by their own names. With one, they are reached only through the alias, which keeps modules of the same name in different projects apart:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-933"></button><textarea hidden id="copy-933">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-942"></button><textarea hidden id="copy-942">OutputType = &quot;Executable&quot;
 
 [[ProjectReferences]]
 Path = &#x27;geometry/geometry.celp&#x27;
 Alias = &#x27;geo&#x27;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">'geometry/geometry.celp'</span></span><span class="line"><span class="c-field">Alias </span>= <span class="c-literal">'geo'</span></span></code></pre></div>
-<div class="code toml"><div class="code-title">geometry/geometry.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-934"></button><textarea hidden id="copy-934">OutputType = &quot;StaticLibrary&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span></code></pre></div>
-<div class="code cella"><div class="code-title">geometry/shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-935"></button><textarea hidden id="copy-935">mod shapes
+<div class="code toml"><div class="code-title">geometry/geometry.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-943"></button><textarea hidden id="copy-943">OutputType = &quot;StaticLibrary&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span></code></pre></div>
+<div class="code cella"><div class="code-title">geometry/shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-944"></button><textarea hidden id="copy-944">mod shapes
 
 area: pub fun(width: f64, height: f64) -&gt; f64 =&gt; width * height</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">shapes</span></span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">pub</span> <span class="c-keyword">fun</span>(<span class="c-parameter">width</span>: <span class="c-type">f64</span>, <span class="c-parameter">height</span>: <span class="c-type">f64</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-parameter">width</span> * <span class="c-parameter">height</span></span></code></pre></div>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-936"></button><textarea hidden id="copy-936">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-945"></button><textarea hidden id="copy-945">mod example
 
 ext
 {
@@ -167,7 +167,7 @@ main: fun
 <p>An alias must be an identifier, can't be the name of a built-in type, and can't name two references. <a href="projects.html#using-a-library-project">Projects and building</a> covers using library projects.</p>
 <h2 id="when-tables"><a class="anchor" href="#when-tables">When tables</a></h2>
 <p>A <code>[When."condition"]</code> table changes settings in the builds where its condition holds. The condition uses flags, built-in or the project's own, with <code>!</code>, <code>&amp;&amp;</code>, <code>||</code> and parentheses, as in a <code>when</code> block. A condition that is a single flag can leave out the quotes: <code>[When.debug]</code>.</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-937"></button><textarea hidden id="copy-937">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-946"></button><textarea hidden id="copy-946">OutputType = &quot;Executable&quot;
 
 [Flags]
 fast = false
@@ -177,7 +177,7 @@ OverflowChecks = false
 
 [When.&quot;release || fast&quot;]
 BoundsChecks = false</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[Flags]</span></span><span class="line"><span class="c-field">fast </span>= <span class="c-literal">false</span></span><span class="line"> </span><span class="line"><span class="c-type">[When.debug]</span></span><span class="line"><span class="c-field">OverflowChecks </span>= <span class="c-literal">false</span></span><span class="line"> </span><span class="line"><span class="c-type">[When."release || fast"]</span></span><span class="line"><span class="c-field">BoundsChecks </span>= <span class="c-literal">false</span></span></code></pre></div>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-938"></button><textarea hidden id="copy-938">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-947"></button><textarea hidden id="copy-947">mod example
 
 ext
 {
@@ -204,7 +204,7 @@ main: fun
 bounds checks on</pre></div>
 <p>This is a debug build, so the first table applies and the second doesn't. A release build, or one with <code>--flag fast</code>, would also turn bounds checks off.</p>
 <p>A setting in a <code>When</code> table replaces the one at the top level. Only <code>SystemLinkPreference</code>, <code>AssemblyName</code>, <code>BoundsChecks</code>, <code>OverflowChecks</code>, <code>DebugInfo</code>, <code>Referenceable</code>, <code>[Lints]</code> and project references can go in one; a <code>Lints</code> table replaces only the lints it names. <code>[[When."condition".ProjectReferences]]</code> tables add references in the builds where the condition holds, after the ones at the top level:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-939"></button><textarea hidden id="copy-939">[[When.windows.ProjectReferences]]
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-948"></button><textarea hidden id="copy-948">[[When.windows.ProjectReferences]]
 Path = &#x27;win32/win32.celp&#x27;</textarea><pre><code><span class="line"><span class="c-type">[[When.windows.ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">'win32/win32.celp'</span></span></code></pre></div>
 <p>Two tables whose conditions both hold can't set the same setting: that's an error such as "'BoundsChecks' is set more than once, by [When."debug"] and [When."windows || linux"]".</p>
 <h2 id="problems-in-project-files"><a class="anchor" href="#problems-in-project-files">Problems in project files</a></h2>

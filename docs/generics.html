@@ -34,7 +34,7 @@ try {
 <main>
 <article class="content">
 <h1>Generics</h1>
-<p>A generic declaration takes types as parameters. One generic function or record works for every type you give it, and the compiler builds a separate copy of it for each type it's used with. This chapter covers generic functions, records and enums, the constraints that say which types a parameter accepts, and value parameters, which take compile-time integers instead of types.</p>
+<p>A generic declaration takes types as parameters. One generic function or record works for every type you give it, and the compiler builds a separate copy of it for each type it's used with. This chapter covers generic functions, records and enums, the constraints that say which types a parameter accepts, value parameters, which take compile-time integers instead of types, and defaults for both.</p>
 <h2 id="generic-functions"><a class="anchor" href="#generic-functions">Generic functions</a></h2>
 <p>Type parameters go in brackets after the function's name. Inside the function, a type parameter is a type like any other:</p>
 <div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-522"></button><textarea hidden id="copy-522">mod example
@@ -686,9 +686,140 @@ main: fun
 	val a = Small[300]()
 	val b = Small[i32]()
 }</textarea><pre><code><span class="line"><span class="c-function">grow</span>[<span class="c-typeparam">length</span>: <span class="c-keyword">const</span> <span class="c-type">usize</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">values</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-typeparam">length</span>]) -&gt; array[<span class="c-type">i32</span>, length + <span class="c-literal">1</span>] =&gt; <span class="c-keyword">undef</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:73ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:73ch">Cannot use arithmetic on value parameters in generic arguments</span></span><span class="line"> </span><span class="line"><span class="c-type">Ratio</span>[<span class="c-typeparam">scale</span>: <span class="c-keyword">const</span> <span class="c-type">f64</span>]: <span class="c-keyword">rec</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:19ch">Value parameters need an integer type</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Small</span>[<span class="c-typeparam">count</span>: <span class="c-keyword">const</span> <span class="c-type">u8</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">items</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-typeparam">count</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">misuse</span>[<span class="c-typeparam">count</span>: <span class="c-keyword">const</span> <span class="c-type">usize</span>]: <span class="c-keyword">fun</span> -&gt; <span class="c-type">usize</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x: count = <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:11ch">&#x27;count&#x27; is not a type</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-typeparam">count</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-type">Small</span>[<span class="c-literal">300</span>]()</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:18ch">&#x27;300&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-type">Small</span>[<span class="c-type">i32</span>]()</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:18ch">&#x27;i32&#x27; is not a constant</span></span><span class="line">}</span></code></pre></div>
+<h2 id="default-arguments"><a class="anchor" href="#default-arguments">Default arguments</a></h2>
+<p>A type or value parameter can name a default after <code>=</code>. Arguments left off the end of the list take their defaults, so a parameter that most uses don't change doesn't have to be written each time:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-549"></button><textarea hidden id="copy-549">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Pair[K, V = K]: rec
+{
+	key: K
+	value: V
+}
+
+Buffer[T, capacity: const usize = 8]: rec
+{
+	items: array[T, capacity]
+	count: usize
+}
+
+main: fun
+{
+	val same = Pair[i32](1, 2)
+	val mixed = Pair[i32, bool](3, true)
+	printf(&quot;%d %d %zu %zu\n&quot;, same.value, mixed.value, sizeOf(Buffer[u8]), sizeOf(Buffer[u8, 64]))
+}</textarea><pre><code><span class="line"><span class="c-type">Pair</span>[<span class="c-typeparam">K</span>, <span class="c-typeparam">V</span> = <span class="c-typeparam">K</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">key</span>: <span class="c-typeparam">K</span></span><span class="line">	<span class="c-field">value</span>: <span class="c-typeparam">V</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Buffer</span>[<span class="c-typeparam">T</span>, <span class="c-typeparam">capacity</span>: <span class="c-keyword">const</span> <span class="c-type">usize</span> = <span class="c-literal">8</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">items</span>: <span class="c-type">array</span>[<span class="c-typeparam">T</span>, <span class="c-typeparam">capacity</span>]</span><span class="line">	<span class="c-field">count</span>: <span class="c-type">usize</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> same = <span class="c-type">Pair</span>[<span class="c-type">i32</span>](<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">val</span> mixed = <span class="c-type">Pair</span>[<span class="c-type">i32</span>, <span class="c-type">bool</span>](<span class="c-literal">3</span>, <span class="c-keyword">true</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %zu %zu\n"</span>, same.<span class="c-field">value</span>, mixed.<span class="c-field">value</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">Buffer</span>[<span class="c-type">u8</span>]), <span class="c-keyword">sizeOf</span>(<span class="c-type">Buffer</span>[<span class="c-type">u8</span>, <span class="c-literal">64</span>]))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>2 1 16 72</pre></div>
+<p><code>Pair[i32]</code> is <code>Pair[i32, i32]</code>: a default can use the parameters before it, but not itself or the ones after it. Parameters with defaults come last. A type whose parameters all have defaults is written by its name alone, so <code>Name</code> here is <code>Name[Utf8]</code>. <code>Name[]</code> means the same and gets a "Redundant '[]'" hint:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-550"></button><textarea hidden id="copy-550">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Ascii: rec
+
+Utf8: rec
+
+Name[Encoding = Utf8]: rec
+{
+	length: usize
+}
+
+measure: fun(name: Name) -&gt; usize =&gt; name.length
+
+main: fun
+{
+	val short = Name(4)
+	val plain = Name[Ascii](6)
+	printf(&quot;%zu %zu\n&quot;, measure(short), plain.length)
+}</textarea><pre><code><span class="line"><span class="c-type">Ascii</span>: <span class="c-keyword">rec</span></span><span class="line"> </span><span class="line"><span class="c-type">Utf8</span>: <span class="c-keyword">rec</span></span><span class="line"> </span><span class="line"><span class="c-type">Name</span>[<span class="c-typeparam">Encoding</span> = <span class="c-type">Utf8</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">length</span>: <span class="c-type">usize</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">measure</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">name</span>: <span class="c-type">Name</span>) -&gt; <span class="c-type">usize</span> =&gt; <span class="c-parameter">name</span>.<span class="c-field">length</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> short = <span class="c-type">Name</span>(<span class="c-literal">4</span>)</span><span class="line">	<span class="c-keyword">val</span> plain = <span class="c-type">Name</span>[<span class="c-type">Ascii</span>](<span class="c-literal">6</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu\n"</span>, <span class="c-function">measure</span>(short), plain.<span class="c-field">length</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4 6</pre></div>
+<p>Defaults work the same way for functions and methods. A method's default can use its type's parameters too. Inference comes first: a default only fills a parameter that neither the arguments nor the expected type settles. Here <code>Cell(5)</code> is a <code>Cell[i32]</code>, since the literal settles <code>T</code>, while the declared type of <code>written</code> makes it a <code>Cell[i64]</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-551"></button><textarea hidden id="copy-551">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Cell[T = i64]: rec
+{
+	value: T
+}
+
+parse[T: default = i64]: fun -&gt; T
+{
+	var value: T
+	ret value
+}
+
+main: fun
+{
+	val inferred = Cell(5)
+	val written: Cell = Cell(5)
+	val plain = parse()
+	val chosen: i16 = parse()
+	printf(&quot;%zu %zu %zu %zu\n&quot;, sizeOf(inferred), sizeOf(written), sizeOf(plain), sizeOf(chosen))
+}</textarea><pre><code><span class="line"><span class="c-type">Cell</span>[<span class="c-typeparam">T</span> = <span class="c-type">i64</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-typeparam">T</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">parse</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">default</span> = <span class="c-type">i64</span>]: <span class="c-keyword">fun</span> -&gt; <span class="c-typeparam">T</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> value: <span class="c-typeparam">T</span></span><span class="line">	<span class="c-keyword">ret</span> value</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> inferred = <span class="c-type">Cell</span>(<span class="c-literal">5</span>)</span><span class="line">	<span class="c-keyword">val</span> written: <span class="c-type">Cell</span> = <span class="c-type">Cell</span>(<span class="c-literal">5</span>)</span><span class="line">	<span class="c-keyword">val</span> plain = <span class="c-function">parse</span>()</span><span class="line">	<span class="c-keyword">val</span> chosen: <span class="c-type">i16</span> = <span class="c-function">parse</span>()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%zu %zu %zu %zu\n"</span>, <span class="c-keyword">sizeOf</span>(inferred), <span class="c-keyword">sizeOf</span>(written), <span class="c-keyword">sizeOf</span>(plain), <span class="c-keyword">sizeOf</span>(chosen))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>4 8 8 2</pre></div>
+<p>A default must meet its parameter's constraints, which is checked where it's declared. Messages leave out trailing arguments that are the same as their defaults, as the last error shows:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-552"></button><textarea hidden id="copy-552">mod example
+
+Eq: trait
+{
+	==: op(imm a: Self, imm b: Self) -&gt; bool
+}
+
+Plain: rec
+{
+	value: i32
+}
+
+Late[T = i32, U]: rec
+{
+	a: T
+	b: U
+}
+
+Forward[T = U, U = i32]: rec
+{
+	a: T
+}
+
+Checked[T: Eq = Plain]: rec
+{
+	a: T
+}
+
+Pair[K, V = K]: rec
+{
+	key: K
+	value: V
+}
+
+main: fun
+{
+	val many: Pair[i32, i32, i32] = undef
+	val pair: Pair[i32] = Pair[i32, bool](1, true)
+}</textarea><pre><code><span class="line"><span class="c-trait">Eq</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">==</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-keyword">imm</span> <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-type">bool</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Plain</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Late</span>[<span class="c-typeparam">T</span> = <span class="c-type">i32</span>, <span class="c-typeparam">U</span>]: <span class="c-keyword">rec</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot take parameters without defaults after parameters with defaults</span></span><span class="line">{</span><span class="line">	<span class="c-field">a</span>: <span class="c-typeparam">T</span></span><span class="line">	<span class="c-field">b</span>: <span class="c-typeparam">U</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Forward</span>[<span class="c-typeparam">T</span> = <span class="c-typeparam">U</span>, <span class="c-typeparam">U</span> = <span class="c-type">i32</span>]: <span class="c-keyword">rec</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use &#x27;U&#x27; in defaults of earlier parameters</span></span><span class="line">{</span><span class="line">	<span class="c-field">a</span>: <span class="c-typeparam">T</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Checked</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Eq</span> = <span class="c-type">Plain</span>]: <span class="c-keyword">rec</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:16ch">&#x27;Checked&#x27; requires &#x27;T: Eq&#x27;<span class="diagnostic-note">&#x27;Plain&#x27; doesn&#x27;t implement &#x27;Eq&#x27;</span></span></span><span class="line">{</span><span class="line">	<span class="c-field">a</span>: <span class="c-typeparam">T</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>[<span class="c-typeparam">K</span>, <span class="c-typeparam">V</span> = <span class="c-typeparam">K</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">key</span>: <span class="c-typeparam">K</span></span><span class="line">	<span class="c-field">value</span>: <span class="c-typeparam">V</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> many: Pair[<span class="c-type">i32</span>, <span class="c-type">i32</span>, <span class="c-type">i32</span>] = <span class="c-keyword">undef</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:19ch"></span><span class="diagnostic-text" style="margin-left:14ch">&#x27;Pair&#x27; takes 1 or 2 generic arguments</span></span><span class="line">	<span class="c-keyword">val</span> pair: <span class="c-type">Pair</span>[<span class="c-type">i32</span>] = <span class="c-type">Pair</span>[<span class="c-type">i32</span>, <span class="c-type">bool</span>](<span class="c-literal">1</span>, <span class="c-keyword">true</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:26ch;width:24ch"></span><span class="diagnostic-text" style="margin-left:26ch">Cannot convert type &#x27;Pair[i32, bool]&#x27; to &#x27;Pair[i32]&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>Two overloads that a call can reach the same way, with or without the defaulted argument, are an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-553"></button><textarea hidden id="copy-553">mod example
+
+first[T]: fun(value: T) -&gt; i32 =&gt; 1
+first[T, U = i32]: fun(value: T) -&gt; i32 =&gt; 2
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">first</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;first&#x27; overloads cannot accept the same arguments</span></span><span class="line"><span class="c-function">first</span>[<span class="c-typeparam">T</span>, <span class="c-typeparam">U</span> = <span class="c-type">i32</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;first&#x27; overloads cannot accept the same arguments</span></span></code></pre></div>
 <h2 id="adding-members-under-bounds"><a class="anchor" href="#adding-members-under-bounds">Adding members under bounds</a></h2>
 <p>An <code>impl</code> block on a generic type with stronger constraints adds members that exist only for the instantiations that meet them. A block can also name a concrete instantiation, so its members exist only for that one type:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-549"></button><textarea hidden id="copy-549">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-554"></button><textarea hidden id="copy-554">mod example
 
 ext
 {
@@ -720,7 +851,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Pair</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">a</span>: <span class="c-typeparam">T</span></span><span class="line">	<span class="c-field">b</span>: <span class="c-typeparam">T</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>[T: <span class="c-keyword">copy</span>]: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-function">swapped</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">Pair</span>[<span class="c-typeparam">T</span>] =&gt; <span class="c-type">Pair</span>(<span class="c-keyword">self</span>.<span class="c-field">b</span>, <span class="c-keyword">self</span>.<span class="c-field">a</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>[<span class="c-type">i32</span>]: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-function">sum</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">a</span> + <span class="c-keyword">self</span>.<span class="c-field">b</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = <span class="c-type">Pair</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>)</span><span class="line">	<span class="c-keyword">val</span> q = p.<span class="c-function">swapped</span>()</span><span class="line">	<span class="c-keyword">val</span> r = <span class="c-type">Pair</span>(<span class="c-literal">1.5</span>, <span class="c-literal">2.5</span>).<span class="c-function">swapped</span>()</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %.1f\n"</span>, q.<span class="c-field">a</span>, q.<span class="c-field">b</span>, p.<span class="c-function">sum</span>(), r.<span class="c-field">a</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>4 3 7 2.5</pre></div>
 <p>Inside <code>Pair[T: copy]: impl</code>, the body knows <code>T: copy</code>, so <code>self</code> can be copied. Using a member on an instantiation that doesn't meet the block's constraints is an error at the use. In the type's own module, a block that adds no constraints to the declaration's is an error, since those members belong in the type's own body:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-550"></button><textarea hidden id="copy-550">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-555"></button><textarea hidden id="copy-555">mod example
 
 Token: own rec
 {
@@ -758,12 +889,98 @@ main: fun
 	val swapped = tokens.swapped()
 	val total = Pair(1.5, 2.5).sum()
 }</textarea><pre><code><span class="line"><span class="c-type">Token</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">a</span>: <span class="c-typeparam">T</span></span><span class="line">	<span class="c-field">b</span>: <span class="c-typeparam">T</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>[T: <span class="c-keyword">copy</span>]: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-function">swapped</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">Pair</span>[<span class="c-typeparam">T</span>] =&gt; <span class="c-type">Pair</span>(<span class="c-keyword">self</span>.<span class="c-field">b</span>, <span class="c-keyword">self</span>.<span class="c-field">a</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>[<span class="c-type">i32</span>]: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-function">sum</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">a</span> + <span class="c-keyword">self</span>.<span class="c-field">b</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>[T]: <span class="c-keyword">impl</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:9ch">Cannot declare &#x27;impl&#x27; blocks that add no bounds</span></span><span class="line">{</span><span class="line">	<span class="c-function">first</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-typeparam">T</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">a</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> tokens = <span class="c-type">Pair</span>(<span class="c-type">Token</span>(<span class="c-literal">1</span>), <span class="c-type">Token</span>(<span class="c-literal">2</span>))</span><span class="line">	<span class="c-keyword">val</span> swapped = tokens.swapped()</span><span class="diagnostic"><span class="squiggle" style="margin-left:25ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:25ch">&#x27;swapped&#x27; requires &#x27;T: copy&#x27;<span class="diagnostic-note">&#x27;Token&#x27; can&#x27;t be copied</span></span></span><span class="line">	<span class="c-keyword">val</span> total = <span class="c-type">Pair</span>(<span class="c-literal">1.5</span>, <span class="c-literal">2.5</span>).sum()</span><span class="diagnostic"><span class="squiggle" style="margin-left:31ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:31ch">Type &#x27;Pair[f64]&#x27; has no member &#x27;sum&#x27;</span></span><span class="line">}</span></code></pre></div>
+<p>A block in the type's own module can also declare constructors. Like its other members, they exist only for the instantiations that meet the block. This lets a type offer a shorter constructor where a parameter's value can start as zeros:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-556"></button><textarea hidden id="copy-556">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Tagged[T, Tag]: rec
+{
+	value: T
+	tag: Tag
+
+	new: op(value: T, tag: Tag)
+	{
+		self.value = value
+		self.tag = tag
+	}
+}
+
+Tagged[T, Tag: default]: impl
+{
+	new: op(value: T)
+	{
+		var tag: Tag
+		self.value = value
+		self.tag = tag
+	}
+}
+
+main: fun
+{
+	val named = Tagged(5, 9)
+	val plain = Tagged[i32, u8](6)
+	printf(&quot;%d %d %d %d\n&quot;, named.value, named.tag, plain.value, plain.tag)
+}</textarea><pre><code><span class="line"><span class="c-type">Tagged</span>[<span class="c-typeparam">T</span>, <span class="c-typeparam">Tag</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-typeparam">T</span></span><span class="line">	<span class="c-field">tag</span>: <span class="c-typeparam">Tag</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-typeparam">T</span>, <span class="c-parameter">tag</span>: <span class="c-typeparam">Tag</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">value</span> = <span class="c-parameter">value</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">tag</span> = <span class="c-parameter">tag</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Tagged</span>[T, Tag: <span class="c-keyword">default</span>]: <span class="c-keyword">impl</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">op</span>(<span class="c-parameter">value</span>: <span class="c-typeparam">T</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">var</span> tag: <span class="c-typeparam">Tag</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">value</span> = <span class="c-parameter">value</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">tag</span> = tag</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> named = <span class="c-type">Tagged</span>(<span class="c-literal">5</span>, <span class="c-literal">9</span>)</span><span class="line">	<span class="c-keyword">val</span> plain = <span class="c-type">Tagged</span>[<span class="c-type">i32</span>, <span class="c-type">u8</span>](<span class="c-literal">6</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, named.<span class="c-field">value</span>, named.<span class="c-field">tag</span>, plain.<span class="c-field">value</span>, plain.<span class="c-field">tag</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>5 9 6 0</pre></div>
+<p>A constructor in a block counts as declaring a constructor, so the type loses its built-in constructors for every instantiation, as <a href="records.html#constructors">Records</a> describes. Calling a block's constructor on an instantiation that doesn't meet the block is an error at the call. A block names every parameter of its type, including the ones with defaults:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-557"></button><textarea hidden id="copy-557">mod example
+
+Token: own rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+Tagged[T, Tag]: rec
+{
+	value: T
+	tag: Tag
+
+	new: op(value: T, tag: Tag)
+	{
+		self.value = value
+		self.tag = tag
+	}
+}
+
+Tagged[T, Tag: default]: impl
+{
+	new: op(value: T)
+	{
+		var tag: Tag
+		self.value = value
+		self.tag = tag
+	}
+}
+
+Pair[K, V = K]: rec
+{
+	key: K
+	value: V
+}
+
+Pair[K: copy]: impl
+{
+	first: fun(self) -&gt; K =&gt; self.key
+}
+
+main: fun
+{
+	val tagged = Tagged[i32, Token](6)
+}</textarea><pre><code><span class="line"><span class="c-type">Token</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>[<span class="c-typeparam">K</span>, <span class="c-typeparam">V</span> = <span class="c-typeparam">K</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">key</span>: <span class="c-typeparam">K</span></span><span class="line">	<span class="c-field">value</span>: <span class="c-typeparam">V</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Pair</span>[K: <span class="c-keyword">copy</span>]: <span class="c-keyword">impl</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;Pair&#x27; takes 2 generic arguments</span></span><span class="line">{</span><span class="line">	<span class="c-function">first</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-typeparam">K</span> =&gt; <span class="c-keyword">self</span>.key</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> tagged = <span class="c-type">Tagged</span>[<span class="c-type">i32</span>, <span class="c-type">Token</span>](<span class="c-literal">6</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:18ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;new&#x27; requires &#x27;Tag: default&#x27;<span class="diagnostic-note">&#x27;Token&#x27; has no default</span></span></span><span class="line">}</span></code></pre></div>
 <p>Blocks like these most often add members under a <a href="traits.html">trait bound</a>. Blocks that implement a trait, and blocks outside the type's own module, are covered in <a href="traits.html">Traits</a>.</p>
 </article>
 <nav class="pager"><a class="previous" href="pointers.html"><span>Previous</span>Pointers and raw memory</a><a class="next" href="traits.html"><span>Next</span>Traits</a></nav>
 </main>
 <aside class="toc">
-<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#generic-functions">Generic functions</a></li><li class="level-2"><a href="#type-arguments">Type arguments</a></li><li class="level-2"><a href="#how-generic-bodies-are-checked">How generic bodies are checked</a></li><li class="level-2"><a href="#generic-and-plain-overloads">Generic and plain overloads</a></li><li class="level-2"><a href="#generic-records">Generic records</a></li><li class="level-2"><a href="#generic-methods">Generic methods</a></li><li class="level-2"><a href="#generic-enums">Generic enums</a></li><li class="level-2"><a href="#constraints">Constraints</a></li><li class="level-3"><a href="#copy">copy</a></li><li class="level-3"><a href="#noref">noref</a></li><li class="level-3"><a href="#drop">drop</a></li><li class="level-3"><a href="#default">default</a></li><li class="level-3"><a href="#new">new</a></li><li class="level-3"><a href="#null">null</a></li><li class="level-2"><a href="#value-parameters">Value parameters</a></li><li class="level-2"><a href="#adding-members-under-bounds">Adding members under bounds</a></li></ul>
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#generic-functions">Generic functions</a></li><li class="level-2"><a href="#type-arguments">Type arguments</a></li><li class="level-2"><a href="#how-generic-bodies-are-checked">How generic bodies are checked</a></li><li class="level-2"><a href="#generic-and-plain-overloads">Generic and plain overloads</a></li><li class="level-2"><a href="#generic-records">Generic records</a></li><li class="level-2"><a href="#generic-methods">Generic methods</a></li><li class="level-2"><a href="#generic-enums">Generic enums</a></li><li class="level-2"><a href="#constraints">Constraints</a></li><li class="level-3"><a href="#copy">copy</a></li><li class="level-3"><a href="#noref">noref</a></li><li class="level-3"><a href="#drop">drop</a></li><li class="level-3"><a href="#default">default</a></li><li class="level-3"><a href="#new">new</a></li><li class="level-3"><a href="#null">null</a></li><li class="level-2"><a href="#value-parameters">Value parameters</a></li><li class="level-2"><a href="#default-arguments">Default arguments</a></li><li class="level-2"><a href="#adding-members-under-bounds">Adding members under bounds</a></li></ul>
 </aside>
 </div>
 <div id="message"></div>

@@ -864,6 +864,75 @@ score: 42
 3 writes
 ```
 
+A trait's type parameters can have [defaults](generics.md#default-arguments). A default can use `Self`, which stands for the type the trait is applied to: the implementing type in an implementation, and the type parameter in a bound. Here `Combine` with no argument means "combine with another value of the same type", while `Offset` names a different right-hand type:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Combine[Rhs = Self]: trait
+{
+	combine: fun(self, other: Rhs) -> Self
+}
+
+i32: impl Combine
+{
+	combine: fun(self, other: i32) -> i32 => self + other
+}
+
+Meters: rec impl Combine
+{
+	value: i32
+
+	combine: fun(self, other: Meters) -> Meters => Meters(self.value + other.value)
+}
+
+Offset: rec impl Combine[i32]
+{
+	value: i32
+
+	combine: fun(self, other: i32) -> Offset => Offset(self.value + other)
+}
+
+sum[T: Combine + copy]: fun(a: T, b: T) -> T => a.combine(b)
+
+main: fun
+{
+	val meters = sum(Meters(2), Meters(3))
+	val offset = Offset(1).combine(9)
+	printf("%d %d %d\n", sum(3, 4), meters.value, offset.value)
+}
+```
+
+```output
+7 5 10
+```
+
+`T: Combine` is `T: Combine[T]`, and `i32: impl Combine` implements `Combine[i32]`. Where there's no type for `Self` to stand for, as in a `dyn` type, the argument has to be written:
+
+```cella error
+~ mod example
+~
+Combine[Rhs = Self]: trait
+{
+	combine: fun(self, other: Rhs) -> Self
+}
+
+describe: fun(imm value: dyn[Combine]) -> i32 => 0
+~
+~ main: fun
+~ {
+~ }
+```
+
+```errors
+'Combine' needs an argument for 'Rhs'
+```
+
 ## Traits that require other traits
 
 `Ord: trait req Eq` says that every type that implements `Ord` implements `Eq` as well. `Ord`'s default bodies can then use `Eq`'s members, and a bound `[T: Ord]` gives generic code both traits' members and meets `[T: Eq]` bounds:

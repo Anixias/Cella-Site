@@ -1,6 +1,6 @@
 # Generics
 
-A generic declaration takes types as parameters. One generic function or record works for every type you give it, and the compiler builds a separate copy of it for each type it's used with. This chapter covers generic functions, records and enums, the constraints that say which types a parameter accepts, and value parameters, which take compile-time integers instead of types.
+A generic declaration takes types as parameters. One generic function or record works for every type you give it, and the compiler builds a separate copy of it for each type it's used with. This chapter covers generic functions, records and enums, the constraints that say which types a parameter accepts, value parameters, which take compile-time integers instead of types, and defaults for both.
 
 ## Generic functions
 
@@ -903,6 +903,180 @@ Value parameters need an integer type
 'i32' is not a constant
 ```
 
+## Default arguments
+
+A type or value parameter can name a default after `=`. Arguments left off the end of the list take their defaults, so a parameter that most uses don't change doesn't have to be written each time:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Pair[K, V = K]: rec
+{
+	key: K
+	value: V
+}
+
+Buffer[T, capacity: const usize = 8]: rec
+{
+	items: array[T, capacity]
+	count: usize
+}
+
+main: fun
+{
+	val same = Pair[i32](1, 2)
+	val mixed = Pair[i32, bool](3, true)
+	printf("%d %d %zu %zu\n", same.value, mixed.value, sizeOf(Buffer[u8]), sizeOf(Buffer[u8, 64]))
+}
+```
+
+```output
+2 1 16 72
+```
+
+`Pair[i32]` is `Pair[i32, i32]`: a default can use the parameters before it, but not itself or the ones after it. Parameters with defaults come last. A type whose parameters all have defaults is written by its name alone, so `Name` here is `Name[Utf8]`. `Name[]` means the same and gets a "Redundant '[]'" hint:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Ascii: rec
+
+Utf8: rec
+
+Name[Encoding = Utf8]: rec
+{
+	length: usize
+}
+
+measure: fun(name: Name) -> usize => name.length
+
+main: fun
+{
+	val short = Name(4)
+	val plain = Name[Ascii](6)
+	printf("%zu %zu\n", measure(short), plain.length)
+}
+```
+
+```output
+4 6
+```
+
+Defaults work the same way for functions and methods. A method's default can use its type's parameters too. Inference comes first: a default only fills a parameter that neither the arguments nor the expected type settles. Here `Cell(5)` is a `Cell[i32]`, since the literal settles `T`, while the declared type of `written` makes it a `Cell[i64]`:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Cell[T = i64]: rec
+{
+	value: T
+}
+
+parse[T: default = i64]: fun -> T
+{
+	var value: T
+	ret value
+}
+
+main: fun
+{
+	val inferred = Cell(5)
+	val written: Cell = Cell(5)
+	val plain = parse()
+	val chosen: i16 = parse()
+	printf("%zu %zu %zu %zu\n", sizeOf(inferred), sizeOf(written), sizeOf(plain), sizeOf(chosen))
+}
+```
+
+```output
+4 8 8 2
+```
+
+A default must meet its parameter's constraints, which is checked where it's declared. Messages leave out trailing arguments that are the same as their defaults, as the last error shows:
+
+```cella error
+~ mod example
+~
+Eq: trait
+{
+	==: op(imm a: Self, imm b: Self) -> bool
+}
+
+Plain: rec
+{
+	value: i32
+}
+
+Late[T = i32, U]: rec
+{
+	a: T
+	b: U
+}
+
+Forward[T = U, U = i32]: rec
+{
+	a: T
+}
+
+Checked[T: Eq = Plain]: rec
+{
+	a: T
+}
+
+Pair[K, V = K]: rec
+{
+	key: K
+	value: V
+}
+
+main: fun
+{
+	val many: Pair[i32, i32, i32] = undef
+	val pair: Pair[i32] = Pair[i32, bool](1, true)
+}
+```
+
+```errors
+Cannot take parameters without defaults after parameters with defaults
+Cannot use 'U' in defaults of earlier parameters
+'Checked' requires 'T: Eq'
+'Pair' takes 1 or 2 generic arguments
+Cannot convert type 'Pair[i32, bool]' to 'Pair[i32]'
+```
+
+Two overloads that a call can reach the same way, with or without the defaulted argument, are an error:
+
+```cella error
+~ mod example
+~
+first[T]: fun(value: T) -> i32 => 1
+first[T, U = i32]: fun(value: T) -> i32 => 2
+~
+~ main: fun
+~ {
+~ }
+```
+
+```errors
+'first' overloads cannot accept the same arguments
+'first' overloads cannot accept the same arguments
+```
+
 ## Adding members under bounds
 
 An `impl` block on a generic type with stronger constraints adds members that exist only for the instantiations that meet them. A block can also name a concrete instantiation, so its members exist only for that one type:
@@ -991,6 +1165,108 @@ main: fun
 Cannot declare 'impl' blocks that add no bounds
 'swapped' requires 'T: copy'
 Type 'Pair[f64]' has no member 'sum'
+```
+
+A block in the type's own module can also declare constructors. Like its other members, they exist only for the instantiations that meet the block. This lets a type offer a shorter constructor where a parameter's value can start as zeros:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Tagged[T, Tag]: rec
+{
+	value: T
+	tag: Tag
+
+	new: op(value: T, tag: Tag)
+	{
+		self.value = value
+		self.tag = tag
+	}
+}
+
+Tagged[T, Tag: default]: impl
+{
+	new: op(value: T)
+	{
+		var tag: Tag
+		self.value = value
+		self.tag = tag
+	}
+}
+
+main: fun
+{
+	val named = Tagged(5, 9)
+	val plain = Tagged[i32, u8](6)
+	printf("%d %d %d %d\n", named.value, named.tag, plain.value, plain.tag)
+}
+```
+
+```output
+5 9 6 0
+```
+
+A constructor in a block counts as declaring a constructor, so the type loses its built-in constructors for every instantiation, as [Records](records.md#constructors) describes. Calling a block's constructor on an instantiation that doesn't meet the block is an error at the call. A block names every parameter of its type, including the ones with defaults:
+
+```cella error
+~ mod example
+~
+Token: own rec
+{
+	id: i32
+
+	drop: op
+	{
+	}
+}
+
+~ Tagged[T, Tag]: rec
+~ {
+~ 	value: T
+~ 	tag: Tag
+~
+~ 	new: op(value: T, tag: Tag)
+~ 	{
+~ 		self.value = value
+~ 		self.tag = tag
+~ 	}
+~ }
+~
+~ Tagged[T, Tag: default]: impl
+~ {
+~ 	new: op(value: T)
+~ 	{
+~ 		var tag: Tag
+~ 		self.value = value
+~ 		self.tag = tag
+~ 	}
+~ }
+~
+Pair[K, V = K]: rec
+{
+	key: K
+	value: V
+}
+
+Pair[K: copy]: impl
+{
+	first: fun(self) -> K => self.key
+}
+
+main: fun
+{
+	val tagged = Tagged[i32, Token](6)
+}
+```
+
+```errors
+'Pair' takes 2 generic arguments
+'new' requires 'Tag: default'
 ```
 
 Blocks like these most often add members under a [trait bound](traits.md). Blocks that implement a trait, and blocks outside the type's own module, are covered in [Traits](traits.md).

@@ -170,6 +170,7 @@ main: fun -> i32
 | `NeverChanged` | `var` variables that are never changed | hint |
 | `UnusedLocal` | local variables that are never used | hint |
 | `UnusedDeclaration` | functions and globals that nothing uses | hint |
+| `UnusedImport` | imports that the file never uses | hint |
 | `Naming` | names that don't follow the [`[Naming]`](#naming) rules | hint |
 | `UnreachableCode` | code that can never run | warning |
 | `FloatPattern` | patterns that compare floats | warning |

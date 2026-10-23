@@ -409,7 +409,7 @@ main: fun
 
 A constructor with no parameters is written `new: op`, with no parentheses, as a function without parameters is.
 
-Declaring any constructor replaces both built-in ones. The record no longer has a field-by-field constructor, `T()` exists only if a constructor without parameters is declared, and the record loses its legal default:
+Declaring any constructor replaces both built-in ones. The record no longer has a field-by-field constructor, `T()` exists only if a constructor without parameters is declared, and the record loses its legal default. This holds for every instantiation of a generic record, including constructors declared in an [`impl` block](generics.md#adding-members-under-bounds):
 
 ```cella error
 ~ mod example
