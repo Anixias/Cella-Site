@@ -418,7 +418,7 @@ Assignment groups from the right, so `x = y = 10` assigns `10` to `y` and then `
 
 ## Constants
 
-`const` declares a constant: a value computed while compiling. Its initial value must be built from literals, other constants and operators on them:
+`const` declares a constant: a value computed while compiling. Its initial value must be built from literals, other constants, operators on them and calls to [constant functions](constant-functions.md):
 
 ```cella
 ~ mod example

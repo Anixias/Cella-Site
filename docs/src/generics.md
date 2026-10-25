@@ -476,9 +476,10 @@ The constraints are:
 | `ext` | types that can cross into C |
 | `atomic` | types the target can access atomically |
 | a trait | types that implement the trait |
+| `const` and a trait | types with an `impl const` of the trait |
 | a function type | functions and closures of that type |
 
-`ext` is covered in [Calling C](calling-c.md), `atomic` in [Atomics](atomics.md), trait bounds in [Traits](traits.md) and function types as constraints in [Function values and closures](closures.md).
+`ext` is covered in [Calling C](calling-c.md), `atomic` in [Atomics](atomics.md), trait bounds in [Traits](traits.md), `const` bounds in [Constant functions](constant-functions.md#constant-implementations-and-bounds) and function types as constraints in [Function values and closures](closures.md).
 
 ### copy
 
@@ -785,7 +786,7 @@ main: fun
 
 ## Value parameters
 
-A value parameter takes a compile-time integer instead of a type. It's declared with `const` and an integer type, as in `length: const usize`, and inside the declaration it's a constant: it can size an array, appear in expressions, or be passed on as another generic's argument. Like a type parameter, it's inferred from the arguments or written out:
+A value parameter takes a compile-time integer instead of a type. It's declared with `const` before its name and an integer type after it, as in `const length: usize`, and inside the declaration it's a constant: it can size an array, appear in expressions, or be passed on as another generic's argument. Like a type parameter, it's inferred from the arguments or written out:
 
 ```cella
 ~ mod example
@@ -795,7 +796,7 @@ A value parameter takes a compile-time integer instead of a type. It's declared 
 ~ 	printf: fun(format: cstr, ...) -> i32
 ~ }
 ~
-sum[length: const usize]: fun(values: array[i32, length]) -> i32
+sum[const length: usize]: fun(values: array[i32, length]) -> i32
 {
 	var total = 0
 	for value in values
@@ -804,7 +805,7 @@ sum[length: const usize]: fun(values: array[i32, length]) -> i32
 	ret total
 }
 
-zeros[length: const usize]: fun -> array[i32, length]
+zeros[const length: usize]: fun -> array[i32, length]
 {
 	var result: array[i32, length]
 	ret result
@@ -836,7 +837,7 @@ Each value gets its own compiled copy, as each type does. Records and enums take
 ~
 capacity: const usize = 4
 
-Stack[T: noref, size: const usize]: rec
+Stack[T: noref, const size: usize]: rec
 {
 	items: array[T, size]
 	count: usize
@@ -870,19 +871,19 @@ A value parameter must have an integer type, and the value given must fit it. In
 ```cella error
 ~ mod example
 ~
-grow[length: const usize]: fun(values: array[i32, length]) -> array[i32, length + 1] => undef
+grow[const length: usize]: fun(values: array[i32, length]) -> array[i32, length + 1] => undef
 
-Ratio[scale: const f64]: rec
+Ratio[const scale: f64]: rec
 {
 	value: i32
 }
 
-Small[count: const u8]: rec
+Small[const count: u8]: rec
 {
 	items: array[i32, count]
 }
 
-misuse[count: const usize]: fun -> usize
+misuse[const count: usize]: fun -> usize
 {
 	val x: count = 1
 	ret count
@@ -921,7 +922,7 @@ Pair[K, V = K]: rec
 	value: V
 }
 
-Buffer[T, capacity: const usize = 8]: rec
+Buffer[T, const capacity: usize = 8]: rec
 {
 	items: array[T, capacity]
 	count: usize
@@ -1104,7 +1105,7 @@ Grid[T]: rec
 	cell: T
 }
 
-Grid[count: const usize]: rec
+Grid[const count: usize]: rec
 {
 	cells: array[i32, count]
 }

@@ -763,7 +763,7 @@ View[T]: ref rec
 	data: ptr[T]
 	length: usize
 
-	as[count: const usize]: op(imm values: array[T, count]) -> View[T] => View(@values[0], count)
+	as[const count: usize]: op(imm values: array[T, count]) -> View[T] => View(@values[0], count)
 
 	[]: op(self, i: usize) -> imm[T] => imm self.data[i]
 }
@@ -849,7 +849,7 @@ Variadic functions are values like other functions, and their [function types](c
 ~ 	data: ptr[T]
 ~ 	length: usize
 ~
-~ 	as[count: const usize]: op(imm values: array[T, count]) -> View[T] => View(@values[0], count)
+~ 	as[const count: usize]: op(imm values: array[T, count]) -> View[T] => View(@values[0], count)
 ~
 ~ 	[]: op(self, i: usize) -> imm[T] => imm self.data[i]
 ~ }

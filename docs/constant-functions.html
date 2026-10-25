@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Constant functions - Cella Documentation</title>
+<link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+<link rel="stylesheet" href="docs.css?v=3">
+<script>
+try {
+	var theme = localStorage.getItem("theme");
+	if (theme === "light" || (!theme && matchMedia("(prefers-color-scheme: light)").matches))
+		document.documentElement.classList.add("light-mode");
+} catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+	<button class="menu-button" type="button" aria-label="Chapters"></button>
+	<a class="brand" href="index.html"><img src="../img/cella.png" alt="">Cella Documentation</a>
+	<span class="version">0.1.0-dev</span>
+	<div class="search">
+		<input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+		<div id="search-results" hidden></div>
+	</div>
+	<a class="home" href="../index.html">Home</a>
+	<a class="source" href="https://github.com/Anixias/Cella" target="_blank" rel="noopener">Source</a>
+	<button class="theme-button" type="button" aria-label="Toggle theme"></button>
+</header>
+<div class="layout">
+<nav class="chapters">
+<ul><li><a href="index.html">Introduction</a></li><li class="part">Getting started</li><li><a href="hello-world.html"><span class="number">1.</span> Hello, World</a></li><li><a href="projects.html"><span class="number">2.</span> Projects and building</a></li><li class="part">Basics</li><li><a href="lexical-structure.html"><span class="number">3.</span> Lexical structure</a></li><li><a href="numbers.html"><span class="number">4.</span> Numbers and arithmetic</a></li><li><a href="text.html"><span class="number">5.</span> Bool, char and strings</a></li><li><a href="variables.html"><span class="number">6.</span> Variables and constants</a></li><li><a href="functions.html"><span class="number">7.</span> Functions</a></li><li><a href="control-flow.html"><span class="number">8.</span> Control flow</a></li><li class="part">Data</li><li><a href="arrays.html"><span class="number">9.</span> Arrays</a></li><li><a href="records.html"><span class="number">10.</span> Records</a></li><li><a href="methods.html"><span class="number">11.</span> Methods and properties</a></li><li><a href="enums.html"><span class="number">12.</span> Enums</a></li><li><a href="pattern-matching.html"><span class="number">13.</span> Pattern matching</a></li><li><a href="unions.html"><span class="number">14.</span> Unions</a></li><li class="part">Memory</li><li><a href="ownership.html"><span class="number">15.</span> Ownership and destructors</a></li><li><a href="parameter-modes.html"><span class="number">16.</span> Parameter modes</a></li><li><a href="borrows.html"><span class="number">17.</span> Borrows</a></li><li><a href="pointers.html"><span class="number">18.</span> Pointers and raw memory</a></li><li class="part">Abstraction</li><li><a href="generics.html"><span class="number">19.</span> Generics</a></li><li><a href="traits.html"><span class="number">20.</span> Traits</a></li><li><a href="trait-objects.html"><span class="number">21.</span> Trait objects</a></li><li><a href="operators.html"><span class="number">22.</span> Operators</a></li><li><a href="conversions.html"><span class="number">23.</span> Conversions</a></li><li><a href="constant-functions.html" class="current"><span class="number">24.</span> Constant functions</a></li><li><a href="closures.html"><span class="number">25.</span> Function values and closures</a></li><li><a href="variadics.html"><span class="number">26.</span> Variadic functions</a></li><li><a href="templates.html"><span class="number">27.</span> String templates</a></li><li class="part">Programs</li><li><a href="modules.html"><span class="number">28.</span> Modules and visibility</a></li><li><a href="conditional-compilation.html"><span class="number">29.</span> Conditional compilation</a></li><li><a href="calling-c.html"><span class="number">30.</span> Calling C</a></li><li><a href="panics.html"><span class="number">31.</span> Checks and panics</a></li><li><a href="atomics.html"><span class="number">32.</span> Atomics</a></li><li class="part">Reference</li><li><a href="keywords.html"><span class="number">33.</span> Keywords</a></li><li><a href="operator-reference.html"><span class="number">34.</span> Operators and precedence</a></li><li><a href="builtin-types.html"><span class="number">35.</span> Built-in types</a></li><li><a href="project-settings.html"><span class="number">36.</span> Project settings</a></li></ul>
+</nav>
+<main>
+<article class="content">
+<h1>Constant functions</h1>
+<p>A constant function is a function the compiler can also run while compiling. Called where a value must be known at compile time, such as a constant's initial value or the length of an array type, it runs then and its result becomes a constant. Called anywhere else, it's an ordinary function call.</p>
+<h2 id="declaring-a-constant-function"><a class="anchor" href="#declaring-a-constant-function">Declaring a constant function</a></h2>
+<p><code>const</code> before <code>fun</code> makes a function constant:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-685"></button><textarea hidden id="copy-685">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+square: const fun(x: i32) -&gt; i32 =&gt; x * x
+
+side: const i32 = square(4)
+cells: val array[u8, usize(square(2))] = [1, 2, 3, 4]
+
+main: fun
+{
+	const area = square(side)
+	val n = 5
+	printf(&quot;%d %d %zu %d\n&quot;, side, area, cells.length, square(n))
+}</textarea><pre><code><span class="line"><span class="c-function">square</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span> * <span class="c-parameter">x</span></span><span class="line"> </span><span class="line"><span class="c-constant">side</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-function">square</span>(<span class="c-literal">4</span>)</span><span class="line"><span class="c-constant">cells</span>: <span class="c-keyword">val</span> <span class="c-type">array</span>[<span class="c-type">u8</span>, <span class="c-type">usize</span>(square(<span class="c-literal">2</span>))] = [<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>, <span class="c-literal">4</span>]</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">const</span> <span class="c-constant">area</span> = <span class="c-function">square</span>(<span class="c-constant">side</span>)</span><span class="line">	<span class="c-keyword">val</span> n = <span class="c-literal">5</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %zu %d\n"</span>, <span class="c-constant">side</span>, <span class="c-constant">area</span>, <span class="c-constant">cells</span>.<span class="c-field">length</span>, <span class="c-function">square</span>(n))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>16 256 4 25</pre></div>
+<p><code>side</code> and <code>area</code> are worked out while compiling, and the type of <code>cells</code> uses <code>square(2)</code> as its length. <code>square(n)</code> in <code>main</code> runs when the program does, like any call.</p>
+<p>A constant function's arguments must be constants where a constant is needed:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-686"></button><textarea hidden id="copy-686">mod example
+
+square: const fun(x: i32) -&gt; i32 =&gt; x * x
+
+counter: var i32 = 3
+total: const i32 = square(counter)
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">square</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span> * <span class="c-parameter">x</span></span><span class="line"> </span><span class="line">counter: <span class="c-keyword">var</span> <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line"><span class="c-constant">total</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-function">square</span>(counter)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:15ch"></span><span class="diagnostic-text" style="margin-left:19ch">The initial value of &#x27;total&#x27; must be a constant</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="what-a-body-can-do"><a class="anchor" href="#what-a-body-can-do">What a body can do</a></h2>
+<p>A constant function's body is an ordinary function body. It can declare <code>val</code>, <code>var</code> and <code>const</code> locals, assign to them, branch, loop, match, take <code>mut</code> and <code>imm</code> parameters and call other constant functions:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-687"></button><textarea hidden id="copy-687">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+crcTable: const fun -&gt; array[u32, 8]
+{
+	var table = array[u32, 8]()
+	for i in 0..8
+	{
+		var c = u32(i)
+		for _ in 0..8
+		{
+			if c &amp; 1 == 1
+				c = 0xEDB88320 ^ (c &gt;&gt; 1)
+			else
+				c = c &gt;&gt; 1
+		}
+
+		table[i] = c
+	}
+
+	ret table
+}
+
+bump: const fun(mut value: i32, by: i32 = 1)
+{
+	value += by
+}
+
+countTo: const fun(limit: i32) -&gt; i32
+{
+	var n = 0
+	while true
+	{
+		bump(mut n)
+		if n == limit
+			break
+	}
+
+	ret n
+}
+
+table: const array[u32, 8] = crcTable()
+
+main: fun
+{
+	printf(&quot;%u %u %d\n&quot;, table[1], table[7], countTo(6))
+}</textarea><pre><code><span class="line"><span class="c-function">crcTable</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">array</span>[<span class="c-type">u32</span>, <span class="c-literal">8</span>]</span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> table = array[<span class="c-type">u32</span>, <span class="c-literal">8</span>]()</span><span class="line">	<span class="c-keyword">for</span> i <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">8</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">var</span> c = <span class="c-type">u32</span>(i)</span><span class="line">		<span class="c-keyword">for</span> _ <span class="c-keyword">in</span> <span class="c-literal">0</span>..<span class="c-literal">8</span></span><span class="line">		{</span><span class="line">			<span class="c-keyword">if</span> c &amp; <span class="c-literal">1</span> == <span class="c-literal">1</span></span><span class="line">				c = <span class="c-literal">0xEDB88320</span> ^ (c &gt;&gt; <span class="c-literal">1</span>)</span><span class="line">			<span class="c-keyword">else</span></span><span class="line">				c = c &gt;&gt; <span class="c-literal">1</span></span><span class="line">		}</span><span class="line"> </span><span class="line">		table[i] = c</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> table</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">bump</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">value</span>: <span class="c-type">i32</span>, <span class="c-parameter">by</span>: <span class="c-type">i32</span> = <span class="c-literal">1</span>)</span><span class="line">{</span><span class="line">	<span class="c-parameter">value</span> += <span class="c-parameter">by</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">countTo</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">limit</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> n = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">while</span> <span class="c-keyword">true</span></span><span class="line">	{</span><span class="line">		<span class="c-function">bump</span>(<span class="c-keyword">mut</span> n)</span><span class="line">		<span class="c-keyword">if</span> n == <span class="c-parameter">limit</span></span><span class="line">			<span class="c-keyword">break</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> n</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-constant">table</span>: <span class="c-keyword">const</span> <span class="c-type">array</span>[<span class="c-type">u32</span>, <span class="c-literal">8</span>] = <span class="c-function">crcTable</span>()</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%u %u %d\n"</span>, <span class="c-constant">table</span>[<span class="c-literal">1</span>], <span class="c-constant">table</span>[<span class="c-literal">7</span>], <span class="c-function">countTo</span>(<span class="c-literal">6</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>1996959894 2657392035 6</pre></div>
+<p>The body may only call constant functions and operators. Built-in operators and conversions are always constant. It can't call other functions, including <code>ext</code> functions and the standard library's <code>panic</code>, read or write module and static values that aren't constants, use pointers, take addresses, call function values or use values with destructors:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-688"></button><textarea hidden id="copy-688">mod example
+
+ext
+{
+	puts: fun(text: cstr) -&gt; i32
+}
+
+counter: var i32 = 0
+
+plain: fun(x: i32) -&gt; i32 =&gt; x
+
+busy: const fun(x: i32) -&gt; i32
+{
+	counter += 1
+	puts(&quot;hi&quot;)
+	ret plain(x)
+}
+
+stop: const fun -&gt; never
+{
+	loop
+	{
+	}
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line">counter: <span class="c-keyword">var</span> <span class="c-type">i32</span> = <span class="c-literal">0</span></span><span class="line"> </span><span class="line"><span class="c-function">plain</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span></span><span class="line"> </span><span class="line"><span class="c-function">busy</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	counter += <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot use module values in constant functions</span></span><span class="line">	<span class="c-function">puts</span>(<span class="c-literal">"hi"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot call &#x27;puts&#x27; in constant functions</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-function">plain</span>(<span class="c-parameter">x</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot call &#x27;plain&#x27; in constant functions</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">stop</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span> -&gt; never</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot return &#x27;never&#x27; from constant functions</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">loop</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>These rules are checked once, where the function is declared, whether or not anything calls it.</p>
+<h2 id="operators-constructors-and-methods"><a class="anchor" href="#operators-constructors-and-methods">Operators, constructors and methods</a></h2>
+<p>Operators, constructors, conversions and methods are constant the same way, with <code>const</code> before <code>op</code> or <code>fun</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-689"></button><textarea hidden id="copy-689">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Point: rec
+{
+	x: i32
+	y: i32
+
+	new: const op(x: i32, y: i32)
+	{
+		self.x = x
+		self.y = y
+	}
+
+	sum: const fun(self) -&gt; i32 =&gt; self.x + self.y
+
+	shift: const fun(mut self, by: i32)
+	{
+		self.x += by
+		self.y += by
+	}
+
+	+: const op(a: Point, b: Point) -&gt; Point =&gt; Point(a.x + b.x, a.y + b.y)
+}
+
+moved: const fun -&gt; Point
+{
+	var p = Point(1, 2) + Point(3, 4)
+	p.shift(10)
+	ret p
+}
+
+corner: const Point = moved()
+total: const i32 = corner.sum()
+
+main: fun
+{
+	printf(&quot;%d %d %d\n&quot;, corner.x, corner.y, total)
+}</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">new</span>: <span class="c-keyword">const</span> <span class="c-keyword">op</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>, <span class="c-parameter">y</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">x</span> = <span class="c-parameter">x</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">y</span> = <span class="c-parameter">y</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">sum</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">x</span> + <span class="c-keyword">self</span>.<span class="c-field">y</span></span><span class="line"> </span><span class="line">	<span class="c-function">shift</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">by</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">x</span> += <span class="c-parameter">by</span></span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">y</span> += <span class="c-parameter">by</span></span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">+</span>: <span class="c-keyword">const</span> <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-type">Point</span>(<span class="c-parameter">a</span>.<span class="c-field">x</span> + <span class="c-parameter">b</span>.<span class="c-field">x</span>, <span class="c-parameter">a</span>.<span class="c-field">y</span> + <span class="c-parameter">b</span>.<span class="c-field">y</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">moved</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">Point</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> p = <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>) <span class="c-function">+</span> <span class="c-type">Point</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>)</span><span class="line">	p.<span class="c-function">shift</span>(<span class="c-literal">10</span>)</span><span class="line">	<span class="c-keyword">ret</span> p</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-constant">corner</span>: <span class="c-keyword">const</span> <span class="c-type">Point</span> = <span class="c-function">moved</span>()</span><span class="line"><span class="c-constant">total</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-constant">corner</span>.<span class="c-function">sum</span>()</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-constant">corner</span>.<span class="c-field">x</span>, <span class="c-constant">corner</span>.<span class="c-field">y</span>, <span class="c-constant">total</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>14 16 30</pre></div>
+<p>A constructor declared <code>new: op() = default</code> is always constant, and so is building a record field by field. Destructors can't be constant.</p>
+<h2 id="functions-without-parameters"><a class="anchor" href="#functions-without-parameters">Functions without parameters</a></h2>
+<p>A constant function that takes no parameters and isn't generic works like a constant. The compiler runs it once, where it's declared, and every call to it is that value. Its errors are reported where it's declared, even if nothing calls it:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-690"></button><textarea hidden id="copy-690">mod example
+
+largest: const fun -&gt; i32
+{
+	val top: i32 = 2147483647
+	ret top + 1
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">largest</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:0ch">Panic in &#x27;largest&#x27;: addition overflow<span class="diagnostic-note">On line 6</span></span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> top: <span class="c-type">i32</span> = <span class="c-literal">2147483647</span></span><span class="line">	<span class="c-keyword">ret</span> top + <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>It's still compiled as a function when something needs one: when it's <code>pub</code>, when it's used as a function value, or when it meets a trait's requirement. Otherwise only its value is kept.</p>
+<h2 id="errors-while-running"><a class="anchor" href="#errors-while-running">Errors while running</a></h2>
+<p>A constant function that fails while compiling stops the build. The error points at the call, and its note shows where in the function it happened:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-691"></button><textarea hidden id="copy-691">mod example
+
+square: const fun(x: i32) -&gt; i32 =&gt; x * x
+halve: const fun(x: i32, by: i32) -&gt; i32 =&gt; x / by
+pick: const fun(values: array[i32, 3], at: usize) -&gt; i32 =&gt; values[at]
+
+big: const i32 = square(100000)
+divided: const i32 = halve(1, 0)
+picked: const i32 = pick([1, 2, 3], 5)
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">square</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span> * <span class="c-parameter">x</span></span><span class="line"><span class="c-function">halve</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>, <span class="c-parameter">by</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span> / <span class="c-parameter">by</span></span><span class="line"><span class="c-function">pick</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">values</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">3</span>], <span class="c-parameter">at</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">values</span>[<span class="c-parameter">at</span>]</span><span class="line"> </span><span class="line"><span class="c-constant">big</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-function">square</span>(<span class="c-literal">100000</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:14ch"></span><span class="diagnostic-text" style="margin-left:17ch">Panic in &#x27;square&#x27;: multiplication overflow<span class="diagnostic-note">On line 3</span></span></span><span class="line"><span class="c-constant">divided</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-function">halve</span>(<span class="c-literal">1</span>, <span class="c-literal">0</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:21ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:21ch">Panic in &#x27;halve&#x27;: division by zero<span class="diagnostic-note">On line 4</span></span></span><span class="line"><span class="c-constant">picked</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-function">pick</span>([<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>], <span class="c-literal">5</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:18ch"></span><span class="diagnostic-text" style="margin-left:20ch">Panic in &#x27;pick&#x27;: index out of bounds<span class="diagnostic-note">On line 5</span></span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>A function that runs for too long or recurses too deeply also stops with an error, such as "Evaluating 'spin' takes too many steps". The same function called while the program runs fails the way any call does, with a panic.</p>
+<h2 id="generic-constant-functions"><a class="anchor" href="#generic-constant-functions">Generic constant functions</a></h2>
+<p>A constant function can be generic. Since it can't use values with destructors, a type parameter it stores or copies needs <code>copy</code>:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-692"></button><textarea hidden id="copy-692">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+twice[T: copy]: const fun(x: T) -&gt; array[T, 2] =&gt; [x, x]
+
+pair: const array[i64, 2] = twice(7i64)
+
+main: fun
+{
+	printf(&quot;%d %d\n&quot;, i32(pair[0]), i32(pair[1]))
+}</textarea><pre><code><span class="line"><span class="c-function">twice</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">copy</span>]: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">array</span>[<span class="c-typeparam">T</span>, <span class="c-literal">2</span>] =&gt; [<span class="c-parameter">x</span>, <span class="c-parameter">x</span>]</span><span class="line"> </span><span class="line"><span class="c-constant">pair</span>: <span class="c-keyword">const</span> <span class="c-type">array</span>[<span class="c-type">i64</span>, <span class="c-literal">2</span>] = <span class="c-function">twice</span>(<span class="c-literal">7i64</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-type">i32</span>(<span class="c-constant">pair</span>[<span class="c-literal">0</span>]), <span class="c-type">i32</span>(<span class="c-constant">pair</span>[<span class="c-literal">1</span>]))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>7 7</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-693"></button><textarea hidden id="copy-693">mod example
+
+same[T]: const fun(x: T) -&gt; T =&gt; x
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">same</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-typeparam">T</span> =&gt; <span class="c-parameter">x</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:19ch">&#x27;same&#x27; requires &#x27;T: copy&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h2 id="constant-traits"><a class="anchor" href="#constant-traits">Constant traits</a></h2>
+<p>Generic code can call a trait's members at compile time only when every type that meets the bound has constant ones. There are two ways to promise that.</p>
+<h3 id="constant-requirements"><a class="anchor" href="#constant-requirements">Constant requirements</a></h3>
+<p>A trait member declared <code>const</code> is constant for every type that implements the trait. Each implementation must give a constant member, and built-in operators count:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-694"></button><textarea hidden id="copy-694">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Bits: trait req copy + noref
+{
+	|: const op(a: Self, b: Self) -&gt; Self
+}
+
+u32: impl Bits
+
+combine[T: Bits]: const fun(a: T, b: T) -&gt; T =&gt; a | b
+
+mask: const u32 = combine(0x10u32, 0x01u32)
+
+main: fun
+{
+	printf(&quot;%u\n&quot;, mask)
+}</textarea><pre><code><span class="line"><span class="c-trait">Bits</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-keyword">copy</span> + <span class="c-keyword">noref</span></span><span class="line">{</span><span class="line">	<span class="c-function">|</span>: <span class="c-keyword">const</span> <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-typeparam">Self</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">u32</span>: <span class="c-keyword">impl</span> <span class="c-trait">Bits</span></span><span class="line"> </span><span class="line"><span class="c-function">combine</span>[<span class="c-typeparam">T</span>: <span class="c-trait">Bits</span>]: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-typeparam">T</span>, <span class="c-parameter">b</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-typeparam">T</span> =&gt; <span class="c-parameter">a</span> <span class="c-function">|</span> <span class="c-parameter">b</span></span><span class="line"> </span><span class="line"><span class="c-constant">mask</span>: <span class="c-keyword">const</span> <span class="c-type">u32</span> = <span class="c-function">combine</span>(<span class="c-literal">0x10u32</span>, <span class="c-literal">0x01u32</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%u\n"</span>, <span class="c-constant">mask</span>)</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>17</pre></div>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-695"></button><textarea hidden id="copy-695">mod example
+
+Bits: trait req copy + noref
+{
+	|: const op(a: Self, b: Self) -&gt; Self
+}
+
+Mask: rec impl Bits
+{
+	value: u8
+
+	|: op(a: Mask, b: Mask) -&gt; Mask =&gt; Mask(a.value | b.value)
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Bits</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-keyword">copy</span> + <span class="c-keyword">noref</span></span><span class="line">{</span><span class="line">	<span class="c-function">|</span>: <span class="c-keyword">const</span> <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-typeparam">Self</span>, <span class="c-parameter">b</span>: <span class="c-typeparam">Self</span>) -&gt; <span class="c-typeparam">Self</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Mask</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Bits</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">u8</span></span><span class="line"> </span><span class="line">	<span class="c-function">|</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Mask</span>, <span class="c-parameter">b</span>: <span class="c-type">Mask</span>) -&gt; <span class="c-type">Mask</span> =&gt; <span class="c-type">Mask</span>(<span class="c-parameter">a</span>.<span class="c-field">value</span> | <span class="c-parameter">b</span>.<span class="c-field">value</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;|&#x27; must be &#x27;const&#x27; to match &#x27;Bits.|&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<h3 id="constant-implementations-and-bounds"><a class="anchor" href="#constant-implementations-and-bounds">Constant implementations and bounds</a></h3>
+<p>A trait whose members aren't <code>const</code> can still be implemented as constant. <code>impl const</code> promises that every member of that implementation is constant, and <code>T: const Trait</code> accepts only types with such an implementation. Inside the generic function, the trait's members, and those of the traits it requires, can then be called at compile time:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-696"></button><textarea hidden id="copy-696">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Score: trait
+{
+	score: fun(self) -&gt; i32
+}
+
+Ranked: trait req Score
+{
+	rank: fun(self) -&gt; i32
+}
+
+Gem: rec impl const Ranked
+{
+	value: i32
+
+	score: const fun(self) -&gt; i32 =&gt; self.value * 10
+	rank: const fun(self) -&gt; i32 =&gt; self.value
+}
+
+Rock: rec impl Ranked
+{
+	value: i32
+
+	score: fun(self) -&gt; i32 =&gt; self.value
+	rank: fun(self) -&gt; i32 =&gt; 0
+}
+
+total[T: copy + const Ranked]: const fun(x: T) -&gt; i32 =&gt; x.score() + x.rank()
+
+gem: const i32 = total(Gem(3))
+
+main: fun
+{
+	printf(&quot;%d %d\n&quot;, gem, Rock(5).score())
+}</textarea><pre><code><span class="line"><span class="c-trait">Score</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">score</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Ranked</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-trait">Score</span></span><span class="line">{</span><span class="line">	<span class="c-function">rank</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Gem</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-keyword">const</span> <span class="c-trait">Ranked</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">score</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">value</span> * <span class="c-literal">10</span></span><span class="line">	<span class="c-function">rank</span>: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Rock</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Ranked</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">score</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="line">	<span class="c-function">rank</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">total</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">copy</span> + <span class="c-keyword">const</span> <span class="c-trait">Ranked</span>]: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span>.<span class="c-function">score</span>() + <span class="c-parameter">x</span>.<span class="c-function">rank</span>()</span><span class="line"> </span><span class="line"><span class="c-constant">gem</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-function">total</span>(<span class="c-type">Gem</span>(<span class="c-literal">3</span>))</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-constant">gem</span>, <span class="c-type">Rock</span>(<span class="c-literal">5</span>).<span class="c-function">score</span>())</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>33 5</pre></div>
+<p><code>Gem</code>'s implementation is constant, so <code>total</code> accepts it while compiling. <code>Rock</code>'s isn't, so it doesn't meet <code>const Ranked</code>. An <code>impl const</code> checks its members, a default it would use must itself be <code>const</code>, and the traits it requires must be implemented as constant too:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-697"></button><textarea hidden id="copy-697">mod example
+
+Score: trait
+{
+	score: fun(self) -&gt; i32
+	bonus: fun(self) -&gt; i32 =&gt; 1
+}
+
+Ranked: trait req Score
+{
+	rank: fun(self) -&gt; i32
+}
+
+Gem: rec impl const Score
+{
+	value: i32
+
+	score: fun(self) -&gt; i32 =&gt; self.value
+}
+
+Rock: rec impl Ranked
+{
+	value: i32
+
+	score: fun(self) -&gt; i32 =&gt; self.value
+	rank: fun(self) -&gt; i32 =&gt; 0
+}
+
+total[T: copy + const Ranked]: const fun(x: T) -&gt; i32 =&gt; x.rank()
+plain[T: copy + Ranked]: const fun(x: T) -&gt; i32 =&gt; x.rank()
+
+rock: const i32 = total(Rock(1))
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-trait">Score</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">score</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="line">	<span class="c-function">bonus</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Ranked</span>: <span class="c-keyword">trait</span> <span class="c-keyword">req</span> <span class="c-trait">Score</span></span><span class="line">{</span><span class="line">	<span class="c-function">rank</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Gem</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-keyword">const</span> <span class="c-trait">Score</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:20ch">&#x27;Score.bonus&#x27; has no &#x27;const&#x27; default</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">score</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;score&#x27; must be &#x27;const&#x27; in &#x27;impl const Score&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Rock</span>: <span class="c-keyword">rec</span> <span class="c-keyword">impl</span> <span class="c-trait">Ranked</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">score</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="line">	<span class="c-function">rank</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">total</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">copy</span> + <span class="c-keyword">const</span> <span class="c-trait">Ranked</span>]: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span>.<span class="c-function">rank</span>()</span><span class="line"><span class="c-function">plain</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">copy</span> + <span class="c-trait">Ranked</span>]: <span class="c-keyword">const</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span>.<span class="c-function">rank</span>()</span><span class="diagnostic"><span class="squiggle" style="margin-left:51ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:51ch">Cannot call &#x27;Ranked.rank&#x27; in constant functions</span></span><span class="line"> </span><span class="line"><span class="c-constant">rock</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-function">total</span>(<span class="c-type">Rock</span>(<span class="c-literal">1</span>))</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:18ch">&#x27;total&#x27; requires &#x27;T: const Ranked&#x27;<span class="diagnostic-note">&#x27;Rock&#x27; doesn&#x27;t implement &#x27;const Ranked&#x27;</span></span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>A constant implementation is only ever the written <code>impl const</code>: a conformance whose members happen to all be constant doesn't meet <code>const Trait</code>.</p>
+</article>
+<nav class="pager"><a class="previous" href="conversions.html"><span>Previous</span>Conversions</a><a class="next" href="closures.html"><span>Next</span>Function values and closures</a></nav>
+</main>
+<aside class="toc">
+<div class="toc-title">On this page</div><ul><li class="level-2"><a href="#declaring-a-constant-function">Declaring a constant function</a></li><li class="level-2"><a href="#what-a-body-can-do">What a body can do</a></li><li class="level-2"><a href="#operators-constructors-and-methods">Operators, constructors and methods</a></li><li class="level-2"><a href="#functions-without-parameters">Functions without parameters</a></li><li class="level-2"><a href="#errors-while-running">Errors while running</a></li><li class="level-2"><a href="#generic-constant-functions">Generic constant functions</a></li><li class="level-2"><a href="#constant-traits">Constant traits</a></li><li class="level-3"><a href="#constant-requirements">Constant requirements</a></li><li class="level-3"><a href="#constant-implementations-and-bounds">Constant implementations and bounds</a></li></ul>
+</aside>
+</div>
+<div id="message"></div>
+<script src="search-index.js"></script>
+<script src="docs.js?v=3"></script>
+</body>
+</html>

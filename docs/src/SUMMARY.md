@@ -32,6 +32,7 @@
 - [Trait objects](trait-objects.md)
 - [Operators](operators.md)
 - [Conversions](conversions.md)
+- [Constant functions](constant-functions.md)
 - [Function values and closures](closures.md)
 - [Variadic functions](variadics.md)
 - [String templates](templates.md)

@@ -227,7 +227,7 @@ Money: rec impl Sum
 	empty: fun -> Money => Money(0)
 }
 
-total[T: Sum + noref, length: const usize]: fun(imm values: array[T, length]) -> T
+total[T: Sum + noref, const length: usize]: fun(imm values: array[T, length]) -> T
 {
 	var sum = T.empty()
 	for imm value in values
@@ -627,6 +627,8 @@ Library projects are covered in [Modules and visibility](modules.md).
 A bound gives generic code every member of the trait: methods and properties on values, static functions and constants on the type parameter, operators, and constructors as `T(...)`. Several bounds are joined with `+`, and they mix with the other [constraints](generics.md#constraints), as in `[T: Sum + noref]`. Records and enums take bounds on their type parameters too, as in `Set[T: Hash + noref]: rec`.
 
 Inside generic code, a type parameter meets a bound only if its own bounds include that trait or a trait that requires it (see [Traits that require other traits](#traits-that-require-other-traits)), or a [blanket implementation](#blanket-implementations) covers it.
+
+A member declared `const`, an `impl const` implementation and a `T: const Trait` bound let generic code call a trait's members while compiling; see [Constant traits](constant-functions.md#constant-traits).
 
 ## Picking a trait's member
 
