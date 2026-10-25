@@ -1351,4 +1351,44 @@ main: fun
 'new' requires 'Tag: default'
 ```
 
+A block can also name a generic type inside its target and declare that type's parameters there. Its members then exist for every instantiation of that shape, and the body can use the inner parameters like any other:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+~ Pair[T]: rec
+~ {
+~ 	a: T
+~ 	b: T
+~ }
+~
+Box[T]: rec
+{
+	value: T
+}
+
+Pair[Box[Item: copy]]: impl
+{
+	unboxed: fun(self) -> Pair[Item] => Pair(self.a.value, self.b.value)
+}
+
+main: fun
+{
+	val boxes = Pair(Box(3), Box(4))
+	val numbers = boxes.unboxed()
+	printf("%d %d\n", numbers.a, numbers.b)
+}
+```
+
+```output
+3 4
+```
+
+The inner parameters must meet the inner type's constraints, and like the block's other parameters they can't have defaults.
+
 Blocks like these most often add members under a [trait bound](traits.md). Blocks that implement a trait, and blocks outside the type's own module, are covered in [Traits](traits.md).

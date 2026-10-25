@@ -739,6 +739,8 @@ main: fun
 0 0 2 0
 ```
 
+A call to it is a constant, so `origin: const Vec2 = Vec2()` works.
+
 `= default` is allowed only on the constructor without parameters, and only when every field has a default:
 
 ```cella error
