@@ -876,7 +876,7 @@ main: fun
 odd
 ```
 
-[Generics](generics.md) covers type parameters and their constraints.
+[Generics](generics.md) covers type parameters and their constraints, including [`T: enum`](generics.md#enum) for generic code over enums without payloads.
 
 ## Tagless enums
 

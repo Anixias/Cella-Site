@@ -474,6 +474,7 @@ The constraints are:
 | `new`, `new(...)` | types with a matching constructor |
 | `null` | types that have a `null` value |
 | `ext` | types that can cross into C |
+| `enum`, `enum(Tag)` | enums without payloads, optionally with that tag type |
 | `atomic` | types the target can access atomically |
 | a trait | types that implement the trait |
 | `const` and a trait | types with an `impl const` of the trait |
@@ -782,6 +783,86 @@ main: fun
 
 ```errors
 'Nullable' requires 'T: null'
+```
+
+### enum
+
+`T: enum` accepts enums without payloads, plain or `ext`. Generic code can do with a `T` what it can do with such an enum: convert it to and from integers, and compare two values with `==` and `!=`. `T: enum(u8)` also requires the tag type to be `u8`, whether it was written or picked by the compiler. The tag can be a type parameter, as in `[E: enum(T), T]`. The call infers `T` from the enum, and `T(value)` and `E(bits)` convert between the two:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Code: enum
+{
+	none
+	first = 100
+	second
+}
+
+Access: ext enum(u32)
+{
+	none = 0
+	read = 1
+	write = 2
+}
+
+tagOf[E: enum(T), T]: fun(value: E) -> T => T(value)
+
+wide[E: enum]: fun(value: E) -> i64 => i64(value)
+
+fromRaw[E: enum]: fun(raw: i32) -> E => E(raw)
+
+same[E: enum]: fun(left: E, right: E) -> bool => left == right
+
+main: fun
+{
+	val code: Code = fromRaw(100)
+	printf("%u %lld %d\n", tagOf(Access.write), wide(Code.second), i32(same(code, Code.first)))
+}
+```
+
+```output
+2 101 1
+```
+
+`enum` implies `copy`, `noref` and `default`, since an enum without payloads is only its tag and every such enum has a valid zero value. As outside generic code, converting an integer that matches no case to a plain enum panics. `ext + enum` accepts only `ext` enums, which take every value of their tag type.
+
+Enums with payloads, [tagless enums](enums.md#tagless-enums) and other types don't meet `enum`. The hints say why: "'Shape' has payloads", "'Socket' has no tag type", "'Point' isn't an enum" or, for a tag type, "'Wide' has the tag type 'u16'":
+
+```cella error
+~ mod example
+~
+pack[E: enum(u8)]: fun(value: E) -> u8 => u8(value)
+
+plain[E: enum]: fun(value: E) -> i32 => i32(value)
+
+Shape: enum
+{
+	none
+	circle(radius: f64)
+}
+
+Wide: enum
+{
+	zero
+	big = 300
+}
+
+main: fun
+{
+	val _ = plain(Shape.none)
+	val _ = pack(Wide.big)
+}
+```
+
+```errors
+'plain' requires 'E: enum'
+'pack' requires 'E: enum(u8)'
 ```
 
 ## Value parameters

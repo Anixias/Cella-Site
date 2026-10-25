@@ -104,7 +104,7 @@ main: fun
 | `pvt` | Makes a declaration visible to its file, or a member visible to its type. | [Modules](modules.md), [Methods](methods.md) |
 | `ext` | Declares C functions and globals (`ext { }`), C function types (`ext fun[...]`), C-compatible enums (`ext enum`), C names (`ext("name")`); `T: ext` constrains a type parameter. | [Calling C](calling-c.md) |
 | `rec` | Declares a record type. | [Records](records.md) |
-| `enum` | Declares an enum type. | [Enums](enums.md) |
+| `enum` | Declares an enum type; `T: enum` and `T: enum(Tag)` constrain a type parameter. | [Enums](enums.md), [Generics](generics.md#enum) |
 | `union` | Declares a union type. | [Unions](unions.md) |
 | `trait` | Declares a trait; `K: trait` makes a parameter that takes a trait. | [Traits](traits.md), [Trait objects](trait-objects.md) |
 | `impl` | Implements traits for a type (`rec impl Shape`, `Circle: impl Shape`) and adds members in `impl` blocks. | [Traits](traits.md) |

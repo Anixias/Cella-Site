@@ -37,7 +37,7 @@ try {
 <p>Cella calls C functions directly, with no wrappers or generated bindings: you declare a C function's signature in Cella types, and calls to it follow the platform's C calling convention. The same works the other way, so C code can call Cella functions and read Cella globals. Everything that crosses between the two languages is marked with the <code>ext</code> keyword.</p>
 <h2 id="ext-blocks"><a class="anchor" href="#ext-blocks"><code>ext</code> blocks</a></h2>
 <p>An <code>ext</code> block declares functions that are defined in C. Each member is a name and a signature, with no body:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-851"></button><textarea hidden id="copy-851">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-855"></button><textarea hidden id="copy-855">mod example
 
 ext
 {
@@ -57,7 +57,7 @@ both right</pre></div>
 <p>These three come from the C runtime, which every program links. Functions from other libraries need the library named, as <a href="#linking">Linking</a> describes.</p>
 <p>The declarations are ordinary module names: a module can have any number of <code>ext</code> blocks, and code in any of its files can call them. A block with a single member can drop the braces, as in <code>ext puts: fun(text: cstr) -&gt; i32</code>.</p>
 <p>The signature must be complete. Every parameter needs a name and a type, and the result follows <code>-&gt;</code> as for any function; a C function that returns <code>void</code> has no <code>-&gt;</code>. A body is an error, since the function is defined elsewhere:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-852"></button><textarea hidden id="copy-852">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-856"></button><textarea hidden id="copy-856">mod example
 
 ext
 {
@@ -69,7 +69,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">abs</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; value</span><span class="diagnostic"><span class="squiggle" style="margin-left:32ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:32ch">Cannot declare bodies for &#x27;ext&#x27; functions</span></span><span class="line">	<span class="c-function">labs</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>) -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:19ch">Expected &#x27;:&#x27; and a type</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p><code>ext</code> functions can't be overloaded. Two declarations with one name are an error on each of them:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-853"></button><textarea hidden id="copy-853">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-857"></button><textarea hidden id="copy-857">mod example
 
 ext
 {
@@ -81,7 +81,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">abs</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;ext&#x27; functions cannot be overloaded</span></span><span class="line">	<span class="c-function">abs</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i64</span>) -&gt; <span class="c-type">i64</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;ext&#x27; functions cannot be overloaded</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>A C function that never returns, such as <code>exit</code> or <code>abort</code>, is declared <code>-&gt; never</code>, and calls to it end their path like <code>ret</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-854"></button><textarea hidden id="copy-854">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-858"></button><textarea hidden id="copy-858">mod example
 
 ext
 {
@@ -107,7 +107,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>not ready</pre></div>
 <h3 id="visibility"><a class="anchor" href="#visibility">Visibility</a></h3>
 <p>Like other top-level declarations, the names in an <code>ext</code> block are visible to the whole project. A visibility word in front of the block applies to every member: <code>pvt ext { ... }</code> keeps them in one file, <code>mod ext { ... }</code> in the module, and <code>pub ext { ... }</code> lets projects that reference this one call them, as in <code>lib.abs(-3)</code>. Visibility words can't appear inside the block:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-855"></button><textarea hidden id="copy-855">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-859"></button><textarea hidden id="copy-859">mod example
 
 ext
 {
@@ -127,7 +127,7 @@ main: fun
 <p><code>ptr[T]</code> points to a <code>T</code> and <code>ptr</code> points to anything; <a href="pointers.html">Pointers</a> covers both. A C function with a variable argument list, such as <code>printf</code>, ends its parameters with <code>...</code>; <a href="variadics.html#c-variadics">Variadic functions</a> covers what can be passed through it.</p>
 <h2 id="renaming-with-extname"><a class="anchor" href="#renaming-with-extname">Renaming with <code>ext("name")</code></a></h2>
 <p>A declaration takes the C name from its own name. <code>ext("name")</code> before <code>fun</code> gives the C name separately, so the Cella name can follow Cella's style or avoid a clash:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-856"></button><textarea hidden id="copy-856">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-860"></button><textarea hidden id="copy-860">mod example
 
 ext
 {
@@ -148,7 +148,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>renamed
 5000000000</pre></div>
 <p>The C name must be a plain identifier:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-857"></button><textarea hidden id="copy-857">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-861"></button><textarea hidden id="copy-861">mod example
 
 ext
 {
@@ -161,7 +161,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">dotted</span>: <span class="c-keyword">ext</span>(<span class="c-literal">"app.counter"</span>) <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot use &#x27;app.counter&#x27; as an &#x27;ext&#x27; name</span></span><span class="line">	<span class="c-function">blank</span>: <span class="c-keyword">ext</span>(<span class="c-literal">""</span>) <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:15ch">Cannot use empty &#x27;ext&#x27; names</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h3 id="several-signatures-for-one-c-function"><a class="anchor" href="#several-signatures-for-one-c-function">Several signatures for one C function</a></h3>
 <p>Since the C name and the Cella name are separate, one C function can be declared several times with different Cella signatures, in one module or in several. Each call uses the signature of the declaration it calls. This is how a C function that takes a <code>void*</code> can be given typed parameters for each use:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-858"></button><textarea hidden id="copy-858">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-862"></button><textarea hidden id="copy-862">mod example
 
 ext
 {
@@ -191,7 +191,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>0 0 0</pre></div>
 <h2 id="strings"><a class="anchor" href="#strings">Strings</a></h2>
 <p>C strings are pointers to zero-terminated bytes, and Cella's type for them is <code>cstr</code>. A string literal converts to a <code>cstr</code> where one is expected, with the terminating zero added. A <code>cstr</code> can also be <code>null</code>, which C functions often return to mean "not found":</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-859"></button><textarea hidden id="copy-859">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-863"></button><textarea hidden id="copy-863">mod example
 
 ext
 {
@@ -218,7 +218,7 @@ main: fun
 <p>A <code>cstr</code> has no length, so indexing one reads a byte without a bounds check, and it has no arithmetic. Cella's own string type, <code>str</code>, holds a pointer and a length and can't be passed to C; its <code>data</code> property gives the pointer to its bytes. <a href="text.html#cstr">Bool, char and strings</a> covers both types.</p>
 <h2 id="records-and-unions"><a class="anchor" href="#records-and-unions">Records and unions</a></h2>
 <p>A record crosses into C by value with the same layout as a C <code>struct</code> with the same fields in the same order, and a <a href="unions.html">union</a> crosses like a C <code>union</code>. C's <code>div</code> returns a struct of two <code>int</code>s:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-860"></button><textarea hidden id="copy-860">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-864"></button><textarea hidden id="copy-864">mod example
 
 ext
 {
@@ -243,7 +243,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Quotient</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">quot</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">rem</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">div</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">numerator</span>: <span class="c-type">i32</span>, <span class="c-parameter">denominator</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Quotient</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> result = <span class="c-function">div</span>(<span class="c-literal">17</span>, <span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d remainder %d\n"</span>, result.<span class="c-field">quot</span>, result.<span class="c-field">rem</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>3 remainder 2</pre></div>
 <p>C functions that take a pointer to fill in can be declared with a <code>ptr[T]</code> parameter and called with <code>@x</code>, or declared with a <code>mut</code> parameter and called with <code>mut x</code>, which passes the address the same way. An <code>imm</code> parameter passes the address of a value C only reads. C's <code>modf</code> splits a number and stores the whole part through its second parameter:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-861"></button><textarea hidden id="copy-861">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-865"></button><textarea hidden id="copy-865">mod example
 
 ext
 {
@@ -270,7 +270,7 @@ main: fun
 <p>An array can't be passed by value, as in C. Pass its address with <code>imm</code>, <code>mut</code> or a pointer instead. <a href="parameter-modes.html">Parameter modes</a> covers <code>imm</code> and <code>mut</code>.</p>
 <h2 id="ext-enum"><a class="anchor" href="#ext-enum"><code>ext enum</code></a></h2>
 <p>A C enum isn't limited to its named values: C code can store any integer in one, and new versions of a library add values. A plain Cella <code>enum</code> can only hold its own cases, so it can't cross into C. An <code>ext enum</code> is the open version: any value of its tag type is valid, named or not.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-862"></button><textarea hidden id="copy-862">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-866"></button><textarea hidden id="copy-866">mod example
 
 ext
 {
@@ -302,7 +302,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>timeout other other
 -1000 4</pre></div>
 <p>Converting an integer to an <code>ext enum</code> never fails, and a <code>match</code> on one must have an <code>else</code> arm even when it names every case:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-863"></button><textarea hidden id="copy-863">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-867"></button><textarea hidden id="copy-867">mod example
 
 Status: ext enum
 {
@@ -316,7 +316,7 @@ main: fun
 	val code = match status { success =&gt; 0, failed =&gt; 1 }
 }</textarea><pre><code><span class="line"><span class="c-type">Status</span>: <span class="c-keyword">ext</span> <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">success</span></span><span class="line">	<span class="c-case">failed</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> status = <span class="c-type">Status</span>.<span class="c-case">success</span></span><span class="line">	<span class="c-keyword">val</span> code = <span class="c-keyword">match</span> status { <span class="c-case">success</span> =&gt; <span class="c-literal">0</span>, <span class="c-case">failed</span> =&gt; <span class="c-literal">1</span> }</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:15ch">This match doesn&#x27;t handle every value of &#x27;Status&#x27;</span></span><span class="line">}</span></code></pre></div>
 <p>The tag is an <code>i32</code>, like a C <code>enum</code>, unless written <code>ext enum(T)</code> with another integer type. The default value is the one whose bits are all zero, whether or not a case has it. Constant values must fit in the tag type:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-864"></button><textarea hidden id="copy-864">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-868"></button><textarea hidden id="copy-868">mod example
 
 Format: ext enum(u8)
 {
@@ -329,7 +329,7 @@ main: fun
 	val wide = Format(300)
 }</textarea><pre><code><span class="line"><span class="c-type">Format</span>: <span class="c-keyword">ext</span> <span class="c-keyword">enum</span>(<span class="c-type">u8</span>)</span><span class="line">{</span><span class="line">	<span class="c-case">rgba8</span> = <span class="c-literal">37</span></span><span class="line">	<span class="c-case">bgra8</span> = <span class="c-literal">44</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> wide = <span class="c-type">Format</span>(<span class="c-literal">300</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:15ch">&#x27;300&#x27; doesn&#x27;t fit in &#x27;u8&#x27;</span></span><span class="line">}</span></code></pre></div>
 <p>Cases can carry payloads, as in a plain enum. An <code>ext enum</code> with payloads is laid out like the C struct <code>{ T tag; union { ... } payloads; }</code>, which matches C APIs that pass events as a tag and a union:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-865"></button><textarea hidden id="copy-865">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-869"></button><textarea hidden id="copy-869">mod example
 
 ext
 {
@@ -359,7 +359,7 @@ main: fun
 <p><a href="enums.html">Enums</a> covers what <code>ext enum</code> shares with plain enums: case values, payloads and matching.</p>
 <h2 id="callbacks-with-ext-fun"><a class="anchor" href="#callbacks-with-ext-fun">Callbacks with <code>ext fun</code></a></h2>
 <p><code>ext fun[A, B -&gt; R]</code> is the type of a C function pointer: a function that takes an <code>A</code> and a <code>B</code>, returns an <code>R</code>, and uses the C calling convention. A function declared in an <code>ext</code> block is one, and so is a Cella function declared with <code>ext fun</code> and a body; any other Cella function named directly converts to one. C's <code>qsort</code> takes one to compare elements:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-866"></button><textarea hidden id="copy-866">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-870"></button><textarea hidden id="copy-870">mod example
 
 ext
 {
@@ -390,7 +390,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">qsort</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">items</span>: <span class="c-type">ptr</span>, <span class="c-parameter">count</span>: <span class="c-type">usize</span>, <span class="c-parameter">size</span>: <span class="c-type">usize</span>, <span class="c-parameter">compare</span>: <span class="c-keyword">ext</span> <span class="c-keyword">fun</span>[<span class="c-type">ptr</span>, <span class="c-type">ptr</span> -&gt; <span class="c-type">i32</span>])</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">descending</span>: <span class="c-keyword">ext</span> <span class="c-keyword">fun</span>(<span class="c-parameter">left</span>: <span class="c-type">ptr</span>, <span class="c-parameter">right</span>: <span class="c-type">ptr</span>) -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = *ptr[<span class="c-type">i32</span>](<span class="c-parameter">left</span>)</span><span class="line">	<span class="c-keyword">val</span> b = *ptr[<span class="c-type">i32</span>](<span class="c-parameter">right</span>)</span><span class="line">	<span class="c-keyword">if</span> a &lt; b</span><span class="line">		<span class="c-keyword">ret</span> <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">if</span> a &gt; b</span><span class="line">		<span class="c-keyword">ret</span> -<span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> values = [<span class="c-literal">5</span>, <span class="c-literal">3</span>, <span class="c-literal">9</span>, <span class="c-literal">1</span>, <span class="c-literal">7</span>]</span><span class="line">	<span class="c-function">qsort</span>(@values, <span class="c-literal">5</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">i32</span>), <span class="c-function">descending</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d %d\n"</span>, values[<span class="c-literal">0</span>], values[<span class="c-literal">1</span>], values[<span class="c-literal">2</span>], values[<span class="c-literal">3</span>], values[<span class="c-literal">4</span>])</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>9 7 5 3 1</pre></div>
 <p>A lambda works too, as long as it captures nothing, since a C function pointer has nowhere to keep captured values:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-867"></button><textarea hidden id="copy-867">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-871"></button><textarea hidden id="copy-871">mod example
 
 ext
 {
@@ -409,7 +409,7 @@ main: fun
 	printf(&quot;%d %d %d %d\n&quot;, values[0], values[1], values[2], values[3])
 }</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">qsort</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">items</span>: <span class="c-type">ptr</span>, <span class="c-parameter">count</span>: <span class="c-type">usize</span>, <span class="c-parameter">size</span>: <span class="c-type">usize</span>, <span class="c-parameter">compare</span>: <span class="c-keyword">ext</span> <span class="c-keyword">fun</span>[<span class="c-type">ptr</span>, <span class="c-type">ptr</span> -&gt; <span class="c-type">i32</span>])</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> values = [<span class="c-literal">5</span>, <span class="c-literal">3</span>, <span class="c-literal">9</span>, <span class="c-literal">1</span>]</span><span class="line">	<span class="c-function">qsort</span>(@values, <span class="c-literal">4</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">i32</span>), <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>, <span class="c-parameter">b</span>) =&gt; *ptr[<span class="c-type">i32</span>](<span class="c-parameter">a</span>) - *ptr[<span class="c-type">i32</span>](<span class="c-parameter">b</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, values[<span class="c-literal">0</span>], values[<span class="c-literal">1</span>], values[<span class="c-literal">2</span>], values[<span class="c-literal">3</span>])</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>1 3 5 9</pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-868"></button><textarea hidden id="copy-868">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-872"></button><textarea hidden id="copy-872">mod example
 
 ext
 {
@@ -423,7 +423,7 @@ main: fun
 	qsort(@values, 4, sizeOf(i32), fun(a, b) =&gt; sign * (*ptr[i32](a) - *ptr[i32](b)))
 }</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">qsort</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">items</span>: <span class="c-type">ptr</span>, <span class="c-parameter">count</span>: <span class="c-type">usize</span>, <span class="c-parameter">size</span>: <span class="c-type">usize</span>, <span class="c-parameter">compare</span>: <span class="c-keyword">ext</span> <span class="c-keyword">fun</span>[<span class="c-type">ptr</span>, <span class="c-type">ptr</span> -&gt; <span class="c-type">i32</span>])</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> values = [<span class="c-literal">5</span>, <span class="c-literal">3</span>, <span class="c-literal">9</span>, <span class="c-literal">1</span>]</span><span class="line">	<span class="c-keyword">val</span> sign = -<span class="c-literal">1</span></span><span class="line">	<span class="c-function">qsort</span>(@values, <span class="c-literal">4</span>, <span class="c-keyword">sizeOf</span>(<span class="c-type">i32</span>), <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>, <span class="c-parameter">b</span>) =&gt; sign * (*ptr[<span class="c-type">i32</span>](<span class="c-parameter">a</span>) - *ptr[<span class="c-type">i32</span>](<span class="c-parameter">b</span>)))</span><span class="diagnostic"><span class="squiggle" style="margin-left:48ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:48ch">Cannot capture &#x27;sign&#x27; in &#x27;ext fun[ptr, ptr -&gt; i32]&#x27;</span></span><span class="line">}</span></code></pre></div>
 <p><code>ext fun</code> values can be stored in variables, fields and arrays and called like functions. An <code>ext fun</code> converts to the matching Cella function type <code>fun[...]</code>, but a <code>fun</code> value doesn't convert to an <code>ext fun</code>, since it may be a closure:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-869"></button><textarea hidden id="copy-869">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-873"></button><textarea hidden id="copy-873">mod example
 
 ext
 {
@@ -456,7 +456,7 @@ main: fun
 42
 10</pre></div>
 <p><code>ext fun</code> declarations with bodies can't be members of a type, and an <code>ext fun</code> value can't be <code>null</code>. A C API whose callback is optional can be declared with a tagless enum over the function type, whose <code>none</code> case is the null pointer. C's <code>signal</code> takes and returns such a callback:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-870"></button><textarea hidden id="copy-870">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-874"></button><textarea hidden id="copy-874">mod example
 
 ext
 {
@@ -492,7 +492,7 @@ main: fun
 <p><a href="enums.html#tagless-enums">Enums</a> covers tagless enums, and <a href="closures.html">Function values and closures</a> covers function types in general.</p>
 <h2 id="the-t-ext-constraint"><a class="anchor" href="#the-t-ext-constraint">The <code>T: ext</code> constraint</a></h2>
 <p>A type parameter can appear in an <code>ext</code> signature, by value, behind a pointer or in an <code>ext fun</code> type, only when it has the <code>ext</code> constraint. <code>T: ext</code> means <code>T</code> can cross into C, and every type argument is checked for it:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-871"></button><textarea hidden id="copy-871">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-875"></button><textarea hidden id="copy-875">mod example
 
 ext
 {
@@ -516,7 +516,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">call</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">ext</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">f</span>: <span class="c-keyword">ext</span> <span class="c-keyword">fun</span>[<span class="c-typeparam">T</span> -&gt; <span class="c-type">i32</span>], <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">f</span>(<span class="c-parameter">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">twice</span>: <span class="c-keyword">ext</span> <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span> * <span class="c-literal">2</span></span><span class="line"><span class="c-function">sum</span>: <span class="c-keyword">ext</span> <span class="c-keyword">fun</span>(<span class="c-parameter">p</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">p</span>.<span class="c-field">x</span> + <span class="c-parameter">p</span>.<span class="c-field">y</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">call</span>(<span class="c-function">twice</span>, <span class="c-literal">21</span>), <span class="c-function">call</span>(<span class="c-function">sum</span>, <span class="c-type">Point</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>)))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>42 7</pre></div>
 <p>Without the constraint, the signature is rejected:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-872"></button><textarea hidden id="copy-872">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-876"></button><textarea hidden id="copy-876">mod example
 
 call[T]: fun(f: ext fun[T -&gt; i32], imm value: T) -&gt; i32 =&gt; f(value)
 
@@ -524,7 +524,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">call</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">f</span>: <span class="c-keyword">ext</span> <span class="c-keyword">fun</span>[<span class="c-typeparam">T</span> -&gt; <span class="c-type">i32</span>], <span class="c-keyword">imm</span> <span class="c-parameter">value</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">f</span>(<span class="c-parameter">value</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot use &#x27;T&#x27; in &#x27;ext&#x27; signatures</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>A type that can't cross into C can't be the type argument:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-873"></button><textarea hidden id="copy-873">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-877"></button><textarea hidden id="copy-877">mod example
 
 Token: own rec
 {
@@ -545,7 +545,7 @@ main: fun
 <h2 id="what-cant-cross-into-c"><a class="anchor" href="#what-cant-cross-into-c">What can't cross into C</a></h2>
 <p>C knows nothing about Cella's ownership, borrows, traits or closures, so types that depend on them can't appear in <code>ext</code> signatures. That covers <code>ext</code> block members, <code>ext fun</code> definitions and <code>ext fun</code> types, and every field, element and payload of the types they use:</p>
 <ul><li>types with destructors, since C would copy them bit by bit and never drop them</li><li>plain <code>enum</code>s, since C can hand back a value that isn't a case</li><li><code>str</code>, borrow types (<code>imm[T]</code>, <code>mut[T]</code>) and records that hold borrows</li><li>Cella function types (<code>fun[...]</code>, <code>ref fun[...]</code> and owned closures), trait objects (<code>dyn[...]</code>) and templates (<code>fstr[...]</code>)</li><li>arrays by value</li></ul>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-874"></button><textarea hidden id="copy-874">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-878"></button><textarea hidden id="copy-878">mod example
 
 Buffer: own rec
 {
@@ -584,7 +584,7 @@ main: fun
 <p>When the problem is inside a field, the error's note names it, as in "'Holder' contains 'Buffer'". A pointer to a type with a destructor can cross, since C only passes the address along: <code>keep: fun(holder: ptr[Holder])</code> is fine.</p>
 <h2 id="exporting-cella-to-c"><a class="anchor" href="#exporting-cella-to-c">Exporting Cella to C</a></h2>
 <p>A Cella function declared <code>ext fun</code> with a body uses the C calling convention, so C can call it through a pointer, as <code>qsort</code> called <code>descending</code> above. To give it a symbol that C code can link against by name, make it <code>pub</code>: a <code>pub ext fun</code> gets a plain C symbol with its own name, or with the name in <code>ext("name")</code>. Globals work the same way with <code>ext val</code> and <code>ext var</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-875"></button><textarea hidden id="copy-875">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-879"></button><textarea hidden id="copy-879">mod example
 
 ext
 {
@@ -611,7 +611,7 @@ main: fun
 <p>The <code>ext</code> block here imports the program's own exports by their C names, the way C code would see them. An <code>ext var</code> or <code>ext val</code> in an <code>ext</code> block declares a C global and has no initializer; one defined at the top level has one. An <code>ext val</code> always lives in memory, so C can read it, and its value is never folded into the code that uses it.</p>
 <p><code>pub</code> items of executables and shared libraries are exported, so a program can export functions for plugins it loads, and a shared library's <code>pub ext fun</code>s can be called from C. Other <code>pub</code> items keep Cella's own symbol names, which include the module, so overloads and equal names in different modules stay apart. Two <code>ext</code> definitions with the same C name in one program, <code>pub</code> or not, are an error on each of them. An <code>ext fun</code> that isn't <code>pub</code> still uses the C calling convention, and with <code>ext("name")</code> it still defines that symbol for C code linked into the same program, but nothing outside the program sees it.</p>
 <p>The rules for <code>ext</code> signatures apply to exported functions and globals too:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-876"></button><textarea hidden id="copy-876">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-880"></button><textarea hidden id="copy-880">mod example
 
 Team: enum
 {
@@ -628,7 +628,7 @@ main: fun
 <p>An <code>ext</code> block with a library name, <code>ext("name") { ... }</code>, takes its functions from that library, and the build links it:</p>
 <ul><li>On Windows, the name is an import or static library, <code>name.lib</code>, found in the project's folder or the linker's library paths. <code>ext("user32")</code> links <code>user32.lib</code>, which makes the program load <code>user32.dll</code>.</li><li>On Linux, the name <code>m</code> means <code>libm.so</code> or <code>libm.a</code>, found in the project's folder or the system's library paths.</li></ul>
 <p>A name can be a path relative to the project's folder, such as <code>ext("lib/bin/plugin")</code>. Without a name, functions come from the C runtime and the system libraries that every program links. Since library names differ between systems, a [<code>when</code> block](conditional-compilation.md#when-blocks) picks the right one:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-877"></button><textarea hidden id="copy-877">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-881"></button><textarea hidden id="copy-881">mod example
 
 ext
 {
@@ -656,7 +656,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-keyword">when</span> windows</span><span class="line">{</span><span class="line">	<span class="c-keyword">ext</span>(<span class="c-literal">"kernel32"</span>)</span><span class="line">	{</span><span class="line">		<span class="c-function">processId</span>: <span class="c-keyword">ext</span>(<span class="c-literal">"GetCurrentProcessId"</span>) <span class="c-keyword">fun</span> -&gt; <span class="c-type">u32</span></span><span class="line">	}</span><span class="line">}</span><span class="line"><span class="c-keyword">else</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">ext</span></span><span class="line">	{</span><span class="line">		processId: <span class="c-keyword">ext</span>(<span class="c-literal">"getpid"</span>) <span class="c-keyword">fun</span> -&gt; i32</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-type">i32</span>(<span class="c-function">processId</span>() &gt; <span class="c-literal">0</span>))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>1</pre></div>
 <p>A missing library and a missing function are both reported at their declarations:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-878"></button><textarea hidden id="copy-878">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-882"></button><textarea hidden id="copy-882">mod example
 
 ext(&quot;no_such_library&quot;)
 {
@@ -667,7 +667,7 @@ main: fun
 {
 	missing()
 }</textarea><pre><code><span class="line"><span class="c-keyword">ext</span>(<span class="c-literal">"no_such_library"</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:17ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot find the library &#x27;no_such_library&#x27;</span></span><span class="line">{</span><span class="line">	<span class="c-function">missing</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">missing</span>()</span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-879"></button><textarea hidden id="copy-879">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-883"></button><textarea hidden id="copy-883">mod example
 
 ext
 {
@@ -680,7 +680,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">no_such_function</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:16ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot find &#x27;no_such_function&#x27; in the linked libraries</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">no_such_function</span>()</span><span class="line">}</span></code></pre></div>
 <h3 id="linking-the-c-runtime"><a class="anchor" href="#linking-the-c-runtime">Linking the C runtime</a></h3>
 <p>On Windows, programs built with Visual Studio's tools link the C runtime either as a DLL or into the program itself. The <code>SystemLinkPreference</code> setting picks one: <code>"Dynamic"</code>, the default, uses the DLL, and <code>"Static"</code> copies the runtime into the program, so it runs without the runtime installed:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-880"></button><textarea hidden id="copy-880">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-884"></button><textarea hidden id="copy-884">OutputType = &quot;Executable&quot;
 SystemLinkPreference = &quot;Static&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">SystemLinkPreference </span>= <span class="c-literal">"Static"</span></span></code></pre></div>
 <p>Every part of a program has to use the same C runtime, so a program that links it statically can't use a shared library project, and a library used by several programs that link it differently is an error. <a href="project-settings.html#systemlinkpreference">Project settings</a> lists the setting with the others.</p>
 </article>

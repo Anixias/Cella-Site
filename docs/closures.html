@@ -41,7 +41,7 @@ try {
 <p>A parameter can have a mode, as in a declaration: <code>fun[mut i32, i32]</code> takes its first argument as a writable borrow, and <code>fun[imm Text -&gt; i32]</code> borrows its argument to read it (see <a href="parameter-modes.html">Parameter modes</a>).</p>
 <h2 id="functions-as-values"><a class="anchor" href="#functions-as-values">Functions as values</a></h2>
 <p>A function's name, without a call, is a value of its function type:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-699"></button><textarea hidden id="copy-699">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-703"></button><textarea hidden id="copy-703">mod example
 
 ext
 {
@@ -78,7 +78,7 @@ main: fun
 15 14
 20 30 </pre></div>
 <p><code>var f = double</code> gives <code>f</code> the type <code>fun[i32 -&gt; i32]</code>. Calling a function value looks like calling a function. Function values go anywhere other values do, such as arrays, record fields and module variables:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-700"></button><textarea hidden id="copy-700">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-704"></button><textarea hidden id="copy-704">mod example
 
 ext
 {
@@ -105,7 +105,7 @@ main: fun
 16</pre></div>
 <p><code>handler.run(4)</code> calls the function stored in the field. A function value is 16 bytes: the address of the code and a pointer to the data a closure carries, which is null for a plain function.</p>
 <p>A function value always holds a function, so it can't be <code>null</code>. Function values also can't be compared, can't be passed to C's variadic functions, and a declared function can't be assigned to:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-701"></button><textarea hidden id="copy-701">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-705"></button><textarea hidden id="copy-705">mod example
 
 ext
 {
@@ -123,7 +123,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">double</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span> * <span class="c-literal">2</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> f: <span class="c-keyword">fun</span>[<span class="c-type">i32</span> -&gt; <span class="c-type">i32</span>] = <span class="c-keyword">null</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:29ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:29ch">Cannot convert type &#x27;null&#x27; to &#x27;fun[i32 -&gt; i32]&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> same = <span class="c-function">double</span> == <span class="c-function">double</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:16ch"></span><span class="diagnostic-text" style="margin-left:15ch">No operation defined for &#x27;==&#x27; between &#x27;fun[i32 -&gt; i32]&#x27; and &#x27;fun[i32 -&gt; i32]&#x27;</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">double</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot pass &#x27;fun[i32 -&gt; i32]&#x27; values to variadic functions</span></span><span class="line">	<span class="c-function">double</span> = <span class="c-function">double</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign functions</span></span><span class="line">}</span></code></pre></div>
 <h3 id="overloaded-functions"><a class="anchor" href="#overloaded-functions">Overloaded functions</a></h3>
 <p>The name of an overloaded function stands for the overload whose type is expected. A local without a type waits for its uses to decide (see <a href="variables.html">Variables and constants</a>):</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-702"></button><textarea hidden id="copy-702">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-706"></button><textarea hidden id="copy-706">mod example
 
 ext
 {
@@ -143,7 +143,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">half</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span> / <span class="c-literal">2</span></span><span class="line"><span class="c-function">half</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">f64</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-parameter">x</span> / <span class="c-literal">2.0</span></span><span class="line"> </span><span class="line"><span class="c-function">apply</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">f</span>: <span class="c-keyword">fun</span>[<span class="c-type">i32</span> -&gt; <span class="c-type">i32</span>], <span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">f</span>(<span class="c-parameter">x</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> exact: <span class="c-keyword">fun</span>[<span class="c-type">f64</span> -&gt; <span class="c-type">f64</span>] = <span class="c-function">half</span></span><span class="line">	<span class="c-keyword">val</span> g = <span class="c-function">half</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%.1f %d %d\n"</span>, exact(<span class="c-literal">5.0</span>), <span class="c-function">apply</span>(<span class="c-function">half</span>, <span class="c-literal">9</span>), <span class="c-function">apply</span>(g, <span class="c-literal">7</span>))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>2.5 4 3</pre></div>
 <p>When nothing settles it, or no overload has the expected type, the name is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-703"></button><textarea hidden id="copy-703">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-707"></button><textarea hidden id="copy-707">mod example
 
 half: fun(x: i32) -&gt; i32 =&gt; x / 2
 half: fun(x: f64) -&gt; f64 =&gt; x / 2.0
@@ -155,7 +155,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">half</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span> / <span class="c-literal">2</span></span><span class="line"><span class="c-function">half</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">f64</span>) -&gt; <span class="c-type">f64</span> =&gt; <span class="c-parameter">x</span> / <span class="c-literal">2.0</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> g = <span class="c-function">half</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:12ch">Reference to &#x27;half&#x27; is ambiguous</span></span><span class="line">	<span class="c-keyword">val</span> wide: <span class="c-keyword">fun</span>[<span class="c-type">i32</span> -&gt; <span class="c-type">i64</span>] = <span class="c-function">half</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:32ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:32ch">No overload of &#x27;half&#x27; matches &#x27;fun[i32 -&gt; i64]&#x27;</span></span><span class="line">}</span></code></pre></div>
 <h3 id="modes-in-function-types"><a class="anchor" href="#modes-in-function-types">Modes in function types</a></h3>
 <p>A function value with mode parameters is called the way the function is, with <code>imm</code> or <code>mut</code> written at the call:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-704"></button><textarea hidden id="copy-704">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-708"></button><textarea hidden id="copy-708">mod example
 
 ext
 {
@@ -184,7 +184,7 @@ main: fun
 <p>The modes are part of the type: <code>damage</code> is a <code>fun[mut i32, i32]</code>, and it doesn't fit a <code>fun[i32, i32]</code>.</p>
 <h2 id="ext-fun-types"><a class="anchor" href="#ext-fun-types"><code>ext fun</code> types</a></h2>
 <p><code>ext fun[A -&gt; R]</code> is a C function pointer: the address of a function that uses C's calling convention, 8 bytes, with no closure data. It's the type for callbacks that C code calls, like <code>qsort</code>'s comparison. A function declared with <code>ext fun</code>, a function from an <code>ext</code> block and any Cella function named directly all give <code>ext fun</code> values:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-705"></button><textarea hidden id="copy-705">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-709"></button><textarea hidden id="copy-709">mod example
 
 ext
 {
@@ -209,7 +209,7 @@ main: fun
 12 7
 8</pre></div>
 <p>An <code>ext fun</code> value converts to the matching <code>fun</code> type, as <code>applyFun(abs, -7)</code> shows. The other way, a <code>fun</code> value can't become an <code>ext fun</code>, since it may be a closure:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-706"></button><textarea hidden id="copy-706">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-710"></button><textarea hidden id="copy-710">mod example
 
 double: fun(x: i32) -&gt; i32 =&gt; x * 2
 
@@ -221,7 +221,7 @@ main: fun
 <p><a href="calling-c.html">Calling C</a> covers callbacks in C APIs.</p>
 <h2 id="lambdas"><a class="anchor" href="#lambdas">Lambdas</a></h2>
 <p>A lambda is a function without a name, written where it's used: <code>fun</code>, the parameters, and then <code>=&gt;</code> and an expression or a block:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-707"></button><textarea hidden id="copy-707">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-711"></button><textarea hidden id="copy-711">mod example
 
 ext
 {
@@ -248,7 +248,7 @@ ran again</pre></div>
 <p>A lambda with no parameters leaves out the parentheses: <code>fun =&gt; 42</code>, <code>fun { ... }</code>. A block body returns with <code>ret</code>, like a function's.</p>
 <h3 id="types-come-from-the-expected-function-type"><a class="anchor" href="#types-come-from-the-expected-function-type">Types come from the expected function type</a></h3>
 <p>A lambda passed where a function type is expected, or stored in a variable of a function type, takes its parameter types, their modes and its result type from that type. They can also be written out, as long as they match:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-708"></button><textarea hidden id="copy-708">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-712"></button><textarea hidden id="copy-712">mod example
 
 ext
 {
@@ -276,7 +276,7 @@ main: fun
 12 5</pre></div>
 <p>In the first call, <code>value</code> is a <code>mut i32</code> because <code>bump</code> is a <code>fun[mut i32]</code>, so <code>value += 10</code> changes the array's element.</p>
 <p>A lambda that doesn't fit the expected type is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-709"></button><textarea hidden id="copy-709">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-713"></button><textarea hidden id="copy-713">mod example
 
 apply: fun(imm f: fun[i32 -&gt; i32], x: i32) -&gt; i32 =&gt; f(x)
 
@@ -289,7 +289,7 @@ main: fun
 <p>A lambda whose written parameter types don't match keeps its own type, and without <code>-&gt; R</code> that type returns nothing, so the second error calls it a <code>fun[i64]</code>. The <code>ref fun</code> in that message is covered under <a href="#closure-types">Closure types</a>.</p>
 <h3 id="lambdas-without-an-expected-type"><a class="anchor" href="#lambdas-without-an-expected-type">Lambdas without an expected type</a></h3>
 <p>A lambda stored in a local without a type has nothing to learn its types from, other than the local's later uses. Its parameters take their types from those uses or from the lambda itself, and without <code>-&gt; R</code> it returns nothing:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-710"></button><textarea hidden id="copy-710">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-714"></button><textarea hidden id="copy-714">mod example
 
 ext
 {
@@ -309,7 +309,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>hi there
 25 6</pre></div>
 <p><code>triple</code> gets its type from <code>apply</code>, the one place it's used. When nothing gives a parameter its type, or a lambda without <code>-&gt; R</code> has a value as its body, that's an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-711"></button><textarea hidden id="copy-711">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-715"></button><textarea hidden id="copy-715">mod example
 
 loose: fun
 {
@@ -326,7 +326,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">loose</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> identity = <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>) =&gt; <span class="c-parameter">x</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:23ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:23ch">Cannot infer the type of &#x27;x&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">valued</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> add = <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) =&gt; <span class="c-parameter">x</span> + <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:29ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:29ch">Cannot use values as statements</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h3 id="lambdas-and-generic-functions"><a class="anchor" href="#lambdas-and-generic-functions">Lambdas and generic functions</a></h3>
 <p>In a call to a generic function, the other arguments settle the type parameters first, and a lambda with an expression body supplies the rest from what it returns:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-712"></button><textarea hidden id="copy-712">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-716"></button><textarea hidden id="copy-716">mod example
 
 ext
 {
@@ -344,7 +344,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">transform</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">copy</span>, <span class="c-typeparam">U</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-typeparam">T</span>, <span class="c-keyword">imm</span> <span class="c-parameter">f</span>: <span class="c-keyword">fun</span>[<span class="c-typeparam">T</span> -&gt; <span class="c-typeparam">U</span>]) -&gt; <span class="c-typeparam">U</span> =&gt; <span class="c-parameter">f</span>(<span class="c-parameter">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> next = <span class="c-function">transform</span>(<span class="c-literal">20</span>, <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>) =&gt; <span class="c-parameter">x</span> + <span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> half = <span class="c-function">transform</span>(<span class="c-literal">3</span>, <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>) =&gt; <span class="c-type">f64</span>(<span class="c-parameter">x</span>) / <span class="c-literal">2.0</span>)</span><span class="line">	<span class="c-keyword">val</span> wide = <span class="c-function">transform</span>(<span class="c-literal">3</span>, <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>) -&gt; <span class="c-type">i64</span> =&gt; <span class="c-parameter">x</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %.1f %lld\n"</span>, next, half, wide)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>21 1.5 3</pre></div>
 <p>A block body's result isn't used for inference, so it needs <code>-&gt; R</code>:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-713"></button><textarea hidden id="copy-713">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-717"></button><textarea hidden id="copy-717">mod example
 
 transform[T: copy, U]: fun(value: T, imm f: fun[T -&gt; U]) -&gt; U =&gt; f(value)
 
@@ -354,7 +354,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">transform</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">copy</span>, <span class="c-typeparam">U</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-typeparam">T</span>, <span class="c-keyword">imm</span> <span class="c-parameter">f</span>: <span class="c-keyword">fun</span>[<span class="c-typeparam">T</span> -&gt; <span class="c-typeparam">U</span>]) -&gt; <span class="c-typeparam">U</span> =&gt; <span class="c-parameter">f</span>(<span class="c-parameter">value</span>)</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> r = <span class="c-function">transform</span>(<span class="c-literal">2</span>, <span class="c-keyword">fun</span>(x) { <span class="c-keyword">ret</span> x * <span class="c-literal">2</span> })</span><span class="diagnostic"><span class="squiggle" style="margin-left:25ch;width:20ch"></span><span class="diagnostic-text" style="margin-left:25ch">Cannot infer the return type</span></span><span class="line">}</span></code></pre></div>
 <h2 id="captures"><a class="anchor" href="#captures">Captures</a></h2>
 <p>A lambda can use the local variables and parameters of the function around it. It <em>captures</em> them, which makes it a closure:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-714"></button><textarea hidden id="copy-714">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-718"></button><textarea hidden id="copy-718">mod example
 
 ext
 {
@@ -377,7 +377,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>36</pre></div>
 <p><code>each</code> takes its callback as <code>imm visit: fun[i32]</code>, which lends it a closure for the call; <a href="#closure-types">Closure types</a> explains why a callback that may capture is taken with <code>imm</code>.</p>
 <p>A closure captures by reference: it refers to the variable itself, not a copy. It sees the variable as it is when the closure is called, and when the variable is a <code>var</code>, it can change it, as <code>total += ...</code> does above:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-715"></button><textarea hidden id="copy-715">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-719"></button><textarea hidden id="copy-719">mod example
 
 ext
 {
@@ -405,7 +405,7 @@ main: fun
 2</pre></div>
 <p>A lambda inside a method can capture <code>self</code> the same way.</p>
 <p>A closure can change only what its function could change: a <code>var</code>, a <code>mut</code> parameter, or something reached through them. It can't move a captured variable out, since the variable stays with the function that owns it:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-716"></button><textarea hidden id="copy-716">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-720"></button><textarea hidden id="copy-720">mod example
 
 Text: own rec
 {
@@ -453,7 +453,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Text</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">call</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">f</span>: <span class="c-keyword">fun</span>[-&gt; <span class="c-type">i32</span>]) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">f</span>()</span><span class="line"> </span><span class="line"><span class="c-function">consume</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">Text</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">watch</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">limit</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-function">call</span>(<span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	limit = <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot reassign read-only parameters</span></span><span class="line">	<span class="c-keyword">ret</span> limit</span><span class="line">})</span><span class="line"> </span><span class="line"><span class="c-function">change</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> base = <span class="c-literal">10</span></span><span class="line">	<span class="c-function">call</span>(<span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">	{</span><span class="line">		base = <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot reassign values</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-literal">0</span></span><span class="line">	})</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">take</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> text = <span class="c-type">Text</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-function">call</span>(<span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">	{</span><span class="line">		<span class="c-function">consume</span>(text)</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot move captured variables</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-literal">0</span></span><span class="line">	})</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h3 id="closure-types"><a class="anchor" href="#closure-types">Closure types</a></h3>
 <p>A closure borrows the variables it captures, so it's a borrow itself, and a local that holds one has the type <code>ref fun[A -&gt; R]</code>. A plain function fits a <code>ref fun</code> too. A <code>ref fun</code> follows the rules for borrows: it can be held in locals and in the fields of a <code>ref rec</code> (see <a href="borrows.html">Borrows</a>), but not in a plain record or a module variable, and it doesn't convert to <code>fun</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-717"></button><textarea hidden id="copy-717">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-721"></button><textarea hidden id="copy-721">mod example
 
 ext
 {
@@ -484,7 +484,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Ticker</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">next</span>: <span class="c-keyword">ref</span> <span class="c-keyword">fun</span>[-&gt; <span class="c-type">i32</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">triple</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">x</span> * <span class="c-literal">3</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">val</span> ticker = <span class="c-type">Ticker</span>(<span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">	{</span><span class="line">		count += <span class="c-literal">1</span></span><span class="line">		<span class="c-keyword">ret</span> count</span><span class="line">	})</span><span class="line"> </span><span class="line">	ticker.<span class="c-field">next</span>()</span><span class="line">	<span class="c-keyword">val</span> widened: <span class="c-keyword">ref</span> <span class="c-keyword">fun</span>[<span class="c-type">i32</span> -&gt; <span class="c-type">i32</span>] = <span class="c-function">triple</span></span><span class="line">	<span class="c-keyword">val</span> base = <span class="c-literal">4</span></span><span class="line">	<span class="c-keyword">val</span> steps: <span class="c-type">array</span>[<span class="c-keyword">ref</span> <span class="c-keyword">fun</span>[-&gt; <span class="c-type">i32</span>], <span class="c-literal">2</span>] = [<span class="c-keyword">fun</span> =&gt; base, <span class="c-keyword">fun</span> =&gt; count]</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, ticker.<span class="c-field">next</span>(), widened(<span class="c-literal">2</span>), steps[<span class="c-literal">0</span>](), steps[<span class="c-literal">1</span>]())</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>2 6 4 2</pre></div>
 <p>A lambda that captures nothing is a plain function, of type <code>fun[...]</code>.</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-718"></button><textarea hidden id="copy-718">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-722"></button><textarea hidden id="copy-722">mod example
 
 Plain: rec
 {
@@ -500,7 +500,7 @@ main: fun
 	val plain: fun[-&gt; i32] = closure
 }</textarea><pre><code><span class="line"><span class="c-type">Plain</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">run</span>: <span class="c-keyword">ref</span> <span class="c-keyword">fun</span>[]</span><span class="diagnostic"><span class="squiggle" style="margin-left:9ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:9ch">Cannot store borrows in records that aren&#x27;t &#x27;ref&#x27;<span class="diagnostic-note">Did you mean &#x27;Plain: ref rec&#x27;?</span></span></span><span class="line">}</span><span class="line"> </span><span class="line">saved: <span class="c-keyword">var</span> <span class="c-keyword">ref</span> <span class="c-keyword">fun</span>[] = <span class="c-keyword">fun</span> { }</span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot store borrows in module variables</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> base = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> closure = <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; base</span><span class="line">	<span class="c-keyword">val</span> plain: <span class="c-keyword">fun</span>[-&gt; <span class="c-type">i32</span>] = closure</span><span class="diagnostic"><span class="squiggle" style="margin-left:29ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:29ch">Cannot convert type &#x27;ref fun[-&gt; i32]&#x27; to &#x27;fun[-&gt; i32]&#x27;</span></span><span class="line">}</span></code></pre></div>
 <p>Parameters are never written as <code>ref fun</code>. A parameter that takes a closure is written <code>imm f: fun[...]</code>: it borrows the closure for the call, as <code>imm</code> does for any value (see <a href="parameter-modes.html">Parameter modes</a>). That's why it accepts closures that capture, and why the function can call it but can't keep it. A named closure is passed to it with <code>imm</code>, as in <code>apply(imm add, 1)</code>; a lambda written in the call needs nothing:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-719"></button><textarea hidden id="copy-719">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-723"></button><textarea hidden id="copy-723">mod example
 
 zero: fun -&gt; i32 =&gt; 0
 
@@ -520,7 +520,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">zero</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="line"> </span><span class="line">saved: <span class="c-keyword">var</span> <span class="c-keyword">fun</span>[-&gt; <span class="c-type">i32</span>] = <span class="c-function">zero</span></span><span class="line"> </span><span class="line"><span class="c-function">visit</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">f</span>: <span class="c-keyword">ref</span> <span class="c-keyword">fun</span>[<span class="c-type">i32</span>])</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:12ch"></span><span class="diagnostic-text" style="margin-left:18ch">Cannot use borrow types for parameters</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">keep</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">f</span>: <span class="c-keyword">fun</span>[-&gt; <span class="c-type">i32</span>])</span><span class="line">{</span><span class="line">	saved = <span class="c-parameter">f</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot move read-only parameters</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h3 id="where-closures-can-go"><a class="anchor" href="#where-closures-can-go">Where closures can go</a></h3>
 <p>Since a closure borrows its captures, it can't outlive them. It can't be returned from the function that made it, or stored anywhere that lasts longer than its captures, and it can't be used after a captured variable is moved away:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-720"></button><textarea hidden id="copy-720">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-724"></button><textarea hidden id="copy-724">mod example
 
 Text: own rec
 {
@@ -560,7 +560,7 @@ main: fun
 	show()
 }</textarea><pre><code><span class="line"><span class="c-type">Text</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Holder</span>: <span class="c-keyword">ref</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">run</span>: <span class="c-keyword">ref</span> <span class="c-keyword">fun</span>[]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">consume</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">text</span>: <span class="c-type">Text</span>)</span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">make</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-keyword">ref</span> <span class="c-keyword">fun</span>[-&gt; <span class="c-type">i32</span>]</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> base = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-keyword">fun</span> =&gt; base</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot return closures that capture variables</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">store</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-parameter">holder</span>: <span class="c-type">Holder</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> base = <span class="c-literal">1</span></span><span class="line">	<span class="c-parameter">holder</span>.<span class="c-field">run</span> = <span class="c-keyword">fun</span> { <span class="c-keyword">val</span> copy = base }</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:23ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot store new borrows in &#x27;mut&#x27; parameters</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> text = <span class="c-type">Text</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> show = <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; text.<span class="c-field">id</span></span><span class="line">	<span class="c-function">consume</span>(text)</span><span class="line">	show()</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot use borrows of moved values<span class="diagnostic-note">Moved on line 37</span></span></span><span class="line">}</span></code></pre></div>
 <p>A <code>fun[...]</code> parameter without a mode takes its argument by value and can keep it, so it accepts plain functions and lambdas that capture nothing, but no closures that capture. Neither does an <code>ext fun</code>, which has no room for captured data:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-721"></button><textarea hidden id="copy-721">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-725"></button><textarea hidden id="copy-725">mod example
 
 ext
 {
@@ -581,7 +581,7 @@ main: fun
 <p>The same lambdas without <code>base</code> work in both places. To keep a closure past the function that made it, make it an owned closure, below.</p>
 <h2 id="closures-in-loops"><a class="anchor" href="#closures-in-loops">Closures in loops</a></h2>
 <p>A closure made in a loop's body can capture the loop's variable, and can be used during that pass:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-722"></button><textarea hidden id="copy-722">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-726"></button><textarea hidden id="copy-726">mod example
 
 ext
 {
@@ -604,7 +604,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">apply</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">f</span>: <span class="c-keyword">fun</span>[-&gt; <span class="c-type">i32</span>]) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">f</span>()</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> values = [<span class="c-literal">10</span>, <span class="c-literal">20</span>, <span class="c-literal">30</span>]</span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">for</span> v <span class="c-keyword">in</span> values</span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> get = <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; v</span><span class="line">		total += get() + <span class="c-function">apply</span>(<span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; v)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, total)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>120</pre></div>
 <p>Each pass has its own variables, which end with the pass, so a closure from one pass can't be used in a later one or after the loop:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-723"></button><textarea hidden id="copy-723">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-727"></button><textarea hidden id="copy-727">mod example
 
 main: fun -&gt; i32
 {
@@ -617,7 +617,7 @@ main: fun -&gt; i32
 <h2 id="owned-closures"><a class="anchor" href="#owned-closures">Owned closures</a></h2>
 <p><code>own fun</code> makes a closure that holds its captures itself instead of borrowing them, so it can live on after the variables it used are gone. It takes each capture in by its kind:</p>
 <ul><li>a <code>val</code> or a parameter is copied;</li><li>a value with a destructor is moved in, and dropped with the closure;</li><li>a <code>var</code> is taken over: the closure owns it from then on, and the function can't use it again until it assigns a new value.</li></ul>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-724"></button><textarea hidden id="copy-724">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-728"></button><textarea hidden id="copy-728">mod example
 
 ext
 {
@@ -644,7 +644,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>4 100
 12</pre></div>
 <p><code>add</code> has its own <code>step</code>, still 3, and the function's <code>step</code> is a new value. <code>next</code> keeps its <code>count</code> between calls. Using <code>count</code> in <code>main</code> after the closure took it is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-725"></button><textarea hidden id="copy-725">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-729"></button><textarea hidden id="copy-729">mod example
 
 ext
 {
@@ -659,7 +659,7 @@ main: fun
 	printf(&quot;%d\n&quot;, total)
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">0</span></span><span class="line">	<span class="c-keyword">val</span> add = <span class="c-keyword">own</span> <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>) { total += <span class="c-parameter">value</span> }</span><span class="line">	add(<span class="c-literal">5</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, total)</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot use moved values<span class="diagnostic-note">Moved on line 11</span></span></span><span class="line">}</span></code></pre></div>
 <p>A captured value with a destructor lives as long as the closure:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-726"></button><textarea hidden id="copy-726">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-730"></button><textarea hidden id="copy-730">mod example
 
 ext
 {
@@ -690,7 +690,7 @@ texture 7
 end
 free texture 7</pre></div>
 <p>An owned closure is moved like any value with a destructor. Its type has no name: each <code>own fun</code> lambda has a type of its own, so two of them can't be stored in the same variable, and one doesn't convert to <code>fun</code>. It can be passed to an <code>imm f: fun[...]</code> parameter, which borrows it for the call:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-727"></button><textarea hidden id="copy-727">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-731"></button><textarea hidden id="copy-731">mod example
 
 main: fun
 {
@@ -701,7 +701,7 @@ main: fun
 	val plain: fun[-&gt; i32] = pick
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> base = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> other = <span class="c-literal">2</span></span><span class="line">	<span class="c-keyword">var</span> pick = <span class="c-keyword">own</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; base</span><span class="line">	pick = <span class="c-keyword">own</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; other</span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:23ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot convert between &#x27;own fun&#x27; closures</span></span><span class="line">	<span class="c-keyword">val</span> plain: <span class="c-keyword">fun</span>[-&gt; <span class="c-type">i32</span>] = pick</span><span class="diagnostic"><span class="squiggle" style="margin-left:29ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:29ch">Cannot convert type &#x27;own fun[-&gt; i32]&#x27; to &#x27;fun[-&gt; i32]&#x27;</span></span><span class="line">}</span></code></pre></div>
 <p>An owned closure copies or takes in its captures, so it can't change a captured <code>val</code>, and it can't capture a read-only parameter whose type can't be copied:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-728"></button><textarea hidden id="copy-728">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-732"></button><textarea hidden id="copy-732">mod example
 
 Texture: own rec
 {
@@ -728,7 +728,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Texture</span>: <span class="c-keyword">own</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">id</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">drop</span>: <span class="c-keyword">op</span></span><span class="line">	{</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">texture</span>: <span class="c-type">Texture</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> shown = <span class="c-keyword">own</span> <span class="c-keyword">fun</span> { <span class="c-keyword">val</span> id = texture.<span class="c-field">id</span> }</span><span class="diagnostic"><span class="squiggle" style="margin-left:35ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:35ch">Cannot move read-only parameters</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> base = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> step = <span class="c-keyword">own</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">	{</span><span class="line">		base = <span class="c-literal">3</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot reassign values</span></span><span class="line">		<span class="c-keyword">ret</span> base</span><span class="line">	}</span><span class="line">}</span></code></pre></div>
 <h2 id="function-types-as-constraints"><a class="anchor" href="#function-types-as-constraints">Function types as constraints</a></h2>
 <p>A function type also works as a constraint on a type parameter. <code>[F: fun[i32 -&gt; i32]]</code> accepts any value that can be called that way: a function, an <code>ext fun</code>, a borrowing closure or an owned one. Generic code can call it, and keep it in a field:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-729"></button><textarea hidden id="copy-729">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-733"></button><textarea hidden id="copy-733">mod example
 
 ext
 {
@@ -767,7 +767,7 @@ main: fun
 2 30</pre></div>
 <p><code>Counter</code> holds an owned closure without knowing its type, which is how a record keeps one. <a href="generics.html">Generics</a> covers constraints in general.</p>
 <p>A value that doesn't fit the function type is an error at the call:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-730"></button><textarea hidden id="copy-730">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-734"></button><textarea hidden id="copy-734">mod example
 
 twice[F: fun[i32 -&gt; i32]]: fun(imm f: F, x: i32) -&gt; i32 =&gt; f(f(x))
 
@@ -778,7 +778,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">twice</span>[<span class="c-typeparam">F</span>: <span class="c-keyword">fun</span>[<span class="c-type">i32</span> -&gt; <span class="c-type">i32</span>]]: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-parameter">f</span>: <span class="c-typeparam">F</span>, <span class="c-parameter">x</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">f</span>(<span class="c-parameter">f</span>(<span class="c-parameter">x</span>))</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> wrong = <span class="c-function">twice</span>(<span class="c-literal">5</span>, <span class="c-literal">1</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:16ch">&#x27;twice&#x27; requires &#x27;F: fun[i32 -&gt; i32]&#x27;<span class="diagnostic-note">&#x27;i32&#x27; doesn&#x27;t implement &#x27;fun[i32 -&gt; i32]&#x27;</span></span></span><span class="line">	<span class="c-keyword">val</span> fewer = <span class="c-function">twice</span>(<span class="c-keyword">fun</span> =&gt; <span class="c-literal">4</span>, <span class="c-literal">1</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:22ch">&#x27;fun[i32 -&gt; i32]&#x27; takes one parameter</span></span><span class="line">}</span></code></pre></div>
 <h2 id="calling-through"><a class="anchor" href="#calling-through">Calling through <code>*</code></a></h2>
 <p>A call looks through a type's dereference operator (see <a href="operators.html">Operators</a>). When <code>*v</code> gives a function, <code>v(...)</code> calls it, the same as <code>(*v)(...)</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-731"></button><textarea hidden id="copy-731">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-735"></button><textarea hidden id="copy-735">mod example
 
 ext
 {
@@ -807,7 +807,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>call 10
 call 12</pre></div>
 <p>This is how a box type that owns a closure on the heap is called like the closure itself. A function type works as a trait, so <code>dyn[fun[-&gt; i32]]</code> is a trait object for any function with that signature (see <a href="trait-objects.html">Trait objects</a>), and a box of one can hold any owned closure. Returned from a function, it keeps the closure, and the variables the closure took over, alive:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-732"></button><textarea hidden id="copy-732">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-736"></button><textarea hidden id="copy-736">mod example
 
 ext
 {

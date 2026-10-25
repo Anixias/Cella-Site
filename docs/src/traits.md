@@ -814,6 +814,75 @@ main: fun
 10 3 5
 ```
 
+A parameter like `count`'s `T` can also be declared inside the bound. A name in a bound's brackets that doesn't name anything else declares a new parameter, so `[I: Iterator[T]]` declares `T`, and `[I: Iterator[T: copy]]` declares it with constraints. Records, enums and traits declare parameters the same way. The parameter is inferred from the type it's attached to: first from the arguments, then from that type's implementation. So `Skipping[Countdown]` needs no second argument:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+~ Option[T]: enum
+~ {
+~ 	none
+~ 	some(value: T)
+~ }
+~
+~ Iterator[T]: trait
+~ {
+~ 	next: fun(mut self) -> Option[T]
+~ }
+~
+~ Countdown: rec impl Iterator[i32]
+~ {
+~ 	left: i32
+~
+~ 	next: fun(mut self) -> Option[i32]
+~ 	{
+~ 		if self.left == 0
+~ 			ret none
+~
+~ 		self.left -= 1
+~ 		ret some(self.left + 1)
+~ 	}
+~ }
+~
+first[I: Iterator[T]]: fun(mut items: I) -> Option[T] => items.next()
+
+Skipping[I: Iterator[T]]: rec impl Iterator[T]
+{
+	items: I
+
+	next: fun(mut self) -> Option[T]
+	{
+		val _ = self.items.next()
+		ret self.items.next()
+	}
+}
+
+main: fun
+{
+	var steps = Countdown(3)
+	if first(mut steps) is some(val value)
+		printf("%d\n", value)
+
+	var skipping: Skipping[Countdown] = Skipping(Countdown(6))
+	while skipping.next() is some(val value)
+		printf("%d\n", value)
+}
+```
+
+```output
+3
+5
+3
+1
+```
+
+When a type implements the trait more than once, as `Console` does below, the parameter can't be inferred from the type alone. A call can still pick it from its other arguments; otherwise it's an error: "Cannot infer 'T' for 'first'".
+
 A type can implement several instantiations of one trait, each with its own members:
 
 ```cella
@@ -1264,6 +1333,48 @@ Point: rec impl Built
 ```
 
 Constraints and traits mix in one list, as in `req copy + Ord`. Writing `[T: Bounded + copy]` repeats what `Bounded` already requires and gets the hint "Redundant 'copy'".
+
+A trait can require an [enum](generics.md#enum) whose tag is one of the trait's parameters, as in `req enum(T)`. An implementation can then leave that argument out, since the enum's tag decides it. Here `Access: ext enum(u32) impl Flags` implements `Flags[u32]`:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Integral: trait req copy
+{
+	|: op(a: Self, b: Self) -> Self
+}
+
+u32: impl Integral
+
+Flags[T: Integral]: trait req ext + enum(T)
+{
+	|: op(a: Self, b: Self) -> Self => Self(T(a) | T(b))
+}
+
+Access: ext enum(u32) impl Flags
+{
+	none = 0
+	read = 1
+	write = 2
+}
+
+main: fun
+{
+	val both = Access.read | Access.write
+	printf("%u\n", u32(both))
+}
+```
+
+```output
+3
+```
+
+The argument can still be written, and one that doesn't match the tag type is an error. A type that isn't an enum without payloads gets "'Flags' requires 'Self: enum(T)'". Bounds and `dyn` types always need the argument, as in `[E: Flags[T]]`. With `const` operators and an `impl const Integral`, `Access.read | Access.write` also works in constants ([Constant functions](constant-functions.md)).
 
 ## Blanket implementations
 
