@@ -38,7 +38,7 @@ try {
 <p>The examples in this chapter run on one thread, so their output is the same every time. The operations behave the same way when other threads use the memory at the same time.</p>
 <h2 id="loads-and-stores"><a class="anchor" href="#loads-and-stores">Loads and stores</a></h2>
 <p><code>atomic *p</code> reads the value <code>p</code> points to atomically, and <code>atomic *p = v</code> writes it:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-916"></button><textarea hidden id="copy-916">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-917"></button><textarea hidden id="copy-917">mod example
 
 ext
 {
@@ -58,7 +58,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>total 42</pre></div>
 <p>The pointer can be any <code>ptr[T]</code> value, such as <code>@total</code> for a global or a local, or a pointer held in a variable or a field. The keyword covers only the dereference after it, so <code>atomic *p * 2</code> loads <code>*p</code> atomically and then multiplies the result as usual.</p>
 <p>An atomic store is a statement and has no value. Something other than a dereference after <code>atomic</code> is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-917"></button><textarea hidden id="copy-917">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-918"></button><textarea hidden id="copy-918">mod example
 
 main: fun
 {
@@ -66,7 +66,7 @@ main: fun
 	val copy = atomic count
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> copy = <span class="c-keyword">atomic</span> count</span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:22ch">Expected &#x27;*&#x27;</span></span><span class="line">}</span></code></pre></div>
 <p>The pointer has to be a typed <code>ptr[T]</code>. A borrow, a library pointer type with its own <code>*</code> operator and an untyped <code>ptr</code> can't be dereferenced atomically:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-918"></button><textarea hidden id="copy-918">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-919"></button><textarea hidden id="copy-919">mod example
 
 main: fun
 {
@@ -78,7 +78,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> view = <span class="c-keyword">imm</span> count</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-keyword">atomic</span> *view</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot access values atomically through &#x27;imm[i32]&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> raw: <span class="c-type">ptr</span> = <span class="c-type">ptr</span>(@count)</span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-keyword">atomic</span> *raw</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot access values atomically through &#x27;ptr&#x27;</span></span><span class="line">}</span></code></pre></div>
 <h2 id="updates"><a class="anchor" href="#updates">Updates</a></h2>
 <p>A compound assignment after <code>atomic</code> reads the value, combines it and writes the result back in one step. Its value is the new value:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-919"></button><textarea hidden id="copy-919">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-920"></button><textarea hidden id="copy-920">mod example
 
 ext
 {
@@ -98,7 +98,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count = <span class="c-literal">10</span></span><span class="line">	<span class="c-keyword">val</span> p = @count</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-keyword">atomic</span> *p += <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-keyword">atomic</span> *p -= <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-keyword">atomic</span> *p &amp;= <span class="c-literal">0b1100</span></span><span class="line">	<span class="c-keyword">val</span> d = <span class="c-keyword">atomic</span> *p |= <span class="c-literal">0b0001</span></span><span class="line">	<span class="c-keyword">val</span> e = <span class="c-keyword">atomic</span> *p ^= <span class="c-literal">0b1000</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d %d\n"</span>, a, b, c, d, e)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>15 12 12 13 5</pre></div>
 <p>The operators that can be atomic are <code>+=</code>, <code>-=</code>, <code>&amp;=</code>, <code>|=</code>, <code>^=</code> and the wrapping <code>+%=</code> and <code>-%=</code>. Others, such as <code>*=</code> and <code>&lt;&lt;=</code>, are errors:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-920"></button><textarea hidden id="copy-920">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-921"></button><textarea hidden id="copy-921">mod example
 
 main: fun
 {
@@ -109,7 +109,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count = <span class="c-literal">3</span></span><span class="line">	<span class="c-keyword">val</span> p = @count</span><span class="line">	<span class="c-keyword">atomic</span> *p *= <span class="c-literal">2</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot use &#x27;*=&#x27; atomically</span></span><span class="line">	<span class="c-keyword">atomic</span> *p &lt;&lt;= <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot use &#x27;&lt;&lt;=&#x27; atomically</span></span><span class="line">}</span></code></pre></div>
 <p>Which operators work depends on the type:</p>
 <div class="table-wrap"><table><thead><tr><th>Type</th><th>Atomic operators</th></tr></thead><tbody><tr><td>integers</td><td><code>+=</code>, <code>-=</code>, <code>&amp;=</code>, <code>|=</code>, <code>^=</code>, <code>+%=</code>, <code>-%=</code></td></tr><tr><td><code>f32</code>, <code>f64</code></td><td><code>+=</code>, <code>-=</code></td></tr><tr><td><code>bool</code></td><td><code>&amp;=</code>, <code>|=</code>, <code>^=</code></td></tr><tr><td><code>char</code></td><td><code>+=</code> and <code>-=</code> with an <code>i32</code></td></tr></tbody></table></div>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-921"></button><textarea hidden id="copy-921">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-922"></button><textarea hidden id="copy-922">mod example
 
 main: fun
 {
@@ -119,7 +119,7 @@ main: fun
 	atomic *@scale &amp;= 2.0
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> flag = <span class="c-keyword">true</span></span><span class="line">	<span class="c-keyword">atomic</span> *@flag += <span class="c-keyword">true</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:18ch">Cannot use &#x27;+=&#x27; atomically on &#x27;bool&#x27;</span></span><span class="line">	<span class="c-keyword">var</span> scale = <span class="c-literal">1.5</span></span><span class="line">	<span class="c-keyword">atomic</span> *@scale &amp;= <span class="c-literal">2.0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot use &#x27;&amp;=&#x27; atomically on &#x27;f64&#x27;</span></span><span class="line">}</span></code></pre></div>
 <p>Atomic <code>+=</code> and <code>-=</code> on integers and <code>char</code> are checked for overflow like the plain operators, and <code>+%=</code> and <code>-%=</code> wrap. <a href="panics.html#turning-checks-on-and-off">Checks and panics</a> covers when overflow checks run:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-922"></button><textarea hidden id="copy-922">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-923"></button><textarea hidden id="copy-923">mod example
 
 ext
 {
@@ -141,7 +141,7 @@ c
 Panic at main.ce:16:17: subtraction overflow</pre></div>
 <h2 id="compare-and-swap"><a class="anchor" href="#compare-and-swap">Compare and swap</a></h2>
 <p><code>atomic *p == expected = desired</code> stores <code>desired</code> only if the value is <code>expected</code> at that moment. Its value is a <code>bool</code> that says whether it stored:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-923"></button><textarea hidden id="copy-923">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-924"></button><textarea hidden id="copy-924">mod example
 
 ext
 {
@@ -159,7 +159,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>1 0 7</pre></div>
 <p>The first swap finds <code>0</code> and stores <code>7</code>. The second finds <code>7</code>, so it leaves the value alone and gives <code>false</code>.</p>
 <p>The usual pattern for an update that has no atomic operator is a loop: load the value, compute the new one, and try to swap it in. If another thread changed the value in between, the swap fails and the loop tries again:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-924"></button><textarea hidden id="copy-924">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-925"></button><textarea hidden id="copy-925">mod example
 
 ext
 {
@@ -189,7 +189,7 @@ main: fun
 }</textarea><pre><code><span class="line">largest: <span class="c-keyword">var</span> <span class="c-type">i32</span> = <span class="c-literal">0</span></span><span class="line"> </span><span class="line"><span class="c-function">record</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-type">i32</span>)</span><span class="line">{</span><span class="line">	<span class="c-keyword">loop</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">val</span> seen = <span class="c-keyword">atomic</span> relaxed *@largest</span><span class="line">		<span class="c-keyword">if</span> <span class="c-parameter">value</span> &lt;= seen</span><span class="line">			<span class="c-keyword">ret</span></span><span class="line">		<span class="c-keyword">if</span> <span class="c-keyword">atomic</span> *@largest == seen = <span class="c-parameter">value</span></span><span class="line">			<span class="c-keyword">ret</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">record</span>(<span class="c-literal">4</span>)</span><span class="line">	<span class="c-function">record</span>(<span class="c-literal">9</span>)</span><span class="line">	<span class="c-function">record</span>(<span class="c-literal">2</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, largest)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>9</pre></div>
 <p>Compare-and-swap compares bit patterns, not values, so for floats a NaN matches the same NaN, and <code>-0.0</code> doesn't match <code>0.0</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-925"></button><textarea hidden id="copy-925">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-926"></button><textarea hidden id="copy-926">mod example
 
 ext
 {
@@ -204,7 +204,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> negative = -<span class="c-literal">0.0</span></span><span class="line">	<span class="c-keyword">val</span> swapped = <span class="c-keyword">atomic</span> *@negative == <span class="c-literal">0.0</span> = <span class="c-literal">1.0</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %.1f\n"</span>, <span class="c-type">i32</span>(swapped), negative)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>0 -0.0</pre></div>
 <p>Without <code>= desired</code>, <code>==</code> is an ordinary comparison: <code>atomic *p == 7</code> loads <code>*p</code> atomically and compares it with <code>7</code>. Parentheses end the atomic expression, so <code>(atomic *p) = 5</code> isn't a store but an assignment to the loaded value, which is an error:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-926"></button><textarea hidden id="copy-926">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-927"></button><textarea hidden id="copy-927">mod example
 
 target: var i32 = 1
 
@@ -217,7 +217,7 @@ main: fun
 <p>On its own, an atomic operation only guarantees that the access itself is indivisible. A memory ordering also says how the operation orders the thread's other reads and writes, which is what makes a value written by one thread safe to read in another. The ordering goes between <code>atomic</code> and the dereference:</p>
 <div class="table-wrap"><table><thead><tr><th>Ordering</th><th>Meaning</th></tr></thead><tbody><tr><td>none</td><td>Sequentially consistent: every thread sees all such operations in one order.</td></tr><tr><td><code>relaxed</code></td><td>Only the access itself is atomic; nothing else is ordered.</td></tr><tr><td><code>acquire</code></td><td>Reads and writes after the operation can't move before it.</td></tr><tr><td><code>release</code></td><td>Reads and writes before the operation can't move after it.</td></tr><tr><td><code>acquire release</code></td><td>Both.</td></tr></tbody></table></div>
 <p>The typical pair is a <code>release</code> store that publishes data and an <code>acquire</code> load that sees it. A thread that reads <code>ready</code> as <code>true</code> with an acquire load also sees every write the other thread made before its release store:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-927"></button><textarea hidden id="copy-927">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-928"></button><textarea hidden id="copy-928">mod example
 
 ext
 {
@@ -249,7 +249,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>-1
 25</pre></div>
 <p>Loads take <code>relaxed</code> or <code>acquire</code>, stores take <code>relaxed</code> or <code>release</code>, and updates and compare-and-swap take any of them. With no ordering, every operation is sequentially consistent, the strongest and safest choice. Other combinations are errors:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-928"></button><textarea hidden id="copy-928">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-929"></button><textarea hidden id="copy-929">mod example
 
 main: fun
 {
@@ -262,7 +262,7 @@ main: fun
 <p><code>acquire release</code> is always written in that order; <code>release acquire</code> is a syntax error.</p>
 <h2 id="fences"><a class="anchor" href="#fences">Fences</a></h2>
 <p><code>atomic</code> with an ordering and nothing after it is a fence: it orders the thread's memory accesses around it without accessing anything itself. <code>atomic</code> alone is a sequentially consistent fence:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-929"></button><textarea hidden id="copy-929">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-930"></button><textarea hidden id="copy-930">mod example
 
 ext
 {
@@ -288,7 +288,7 @@ main: fun
 }</textarea><pre><code><span class="line">data: <span class="c-keyword">var</span> <span class="c-type">i32</span> = <span class="c-literal">0</span></span><span class="line">flag: <span class="c-keyword">var</span> <span class="c-type">bool</span> = <span class="c-keyword">false</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	data = <span class="c-literal">7</span></span><span class="line">	<span class="c-keyword">atomic</span> release</span><span class="line">	<span class="c-keyword">atomic</span> relaxed *@flag = <span class="c-keyword">true</span></span><span class="line">	<span class="c-keyword">if</span> <span class="c-keyword">atomic</span> relaxed *@flag</span><span class="line">	{</span><span class="line">		<span class="c-keyword">atomic</span> acquire</span><span class="line">		<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, data)</span><span class="line">	}</span><span class="line"> </span><span class="line">	<span class="c-keyword">atomic</span> acquire release</span><span class="line">	<span class="c-keyword">atomic</span></span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>7</pre></div>
 <p>A fence is a statement. <code>relaxed</code> orders nothing, so it can't be a fence:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-930"></button><textarea hidden id="copy-930">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-931"></button><textarea hidden id="copy-931">mod example
 
 main: fun
 {
@@ -299,7 +299,7 @@ main: fun
 <p>These types can be accessed atomically:</p>
 <ul><li>integers up to 64 bits, <code>bool</code> and <code>char</code></li><li><code>f32</code> and <code>f64</code></li><li>typed and untyped pointers, other than pointers to trait objects</li><li><code>cstr</code> and <code>ext fun</code> values</li><li>enums without payloads, unless their tag is <code>i128</code> or <code>u128</code></li><li>tagless enums (<code>enum match</code>) over one of the types above</li></ul>
 <p>Records, <code>str</code>, <code>i128</code>, <code>u128</code>, enums with payloads, pointers to trait objects and <code>fun</code> values can't be:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-931"></button><textarea hidden id="copy-931">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-932"></button><textarea hidden id="copy-932">mod example
 
 Point: rec
 {
@@ -317,7 +317,7 @@ main: fun
 	val c = atomic *@big
 }</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> point = <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-keyword">atomic</span> *@point</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot access &#x27;Point&#x27; values atomically</span></span><span class="line">	<span class="c-keyword">var</span> text = <span class="c-literal">"hi"</span></span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-keyword">atomic</span> *@text</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot access &#x27;str&#x27; values atomically</span></span><span class="line">	<span class="c-keyword">var</span> big: <span class="c-type">i128</span> = <span class="c-literal">1</span></span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-keyword">atomic</span> *@big</span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot access &#x27;i128&#x27; values atomically</span></span><span class="line">}</span></code></pre></div>
 <p>Loads, stores and compare-and-swap work on every type in the list. Pointers swap like any other value:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-932"></button><textarea hidden id="copy-932">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-933"></button><textarea hidden id="copy-933">mod example
 
 ext
 {
@@ -347,7 +347,7 @@ main: fun
 2</pre></div>
 <h2 id="generic-code-and-t-atomic"><a class="anchor" href="#generic-code-and-t-atomic">Generic code and <code>T: atomic</code></a></h2>
 <p>In a generic function or type, <code>atomic</code> works on a <code>T</code> only when <code>T</code> has the <code>atomic</code> constraint. Without it, the body is rejected:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-933"></button><textarea hidden id="copy-933">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-934"></button><textarea hidden id="copy-934">mod example
 
 Slot[T]: rec
 {
@@ -360,7 +360,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-type">Slot</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-typeparam">T</span></span><span class="line"> </span><span class="line">	<span class="c-function">load</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-typeparam">T</span> =&gt; <span class="c-keyword">atomic</span> *@<span class="c-keyword">self</span>.value</span><span class="diagnostic"><span class="squiggle" style="margin-left:39ch;width:12ch"></span><span class="diagnostic-text" style="margin-left:39ch">Cannot access &#x27;T&#x27; values atomically</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>With <code>T: atomic</code>, every type argument must be a type that can be accessed atomically:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-934"></button><textarea hidden id="copy-934">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-935"></button><textarea hidden id="copy-935">mod example
 
 Slot[T: atomic]: rec
 {
@@ -381,7 +381,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Slot</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">atomic</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-typeparam">T</span></span><span class="line"> </span><span class="line">	<span class="c-function">load</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-typeparam">T</span> =&gt; <span class="c-keyword">atomic</span> acquire *@<span class="c-keyword">self</span>.<span class="c-field">value</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> points = <span class="c-type">Slot</span>[<span class="c-type">Point</span>](<span class="c-type">Point</span>(<span class="c-literal">1</span>))</span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:22ch">&#x27;Slot&#x27; requires &#x27;T: atomic&#x27;<span class="diagnostic-note">&#x27;Point&#x27; can&#x27;t be accessed atomically</span></span></span><span class="line">	<span class="c-keyword">val</span> wide = <span class="c-type">Slot</span>[<span class="c-type">i128</span>](<span class="c-literal">1</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:20ch">&#x27;Slot&#x27; requires &#x27;T: atomic&#x27;<span class="diagnostic-note">&#x27;i128&#x27; can&#x27;t be accessed atomically</span></span></span><span class="line">}</span></code></pre></div>
 <p>Each error has a note that says why, such as "'Point' can't be accessed atomically".</p>
 <p><code>T: atomic</code> allows loads, stores and compare-and-swap. Updates depend on the type, so they're checked where the function is used with a concrete type. A call that would apply an update to a type that doesn't support it is an error at the call:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-935"></button><textarea hidden id="copy-935">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-936"></button><textarea hidden id="copy-936">mod example
 
 bump[T: atomic]: fun(target: ptr[T], amount: T) -&gt; T =&gt; atomic *target += amount
 
@@ -393,7 +393,7 @@ main: fun
 	bump(@flag, true)
 }</textarea><pre><code><span class="line"><span class="c-function">bump</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">atomic</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">target</span>: <span class="c-type">ptr</span>[<span class="c-typeparam">T</span>], <span class="c-parameter">amount</span>: <span class="c-typeparam">T</span>) -&gt; <span class="c-typeparam">T</span> =&gt; <span class="c-keyword">atomic</span> *<span class="c-parameter">target</span> += <span class="c-parameter">amount</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> count = <span class="c-literal">1</span></span><span class="line">	<span class="c-function">bump</span>(@count, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-keyword">var</span> flag = <span class="c-keyword">false</span></span><span class="line">	<span class="c-function">bump</span>(@flag, <span class="c-keyword">true</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot use &#x27;+=&#x27; atomically on &#x27;bool&#x27;<span class="diagnostic-note">Used on line 3</span></span></span><span class="line">}</span></code></pre></div>
 <p>A value that can be accessed atomically can always be copied, so <code>T: atomic</code> can't be combined with <code>drop</code>:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-936"></button><textarea hidden id="copy-936">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-937"></button><textarea hidden id="copy-937">mod example
 
 keep[T: atomic + drop]: fun(value: T)
 {
@@ -404,7 +404,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">keep</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">atomic</span> + <span class="c-keyword">drop</span>]: <span class="c-keyword">fun</span>(<span class="c-parameter">value</span>: <span class="c-typeparam">T</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:6ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot combine &#x27;atomic&#x27; and &#x27;drop&#x27;</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot combine &#x27;atomic&#x27; and &#x27;drop&#x27;</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h2 id="an-atomic-counter-type"><a class="anchor" href="#an-atomic-counter-type">An atomic counter type</a></h2>
 <p>Atomic types are records that hold the value and do every access to it through <code>atomic</code>. Methods take <code>imm self</code>, because many threads share one counter and none of them owns it exclusively; the write goes through the pointer <code>@self.value</code>, which the borrow doesn't restrict:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-937"></button><textarea hidden id="copy-937">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-938"></button><textarea hidden id="copy-938">mod example
 
 ext
 {

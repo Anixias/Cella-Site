@@ -114,7 +114,7 @@ main: fun
 1996959894 2657392035 6
 ```
 
-The body may only call constant functions and operators. Built-in operators and conversions are always constant. It can't call other functions, including `ext` functions and the standard library's `panic`, read or write module and static values that aren't constants, use pointers, take addresses, call function values or use values with destructors:
+The body may only call constant functions and operators. Built-in operators and conversions are always constant. It can't call other functions, including `ext` functions, read or write module and static values that aren't constants, use pointers, take addresses, call function values or use values with destructors:
 
 ```cella error
 ~ mod example
@@ -260,6 +260,36 @@ main: fun
 Panic in 'square': multiplication overflow
 Panic in 'halve': division by zero
 Panic in 'pick': index out of bounds
+```
+
+A `panic` is allowed in a constant function, whichever panic it resolves to. Reached while compiling, it stops the build, and its message, when it can be worked out while compiling, becomes part of the error:
+
+```cella error
+~ mod example
+~
+fit: const fun(x: i32, low: i32, high: i32) -> i32
+{
+	if high < low
+		panic "{nameOf(fit)}'s bounds are reversed"
+
+	if x < low
+		ret low
+
+	if high < x
+		ret high
+
+	ret x
+}
+
+fitted: const i32 = fit(1, 5, 1)
+
+main: fun
+{
+}
+```
+
+```errors
+Panic in 'fit': fit's bounds are reversed
 ```
 
 A function that runs for too long or recurses too deeply also stops with an error, such as "Evaluating 'spin' takes too many steps". The same function called while the program runs fails the way any call does, with a panic.
@@ -417,7 +447,7 @@ main: fun
 33 5
 ```
 
-`Gem`'s implementation is constant, so `total` accepts it while compiling. `Rock`'s isn't, so it doesn't meet `const Ranked`. An `impl const` checks its members, a default it would use must itself be `const`, and the traits it requires must be implemented as constant too:
+`Gem`'s implementation is constant, so `total` accepts it while compiling. `Rock`'s isn't, so it doesn't meet `const Ranked`. An `impl const` checks its members, and the traits it requires must be implemented as constant too. A default body the implementation uses is checked as a constant function in which `Self`'s own members count as constant; one that can't be, such as a default that calls a non-constant function, is an error at the `impl const`:
 
 ```cella error
 ~ mod example
@@ -425,8 +455,10 @@ main: fun
 Score: trait
 {
 	score: fun(self) -> i32
-	bonus: fun(self) -> i32 => 1
+	bonus: fun(self) -> i32 => plain(self.score())
 }
+
+plain: fun(x: i32) -> i32 => x
 
 Ranked: trait req Score
 {
