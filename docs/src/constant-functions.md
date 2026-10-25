@@ -583,3 +583,65 @@ Cannot call 'Ranked.rank' in constant functions
 ```
 
 A constant implementation is only ever the written `impl const`: a conformance whose members happen to all be constant doesn't meet `const Trait`.
+
+A type can implement one trait as constant and another as not. `f32` below implements `Float` constantly and `Transcendental`, which requires `Float`, at run time only. Bounds can mix them the same way: `[T: const Float + Transcendental]` can use `Float`'s members in constants and `Transcendental`'s at run time. Naming `Float` there isn't redundant, since `Transcendental` alone doesn't make it constant.
+
+A trait can also require another trait as constant with `req const`. Every type that implements it, constant or not, needs an `impl const` of the required trait, and a bound on it lets constant functions use the required trait's members:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Float: trait req copy
+{
+	floor: fun(x: Self) -> Self
+}
+
+Transcendental: trait req Float
+{
+	root: fun(x: Self) -> Self
+}
+
+f32: impl const Float + Transcendental
+{
+	floor: const fun(x: f32) -> f32 => x - 0.5f32
+	root: fun(x: f32) -> f32 => x / 3
+}
+
+mixed[T: const Float + Transcendental]: fun(x: T) -> T => T.root(T.floor(x))
+
+Measure: trait req copy
+{
+	unit: fun(x: Self) -> Self
+}
+
+Scaled: trait req const Measure
+{
+	scale: fun(x: Self) -> Self
+}
+
+i32: impl Scaled
+{
+	unit: const fun(x: i32) -> i32 => x * 10
+	scale: fun(x: i32) -> i32 => x + 1
+}
+
+units[T: Scaled]: const fun(x: T) -> T => T.unit(x)
+
+tens: const i32 = units(3)
+
+main: fun
+{
+	printf("%.1f %d %d\n", f64(mixed(6.5f32)), tens, i32.scale(tens))
+}
+```
+
+```output
+2.0 30 31
+```
+
+`i32: impl Scaled` makes `i32`'s `Measure` constant, so `unit` has to be a constant function. A type with a non-constant `impl Measure` can't implement `Scaled`: "'u8' needs 'impl const Measure'".

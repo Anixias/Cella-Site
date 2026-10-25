@@ -39,7 +39,7 @@ try {
 <p>From tightest to loosest. Operators in one item have the same precedence.</p>
 <ol><li>Postfix <code>.</code>, <code>()</code>, <code>[]</code> and <code>?</code>, left to right.</li><li>Prefix <code>-</code>, <code>+</code>, <code>!</code>, <code>~</code>, <code>*</code>, <code>@</code>, <code>own</code>, <code>mut</code>, <code>imm</code> and <code>atomic</code>, right to left.</li><li><code>*</code>, <code>/</code>, <code>%</code> and <code>*%</code>, left to right.</li><li><code>+</code>, <code>-</code>, <code>+%</code> and <code>-%</code>, left to right.</li><li><code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>&lt;&lt;&lt;</code> and <code>&gt;&gt;&gt;</code>, left to right.</li><li><code>&amp;</code>, left to right.</li><li><code>^</code>, left to right.</li><li><code>|</code>, left to right.</li><li><code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code> and <code>&gt;=</code>, chained.</li><li><code>is</code>, which doesn't chain.</li><li><code>==</code> and <code>!=</code>, chained.</li><li><code>&amp;&amp;</code>, left to right.</li><li><code>||</code>, left to right.</li><li><code>=</code> and the compound assignments, right to left.</li></ol>
 <p>Unlike C, the bitwise operators <code>&amp;</code>, <code>^</code> and <code>|</code> bind tighter than comparisons, so a mask test needs no parentheses. Shifts bind looser than <code>+</code> and <code>-</code>, as in C:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-947"></button><textarea hidden id="copy-947">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-950"></button><textarea hidden id="copy-950">mod example
 
 ext
 {
@@ -60,7 +60,7 @@ main: fun
 <p><code>flags &amp; mask == mask</code> is <code>(flags &amp; mask) == mask</code>, and <code>1 | 2 == 3</code> is <code>(1 | 2) == 3</code>.</p>
 <h3 id="chained-comparisons"><a class="anchor" href="#chained-comparisons">Chained comparisons</a></h3>
 <p>A run of <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code> and <code>&gt;=</code> is one chained comparison: <code>a &lt; b &lt;= c</code> means <code>a &lt; b &amp;&amp; b &lt;= c</code>, with <code>b</code> evaluated once. <code>==</code> and <code>!=</code> chain the same way among themselves. A chain stops at the first comparison that's false:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-948"></button><textarea hidden id="copy-948">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-951"></button><textarea hidden id="copy-951">mod example
 
 ext
 {
@@ -85,7 +85,7 @@ main: fun
 <p><a href="numbers.html#comparisons">Numbers</a> covers comparisons and their typing rules.</p>
 <h3 id="pattern-tests"><a class="anchor" href="#pattern-tests">Pattern tests</a></h3>
 <p><code>is</code> sits between the comparisons and the equality operators. Its left side can be a comparison or arithmetic, and the result can be compared with <code>==</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-949"></button><textarea hidden id="copy-949">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-952"></button><textarea hidden id="copy-952">mod example
 
 ext
 {
@@ -110,7 +110,7 @@ main: fun
 1</pre></div>
 <h3 id="assignment"><a class="anchor" href="#assignment">Assignment</a></h3>
 <p>Assignment binds loosest and groups right to left, so <code>a = b = 5</code> stores 5 in <code>b</code> and then in <code>a</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-950"></button><textarea hidden id="copy-950">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-953"></button><textarea hidden id="copy-953">mod example
 
 ext
 {
@@ -127,7 +127,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>5 5</pre></div>
 <h3 id="operators-and-line-breaks"><a class="anchor" href="#operators-and-line-breaks">Operators and line breaks</a></h3>
 <p>A new line ends an expression, so a line can't start with a binary operator, an assignment, <code>is</code>, <code>&amp;&amp;</code>, <code>||</code> or <code>=&gt;</code>. Break the line after the operator instead:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-951"></button><textarea hidden id="copy-951">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-954"></button><textarea hidden id="copy-954">mod example
 
 ready: fun(a: bool, b: bool) -&gt; bool
 {
@@ -139,7 +139,7 @@ ready: fun(a: bool, b: bool) -&gt; bool
 main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">ready</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">bool</span>, <span class="c-parameter">b</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">bool</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> both = a</span><span class="line">		&amp;&amp; b</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot start a line with &#x27;&amp;&amp;&#x27;</span></span><span class="line">	<span class="c-keyword">ret</span> both</span><span class="line">}</span></code></pre></div>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-952"></button><textarea hidden id="copy-952">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-955"></button><textarea hidden id="copy-955">mod example
 
 ready: fun(a: bool, b: bool) -&gt; bool
 {
@@ -153,7 +153,7 @@ main: fun
 	val _ = ready(true, false)
 }</textarea><pre><code><span class="line"><span class="c-function">ready</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">bool</span>, <span class="c-parameter">b</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">bool</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> both = <span class="c-parameter">a</span> &amp;&amp;</span><span class="line">		<span class="c-parameter">b</span></span><span class="line">	<span class="c-keyword">ret</span> both</span><span class="line">}</span></code></pre></div>
 <p><code>-</code>, <code>+</code>, <code>*</code>, <code>!</code>, <code>~</code> and <code>@</code> can start a line, but there they are prefix operators that begin a new statement:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-953"></button><textarea hidden id="copy-953">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-956"></button><textarea hidden id="copy-956">mod example
 
 ext
 {

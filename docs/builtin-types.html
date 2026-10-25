@@ -38,7 +38,7 @@ try {
 <h2 id="summary"><a class="anchor" href="#summary">Summary</a></h2>
 <div class="table-wrap"><table><thead><tr><th>Type</th><th>Size</th><th>Alignment</th><th>Default</th></tr></thead><tbody><tr><td><code>i8</code>, <code>u8</code></td><td>1</td><td>1</td><td><code>0</code></td></tr><tr><td><code>i16</code>, <code>u16</code></td><td>2</td><td>2</td><td><code>0</code></td></tr><tr><td><code>i32</code>, <code>u32</code></td><td>4</td><td>4</td><td><code>0</code></td></tr><tr><td><code>i64</code>, <code>u64</code></td><td>8</td><td>8</td><td><code>0</code></td></tr><tr><td><code>i128</code>, <code>u128</code></td><td>16</td><td>16</td><td><code>0</code></td></tr><tr><td><code>isize</code>, <code>usize</code></td><td>8</td><td>8</td><td><code>0</code></td></tr><tr><td><code>f32</code></td><td>4</td><td>4</td><td><code>0.0</code></td></tr><tr><td><code>f64</code></td><td>8</td><td>8</td><td><code>0.0</code></td></tr><tr><td><code>bool</code></td><td>1</td><td>1</td><td><code>false</code></td></tr><tr><td><code>char</code></td><td>4</td><td>4</td><td>the character with code 0</td></tr><tr><td><code>str</code></td><td>16</td><td>8</td><td>the empty string</td></tr><tr><td><code>cstr</code></td><td>8</td><td>8</td><td><code>null</code></td></tr><tr><td><code>ptr</code>, <code>ptr[T]</code></td><td>8</td><td>8</td><td><code>null</code></td></tr><tr><td><code>ptr[dyn[K]]</code></td><td>16</td><td>8</td><td><code>null</code></td></tr><tr><td><code>array[T, N]</code></td><td><code>N</code> times the size of <code>T</code></td><td>the alignment of <code>T</code></td><td>every element at its default</td></tr><tr><td><code>imm[T]</code>, <code>mut[T]</code></td><td>8</td><td>8</td><td>none</td></tr><tr><td><code>imm[dyn[K]]</code>, <code>mut[dyn[K]]</code></td><td>16</td><td>8</td><td>none</td></tr><tr><td><code>fun[...]</code>, <code>ref fun[...]</code></td><td>16</td><td>8</td><td>none</td></tr><tr><td><code>ext fun[...]</code></td><td>8</td><td>8</td><td>none</td></tr><tr><td><code>fstr[K]</code></td><td>24</td><td>8</td><td>none</td></tr><tr><td><code>dyn[K]</code></td><td>no fixed size</td><td></td><td>none</td></tr><tr><td><code>never</code></td><td>no size</td><td></td><td>none</td></tr></tbody></table></div>
 <p><code>sizeOf</code> and <code>alignOf</code> take a type or a value and give a <code>usize</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-954"></button><textarea hidden id="copy-954">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-957"></button><textarea hidden id="copy-957">mod example
 
 ext
 {
@@ -81,7 +81,7 @@ main: fun
 <p><code>never</code> is the result type of a function that doesn't return, such as one that always exits or loops forever. It's only allowed as a result type, and it has no size. <a href="functions.html#functions-that-never-return">Functions</a> covers it.</p>
 <h2 id="defaults"><a class="anchor" href="#defaults">Defaults</a></h2>
 <p>Writing a built-in type's name with empty parentheses gives its default, and a variable declared with <code>var</code> and no value starts at its default. For every type that has one, the default is all zero bytes:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-955"></button><textarea hidden id="copy-955">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-958"></button><textarea hidden id="copy-958">mod example
 
 ext
 {
@@ -100,7 +100,7 @@ main: fun
 0 1 1
 0 5 0</pre></div>
 <p>Borrows, function values, templates and trait objects have no default, since all zero bytes isn't a valid value of them. A variable of one of these types must be given a value before it's used:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-956"></button><textarea hidden id="copy-956">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-959"></button><textarea hidden id="copy-959">mod example
 
 ext
 {
@@ -115,7 +115,7 @@ main: fun
 <p>The types with a default meet the <code>T: default</code> constraint, and an array has one when its element type does. <a href="generics.html#constraints">Generics</a> covers constraints.</p>
 <h2 id="copies-and-borrows"><a class="anchor" href="#copies-and-borrows">Copies and borrows</a></h2>
 <p>Every built-in type other than <code>dyn[K]</code> and <code>never</code> can be copied, so they meet <code>T: copy</code>. Borrow types, <code>str</code>, <code>ref fun[...]</code>, <code>fstr[K]</code>, borrowed trait objects and arrays of any of them hold borrows, so they don't meet <code>T: noref</code>:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-957"></button><textarea hidden id="copy-957">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-960"></button><textarea hidden id="copy-960">mod example
 
 keep[T: noref]: fun(value: T) -&gt; T =&gt; value
 

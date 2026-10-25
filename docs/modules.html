@@ -37,7 +37,7 @@ try {
 <p>A module is a named group of declarations. Every source file belongs to one, and a module can span any number of files. Code reaches another module's declarations through qualified names like <code>geometry.area</code> or by importing them with <code>use</code>. Visibility keywords decide who can see a declaration: its file, its module, its project, or every project that uses it.</p>
 <h2 id="the-mod-line"><a class="anchor" href="#the-mod-line">The <code>mod</code> line</a></h2>
 <p>Every source file starts with a <code>mod</code> line that names its module. Only comments and blank lines may come before it:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-779"></button><textarea hidden id="copy-779">ext
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-782"></button><textarea hidden id="copy-782">ext
 {
 	printf: fun(format: cstr, ...) -&gt; i32
 }
@@ -53,7 +53,7 @@ main: fun
 <p>The name of a file and the folder it sits in don't matter to the compiler. Only the <code>mod</code> line decides which module a file belongs to; which files belong to the project is covered in <a href="projects.html#what-a-project-is">Projects and building</a>. By convention, a file in <code>game/physics/</code> declares <code>mod game.physics</code>.</p>
 <h2 id="modules-across-files"><a class="anchor" href="#modules-across-files">Modules across files</a></h2>
 <p>All files with the same <code>mod</code> line form one module. Their declarations are visible to each other as if they were written in one file, so <code>main.ce</code> here calls <code>twice</code> from <code>helpers.ce</code> without anything extra:</p>
-<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-780"></button><textarea hidden id="copy-780">mod example
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-783"></button><textarea hidden id="copy-783">mod example
 
 ext
 {
@@ -64,14 +64,14 @@ main: fun
 {
 	printf(&quot;%d\n&quot;, twice(21))
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-function">twice</span>(<span class="c-literal">21</span>))</span><span class="line">}</span></code></pre></div>
-<div class="code cella"><div class="code-title">helpers.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-781"></button><textarea hidden id="copy-781">mod example
+<div class="code cella"><div class="code-title">helpers.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-784"></button><textarea hidden id="copy-784">mod example
 
 twice: fun(n: i32) -&gt; i32 =&gt; n * 2</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-function">twice</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">n</span> * <span class="c-literal">2</span></span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>42</pre></div>
 <p>Declaration order doesn't matter within a file, and it doesn't matter across files either.</p>
 <h2 id="qualified-names"><a class="anchor" href="#qualified-names">Qualified names</a></h2>
 <p>A declaration in another module is reached by writing the module's name, a <code>.</code>, and the declaration's name. This works for functions, types, constants, module variables and enum cases alike:</p>
-<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-782"></button><textarea hidden id="copy-782">mod example
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-785"></button><textarea hidden id="copy-785">mod example
 
 ext
 {
@@ -86,7 +86,7 @@ main: fun
 	val shape = geometry.Shape.square
 	printf(&quot;%d\n&quot;, shape == geometry.Shape.circle)
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = <span class="c-module">geometry</span>.<span class="c-type">Point</span>(<span class="c-literal">3</span>, <span class="c-literal">4</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-module">geometry</span>.<span class="c-function">area</span>(<span class="c-literal">2</span>, <span class="c-literal">3</span>), <span class="c-module">geometry</span>.<span class="c-constant">sides</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-module">geometry</span>.<span class="c-function">distance</span>(p))</span><span class="line">	<span class="c-keyword">val</span> shape = <span class="c-module">geometry</span>.<span class="c-type">Shape</span>.<span class="c-case">square</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, shape == <span class="c-module">geometry</span>.<span class="c-type">Shape</span>.<span class="c-case">circle</span>)</span><span class="line">}</span></code></pre></div>
-<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-783"></button><textarea hidden id="copy-783">mod geometry
+<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-786"></button><textarea hidden id="copy-786">mod geometry
 
 sides: const i32 = 4
 
@@ -109,28 +109,28 @@ distance: fun(p: Point) -&gt; i32 =&gt; p.x + p.y</textarea><pre><code><span cla
 0</pre></div>
 <p>Inside <code>geometry</code>, its own declarations need no qualifier. A module can also name itself, as in <code>example.main</code>, which helps when a local name hides one of its declarations.</p>
 <p>Without a qualifier or an import, a name from another module isn't found:</p>
-<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-784"></button><textarea hidden id="copy-784">mod example
+<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-787"></button><textarea hidden id="copy-787">mod example
 
 main: fun
 {
 	val a = area(2, 3)
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = area(<span class="c-literal">2</span>, <span class="c-literal">3</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:10ch"></span><span class="diagnostic-text" style="margin-left:12ch">Symbol &#x27;area&#x27; not found in this scope</span></span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-785"></button><textarea hidden id="copy-785">mod geometry
+<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-788"></button><textarea hidden id="copy-788">mod geometry
 
 area: fun(w: i32, h: i32) -&gt; i32 =&gt; w * h</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">geometry</span></span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">w</span>: <span class="c-type">i32</span>, <span class="c-parameter">h</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">w</span> * <span class="c-parameter">h</span></span></code></pre></div>
 <p>A module isn't a value, so its name can only be used in front of a <code>.</code>:</p>
-<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-786"></button><textarea hidden id="copy-786">mod example
+<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-789"></button><textarea hidden id="copy-789">mod example
 
 main: fun
 {
 	val m = geometry
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> m = <span class="c-module">geometry</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use modules as values</span></span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-787"></button><textarea hidden id="copy-787">mod geometry
+<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-790"></button><textarea hidden id="copy-790">mod geometry
 
 area: fun(w: i32, h: i32) -&gt; i32 =&gt; w * h</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">geometry</span></span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">w</span>: <span class="c-type">i32</span>, <span class="c-parameter">h</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">w</span> * <span class="c-parameter">h</span></span></code></pre></div>
 <h2 id="nested-module-names"><a class="anchor" href="#nested-module-names">Nested module names</a></h2>
 <p>A module name can have several parts separated by dots, as in <code>mod game.physics</code>. The parts make a tree of names: <code>game.physics</code> is reached as <code>game.physics.fall</code>, whether or not a module named <code>game</code> exists. <code>game</code> and <code>game.physics</code> are separate modules, each with its own declarations:</p>
-<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-788"></button><textarea hidden id="copy-788">mod example
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-791"></button><textarea hidden id="copy-791">mod example
 
 ext
 {
@@ -141,10 +141,10 @@ main: fun
 {
 	printf(&quot;%d %d\n&quot;, game.physics.fall(2), game.speed())
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-module">game</span>.<span class="c-module">physics</span>.<span class="c-function">fall</span>(<span class="c-literal">2</span>), <span class="c-module">game</span>.<span class="c-function">speed</span>())</span><span class="line">}</span></code></pre></div>
-<div class="code cella"><div class="code-title">game/game.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-789"></button><textarea hidden id="copy-789">mod game
+<div class="code cella"><div class="code-title">game/game.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-792"></button><textarea hidden id="copy-792">mod game
 
 speed: fun -&gt; i32 =&gt; physics.gravity * 2</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">game</span></span><span class="line"> </span><span class="line"><span class="c-function">speed</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-module">physics</span>.<span class="c-constant">gravity</span> * <span class="c-literal">2</span></span></code></pre></div>
-<div class="code cella"><div class="code-title">game/physics.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-790"></button><textarea hidden id="copy-790">mod game.physics
+<div class="code cella"><div class="code-title">game/physics.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-793"></button><textarea hidden id="copy-793">mod game.physics
 
 gravity: const i32 = 10
 
@@ -152,21 +152,21 @@ fall: fun(time: i32) -&gt; i32 =&gt; gravity * time * time / 2</textarea><pre><c
 <div class="output"><div class="label">Output</div><pre>20 20</pre></div>
 <p>Inside <code>game</code>, its nested module <code>game.physics</code> can be written <code>physics</code>.</p>
 <p>A module can't have a member with the same name as a nested module:</p>
-<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-791"></button><textarea hidden id="copy-791">mod example
+<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-794"></button><textarea hidden id="copy-794">mod example
 
 main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><div class="code-title">game.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-792"></button><textarea hidden id="copy-792">mod game
+<div class="code cella error"><div class="code-title">game.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-795"></button><textarea hidden id="copy-795">mod game
 
 physics: fun -&gt; i32 =&gt; 1</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">game</span></span><span class="line"> </span><span class="line"><span class="c-function">physics</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;game.physics&#x27; is both a module and a member of &#x27;game&#x27;</span></span></code></pre></div>
-<div class="code cella error"><div class="code-title">physics.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-793"></button><textarea hidden id="copy-793">mod game.physics
+<div class="code cella error"><div class="code-title">physics.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-796"></button><textarea hidden id="copy-796">mod game.physics
 
 gravity: const i32 = 10</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">game</span>.<span class="c-module">physics</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:12ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;game.physics&#x27; is both a module and a member of &#x27;game&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-constant">gravity</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">10</span></span></code></pre></div>
 <h2 id="imports"><a class="anchor" href="#imports">Imports</a></h2>
 <p>A <code>use</code> line after the <code>mod</code> line imports names from another module, so the file can use them without a qualifier. <code>use</code> names what it imports:</p>
 <ul><li><code>use geometry.area</code> imports one name.</li><li><code>use geometry.[area, Point]</code> imports several.</li><li><code>use geometry.*</code> imports everything in <code>geometry</code>.</li><li><code>use game.physics</code> imports a nested module, so the file can write <code>physics.fall</code> instead of <code>game.physics.fall</code>.</li></ul>
-<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-794"></button><textarea hidden id="copy-794">mod example
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-797"></button><textarea hidden id="copy-797">mod example
 
 use geometry.[area, Point]
 use shapes.*
@@ -183,7 +183,7 @@ main: fun
 	printf(&quot;%d %d %d\n&quot;, area(2, 3), p.y, perimeter(5))
 	printf(&quot;%d\n&quot;, physics.fall(2))
 }</textarea><pre><code><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.[<span class="c-function">area</span>, <span class="c-type">Point</span>]</span><span class="line"><span class="c-keyword">use</span> <span class="c-module">shapes</span>.*</span><span class="line"><span class="c-keyword">use</span> <span class="c-module">game</span>.<span class="c-module">physics</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = <span class="c-type">Point</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, <span class="c-function">area</span>(<span class="c-literal">2</span>, <span class="c-literal">3</span>), p.<span class="c-field">y</span>, <span class="c-function">perimeter</span>(<span class="c-literal">5</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, <span class="c-module">physics</span>.<span class="c-function">fall</span>(<span class="c-literal">2</span>))</span><span class="line">}</span></code></pre></div>
-<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-795"></button><textarea hidden id="copy-795">mod geometry
+<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-798"></button><textarea hidden id="copy-798">mod geometry
 
 Point: rec
 {
@@ -192,28 +192,28 @@ Point: rec
 }
 
 area: fun(w: i32, h: i32) -&gt; i32 =&gt; w * h</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">geometry</span></span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">y</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">w</span>: <span class="c-type">i32</span>, <span class="c-parameter">h</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">w</span> * <span class="c-parameter">h</span></span></code></pre></div>
-<div class="code cella"><div class="code-title">shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-796"></button><textarea hidden id="copy-796">mod shapes
+<div class="code cella"><div class="code-title">shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-799"></button><textarea hidden id="copy-799">mod shapes
 
 perimeter: fun(side: i32) -&gt; i32 =&gt; side * 4</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">shapes</span></span><span class="line"> </span><span class="line"><span class="c-function">perimeter</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">side</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">side</span> * <span class="c-literal">4</span></span></code></pre></div>
-<div class="code cella"><div class="code-title">game/physics.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-797"></button><textarea hidden id="copy-797">mod game.physics
+<div class="code cella"><div class="code-title">game/physics.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-800"></button><textarea hidden id="copy-800">mod game.physics
 
 fall: fun(time: i32) -&gt; i32 =&gt; 5 * time * time</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">game</span>.<span class="c-module">physics</span></span><span class="line"> </span><span class="line"><span class="c-function">fall</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">time</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">5</span> * <span class="c-parameter">time</span> * <span class="c-parameter">time</span></span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>6 2 20
 20</pre></div>
 <p>An import applies to the file it's written in, not to the rest of the module. Imported names can still be written with their qualifier.</p>
 <p>Imports come right after the <code>mod</code> line, before any declaration:</p>
-<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-798"></button><textarea hidden id="copy-798">mod example
+<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-801"></button><textarea hidden id="copy-801">mod example
 
 main: fun
 {
 }
 
 use geometry.area</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.<span class="c-function">area</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:0ch">Imports must precede all other declarations</span></span></code></pre></div>
-<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-799"></button><textarea hidden id="copy-799">mod geometry
+<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-802"></button><textarea hidden id="copy-802">mod geometry
 
 area: fun(w: i32, h: i32) -&gt; i32 =&gt; w * h</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">geometry</span></span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">w</span>: <span class="c-type">i32</span>, <span class="c-parameter">h</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">w</span> * <span class="c-parameter">h</span></span></code></pre></div>
 <p>An import that names something that doesn't exist is an error, with a suggestion when a close spelling exists:</p>
-<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-800"></button><textarea hidden id="copy-800">mod example
+<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-803"></button><textarea hidden id="copy-803">mod example
 
 use geometry.missing
 use gemoetry.area
@@ -222,14 +222,14 @@ use geometry.area.more
 main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.missing</span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:13ch">Module &#x27;geometry&#x27; has no member &#x27;missing&#x27;</span></span><span class="line"><span class="c-keyword">use</span> gemoetry.area</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:4ch">Module &#x27;gemoetry&#x27; not found<span class="diagnostic-note">Did you mean &#x27;geometry&#x27;?</span></span></span><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.area.more</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;geometry.area&#x27; is not a module</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-801"></button><textarea hidden id="copy-801">mod geometry
+<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-804"></button><textarea hidden id="copy-804">mod geometry
 
 area: fun(w: i32, h: i32) -&gt; i32 =&gt; w * h</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">geometry</span></span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">w</span>: <span class="c-type">i32</span>, <span class="c-parameter">h</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">w</span> * <span class="c-parameter">h</span></span></code></pre></div>
 <p>Importing the same name twice is "'area' is imported more than once".</p>
 <h2 id="imports-and-the-modules-own-names"><a class="anchor" href="#imports-and-the-modules-own-names">Imports and the module's own names</a></h2>
 <p>A file sees its module's declarations and its imports together, and neither one wins over the other:</p>
 <ul><li>Functions from both form one set of overloads. When the module declares a function with the same name and parameters as an imported one, the module's own function hides the import; the imported one is still reachable through its qualifier.</li><li>A type, constant or variable that comes in through <code>*</code> is hidden by a module declaration with the same name.</li></ul>
-<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-802"></button><textarea hidden id="copy-802">mod example
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-805"></button><textarea hidden id="copy-805">mod example
 
 use geometry.area
 use geometry.scale
@@ -250,7 +250,7 @@ main: fun
 	printf(&quot;%d %d\n&quot;, scale(1), scale(1, 2))
 	printf(&quot;%d %d\n&quot;, limit, geometry.limit)
 }</textarea><pre><code><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.<span class="c-function">area</span></span><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.<span class="c-function">scale</span></span><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.*</span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="line"><span class="c-function">scale</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">a</span> + <span class="c-parameter">b</span></span><span class="line"><span class="c-constant">limit</span>: <span class="c-keyword">val</span> <span class="c-type">i32</span> = <span class="c-literal">3</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">area</span>(), <span class="c-module">geometry</span>.<span class="c-function">area</span>())</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">scale</span>(<span class="c-literal">1</span>), <span class="c-function">scale</span>(<span class="c-literal">1</span>, <span class="c-literal">2</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-constant">limit</span>, <span class="c-module">geometry</span>.<span class="c-constant">limit</span>)</span><span class="line">}</span></code></pre></div>
-<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-803"></button><textarea hidden id="copy-803">mod geometry
+<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-806"></button><textarea hidden id="copy-806">mod geometry
 
 area: fun -&gt; i32 =&gt; 2
 scale: fun(x: i32) -&gt; i32 =&gt; x * 10
@@ -259,7 +259,7 @@ limit: val i32 = 7</textarea><pre><code><span class="line"><span class="c-keywor
 10 3
 3 7</pre></div>
 <p>Naming a type, constant or variable in an import while the module declares the same name is an error, since the import could never be used by its plain name. Both places are reported:</p>
-<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-804"></button><textarea hidden id="copy-804">mod example
+<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-807"></button><textarea hidden id="copy-807">mod example
 
 use geometry.Point
 
@@ -271,7 +271,7 @@ Point: rec
 main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.<span class="c-type">Point</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:13ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:13ch">&#x27;Point&#x27; is ambiguous<span class="diagnostic-note">Also declared in &#x27;example&#x27;</span></span></span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:0ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:0ch">&#x27;Point&#x27; is ambiguous<span class="diagnostic-note">Also imported from &#x27;geometry&#x27;</span></span></span><span class="line">{</span><span class="line">	<span class="c-field">z</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-805"></button><textarea hidden id="copy-805">mod geometry
+<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-808"></button><textarea hidden id="copy-808">mod geometry
 
 Point: rec
 {
@@ -279,7 +279,7 @@ Point: rec
 }</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">geometry</span></span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">}</span></code></pre></div>
 <p>The first error is on the import, with the note "Also declared in 'example'", and the second on the declaration, with "Also imported from 'geometry'".</p>
 <p>Imports never hide each other. When two imports bring in the same name, using it is ambiguous; for functions, only when they have the same parameters:</p>
-<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-806"></button><textarea hidden id="copy-806">mod example
+<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-809"></button><textarea hidden id="copy-809">mod example
 
 use geometry.*
 use shapes.*
@@ -289,7 +289,7 @@ main: fun
 	val a = area()
 	val p = Point(1)
 }</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-keyword">use</span> <span class="c-module">geometry</span>.*</span><span class="line"><span class="c-keyword">use</span> <span class="c-module">shapes</span>.*</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-function">area</span>()</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:12ch">Call to &#x27;area&#x27; is ambiguous<span class="diagnostic-note">Candidate in &#x27;geometry.ce&#x27; on line 3</span><span class="diagnostic-note">Candidate in &#x27;shapes.ce&#x27; on line 3</span></span></span><span class="line">	<span class="c-keyword">val</span> p = Point(<span class="c-literal">1</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:12ch">Reference to &#x27;Point&#x27; is ambiguous</span></span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-807"></button><textarea hidden id="copy-807">mod geometry
+<div class="code cella error"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-810"></button><textarea hidden id="copy-810">mod geometry
 
 area: fun -&gt; i32 =&gt; 2
 
@@ -297,7 +297,7 @@ Point: rec
 {
 	x: i32
 }</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">geometry</span></span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">2</span></span><span class="line"> </span><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><div class="code-title">shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-808"></button><textarea hidden id="copy-808">mod shapes
+<div class="code cella error"><div class="code-title">shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-811"></button><textarea hidden id="copy-811">mod shapes
 
 area: fun -&gt; i32 =&gt; 3
 
@@ -308,7 +308,7 @@ Point: rec
 <p>The qualified names <code>geometry.area</code> and <code>shapes.area</code> still work.</p>
 <h2 id="mod-paths"><a class="anchor" href="#mod-paths"><code>mod.</code> paths</a></h2>
 <p>A local variable, parameter or declaration can have the same name as a module and hide it. A path starting with <code>mod.</code> always starts from the top of the module tree, whatever is in scope:</p>
-<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-809"></button><textarea hidden id="copy-809">mod example
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-812"></button><textarea hidden id="copy-812">mod example
 
 ext
 {
@@ -321,7 +321,7 @@ main: fun
 	val shape = mod.geometry.Shape(3)
 	printf(&quot;%d %d %d\n&quot;, geometry, shape.side, mod.geometry.area(2))
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> geometry = <span class="c-literal">4</span></span><span class="line">	<span class="c-keyword">val</span> shape = <span class="c-module">mod</span>.<span class="c-module">geometry</span>.<span class="c-type">Shape</span>(<span class="c-literal">3</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, geometry, shape.<span class="c-field">side</span>, <span class="c-module">mod</span>.<span class="c-module">geometry</span>.<span class="c-function">area</span>(<span class="c-literal">2</span>))</span><span class="line">}</span></code></pre></div>
-<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-810"></button><textarea hidden id="copy-810">mod geometry
+<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-813"></button><textarea hidden id="copy-813">mod geometry
 
 Shape: rec
 {
@@ -335,28 +335,28 @@ area: fun(side: i32) -&gt; i32 =&gt; side * side</textarea><pre><code><span clas
 <div class="table-wrap"><table><thead><tr><th>Keyword</th><th>Visible in</th></tr></thead><tbody><tr><td><code>pvt</code></td><td>its own file</td></tr><tr><td><code>mod</code></td><td>its own module, in every file</td></tr><tr><td>none</td><td>its own project</td></tr><tr><td><code>pub</code></td><td>every project that references this one</td></tr></tbody></table></div>
 <p>The keyword goes after the colon, before what the declaration is, as in <code>helper: pvt fun</code> or <code>Point: pub rec</code>. A declaration without one is visible in the whole project, which is all a program made of one project needs.</p>
 <p><code>pvt</code> keeps a declaration to its file, even from other files of the same module:</p>
-<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-811"></button><textarea hidden id="copy-811">mod example
+<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-814"></button><textarea hidden id="copy-814">mod example
 
 main: fun
 {
 	val n = helper()
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> n = helper()</span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:12ch">&#x27;helper&#x27; is private to its file</span></span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><div class="code-title">helpers.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-812"></button><textarea hidden id="copy-812">mod example
+<div class="code cella error"><div class="code-title">helpers.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-815"></button><textarea hidden id="copy-815">mod example
 
 helper: pvt fun -&gt; i32 =&gt; 1</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-function">helper</span>: <span class="c-keyword">pvt</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span></code></pre></div>
 <p><code>mod</code> keeps a declaration to its module. A nested module is a different module, so <code>game.physics</code> can't see <code>mod</code> declarations of <code>game</code>, and the other way around:</p>
-<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-813"></button><textarea hidden id="copy-813">mod example
+<div class="code cella error"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-816"></button><textarea hidden id="copy-816">mod example
 
 main: fun
 {
 	val n = game.tool()
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> n = <span class="c-module">game</span>.tool()</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;game.tool&#x27; is private to its module</span></span><span class="line">}</span></code></pre></div>
-<div class="code cella error"><div class="code-title">game.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-814"></button><textarea hidden id="copy-814">mod game
+<div class="code cella error"><div class="code-title">game.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-817"></button><textarea hidden id="copy-817">mod game
 
 tool: mod fun -&gt; i32 =&gt; 1</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">game</span></span><span class="line"> </span><span class="line"><span class="c-function">tool</span>: <span class="c-keyword">mod</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span></code></pre></div>
 <p>The same rules apply to imports: a hidden declaration that comes in through <code>*</code> still can't be used, and naming one in an import is an error.</p>
 <p>Types, functions, constants, module variables, traits and <code>ext</code> declarations all take visibility. Local variables don't:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-815"></button><textarea hidden id="copy-815">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-818"></button><textarea hidden id="copy-818">mod example
 
 main: fun
 {
@@ -365,7 +365,7 @@ main: fun
 <p>Members of records, enums and other types have their own visibility rules, covered in <a href="methods.html">Methods and properties</a>.</p>
 <h3 id="visibility-blocks"><a class="anchor" href="#visibility-blocks">Visibility blocks</a></h3>
 <p>A block gives every declaration in it the same visibility: <code>pvt { ... }</code>, <code>mod { ... }</code> or <code>pub { ... }</code>. It can hold any top-level declarations, <code>ext</code> blocks included, and <code>pvt ext { ... }</code> is short for an <code>ext</code> block inside a <code>pvt</code> block:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-816"></button><textarea hidden id="copy-816">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-819"></button><textarea hidden id="copy-819">mod example
 
 pvt ext
 {
@@ -384,7 +384,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-keyword">pvt</span> <span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">format</span>: <span class="c-type">cstr</span>, ...) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-keyword">mod</span></span><span class="line">{</span><span class="line">	<span class="c-function">twice</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">n</span> * <span class="c-literal">2</span></span><span class="line">	<span class="c-constant">limit</span>: <span class="c-keyword">const</span> <span class="c-type">i32</span> = <span class="c-literal">100</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">twice</span>(<span class="c-literal">4</span>), <span class="c-constant">limit</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>8 100</pre></div>
 <p>A declaration inside a block can't name a visibility of its own, and blocks of different levels can't be nested:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-817"></button><textarea hidden id="copy-817">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-820"></button><textarea hidden id="copy-820">mod example
 
 mod
 {
@@ -403,7 +403,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">example</span></span><span class="line"> </span><span class="line"><span class="c-keyword">mod</span></span><span class="line">{</span><span class="line">	<span class="c-function">helper</span>: <span class="c-keyword">pvt</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot use &#x27;pvt&#x27; in &#x27;mod&#x27; blocks</span></span><span class="line"> </span><span class="line">	<span class="c-keyword">pvt</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot use &#x27;pvt&#x27; in &#x27;mod&#x27; blocks</span></span><span class="line">	{</span><span class="line">		<span class="c-function">other</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">twice</span>: <span class="c-keyword">pvt</span> <span class="c-keyword">mod</span> <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:7ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:7ch">Cannot combine &#x27;pvt&#x27; and &#x27;mod&#x27;</span></span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h3 id="signatures-cant-expose-hidden-types"><a class="anchor" href="#signatures-cant-expose-hidden-types">Signatures can't expose hidden types</a></h3>
 <p>A declaration can't mention a type that is less visible than the declaration itself, since code that can see the declaration couldn't name the type. This covers parameter and result types, field types, payloads and the types of module variables:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-818"></button><textarea hidden id="copy-818">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-821"></button><textarea hidden id="copy-821">mod example
 
 Node: pvt rec
 {
@@ -427,12 +427,12 @@ main: fun
 <p><code>keep</code> is fine: it's <code>pvt</code> like <code>Node</code>, so it's never visible where <code>Node</code> isn't. The same holds for types built from a hidden type, like <code>ptr[Node]</code> or <code>array[Node, 4]</code>, and for traits named in bounds and <code>dyn</code> types.</p>
 <h2 id="libraries"><a class="anchor" href="#libraries">Libraries</a></h2>
 <p>A project can reference a library project, as <a href="projects.html">Projects and building</a> shows, and use its declarations. Only the library's <code>pub</code> declarations cross over; everything else is private to the library's project. The library's modules are reached by name, exactly like the program's own:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-819"></button><textarea hidden id="copy-819">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-822"></button><textarea hidden id="copy-822">OutputType = &quot;Executable&quot;
 
 [[ProjectReferences]]
 Path = &#x27;shapes/shapes.celp&#x27;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">'shapes/shapes.celp'</span></span></code></pre></div>
-<div class="code toml"><div class="code-title">shapes/shapes.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-820"></button><textarea hidden id="copy-820">OutputType = &quot;StaticLibrary&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span></code></pre></div>
-<div class="code cella"><div class="code-title">shapes/shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-821"></button><textarea hidden id="copy-821">mod shapes
+<div class="code toml"><div class="code-title">shapes/shapes.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-823"></button><textarea hidden id="copy-823">OutputType = &quot;StaticLibrary&quot;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span></code></pre></div>
+<div class="code cella"><div class="code-title">shapes/shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-824"></button><textarea hidden id="copy-824">mod shapes
 
 Square: pub rec
 {
@@ -442,7 +442,7 @@ Square: pub rec
 area: pub fun(s: Square) -&gt; i32 =&gt; s.side * s.side * scale()
 
 scale: fun -&gt; i32 =&gt; 1</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">shapes</span></span><span class="line"> </span><span class="line"><span class="c-type">Square</span>: <span class="c-keyword">pub</span> <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">side</span>: <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">pub</span> <span class="c-keyword">fun</span>(<span class="c-parameter">s</span>: <span class="c-type">Square</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">s</span>.<span class="c-field">side</span> * <span class="c-parameter">s</span>.<span class="c-field">side</span> * <span class="c-function">scale</span>()</span><span class="line"> </span><span class="line"><span class="c-function">scale</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span></code></pre></div>
-<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-822"></button><textarea hidden id="copy-822">mod example
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-825"></button><textarea hidden id="copy-825">mod example
 
 use shapes.[Square, area]
 
@@ -459,9 +459,9 @@ main: fun
 <p>Using <code>scale</code> from the program would be "'shapes.scale' is private to its project". A <code>pub</code> declaration also can't expose a type that isn't <code>pub</code>, by the rule in the previous section.</p>
 <h2 id="project-imports"><a class="anchor" href="#project-imports">Project imports</a></h2>
 <p>A project's <code>.celp</code> file can list imports that apply to every source file in the project, so each file doesn't need its own <code>use</code> lines. <code>Imports</code> takes the same forms as <code>use</code>, written as strings:</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-823"></button><textarea hidden id="copy-823">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-826"></button><textarea hidden id="copy-826">OutputType = &quot;Executable&quot;
 Imports = [&quot;geometry.area&quot;, &quot;shapes.*&quot;]</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"><span class="c-field">Imports </span>= [<span class="c-literal">"geometry.area"</span>, <span class="c-literal">"shapes.*"</span>]</span></code></pre></div>
-<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-824"></button><textarea hidden id="copy-824">mod example
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-827"></button><textarea hidden id="copy-827">mod example
 
 ext
 {
@@ -472,22 +472,22 @@ main: fun
 {
 	printf(&quot;%d %d\n&quot;, area(2, 3), perimeter(5))
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, <span class="c-function">area</span>(<span class="c-literal">2</span>, <span class="c-literal">3</span>), <span class="c-function">perimeter</span>(<span class="c-literal">5</span>))</span><span class="line">}</span></code></pre></div>
-<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-825"></button><textarea hidden id="copy-825">mod geometry
+<div class="code cella"><div class="code-title">geometry.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-828"></button><textarea hidden id="copy-828">mod geometry
 
 area: fun(w: i32, h: i32) -&gt; i32 =&gt; w * h</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">geometry</span></span><span class="line"> </span><span class="line"><span class="c-function">area</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">w</span>: <span class="c-type">i32</span>, <span class="c-parameter">h</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">w</span> * <span class="c-parameter">h</span></span></code></pre></div>
-<div class="code cella"><div class="code-title">shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-826"></button><textarea hidden id="copy-826">mod shapes
+<div class="code cella"><div class="code-title">shapes.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-829"></button><textarea hidden id="copy-829">mod shapes
 
 perimeter: fun(side: i32) -&gt; i32 =&gt; side * 4</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">shapes</span></span><span class="line"> </span><span class="line"><span class="c-function">perimeter</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">side</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">side</span> * <span class="c-literal">4</span></span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>6 20</pre></div>
 <p>Project imports combine with the module's own declarations by the same rules as <code>use</code> lines. An import listed there and in a file's <code>use</code> line is "'area' is imported more than once", and errors in the list point into the <code>.celp</code> file.</p>
 <p>A library's <code>.celp</code> can list a <code>Prelude</code> instead: imports that every project referencing the library gets automatically. A <code>use</code> line that repeats one of them gets the hint "Redundant import".</p>
-<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-827"></button><textarea hidden id="copy-827">OutputType = &quot;Executable&quot;
+<div class="code toml"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-830"></button><textarea hidden id="copy-830">OutputType = &quot;Executable&quot;
 
 [[ProjectReferences]]
 Path = &#x27;greetings/greetings.celp&#x27;</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"Executable"</span></span><span class="line"> </span><span class="line"><span class="c-type">[[ProjectReferences]]</span></span><span class="line"><span class="c-field">Path </span>= <span class="c-literal">'greetings/greetings.celp'</span></span></code></pre></div>
-<div class="code toml"><div class="code-title">greetings/greetings.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-828"></button><textarea hidden id="copy-828">OutputType = &quot;StaticLibrary&quot;
+<div class="code toml"><div class="code-title">greetings/greetings.celp</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-831"></button><textarea hidden id="copy-831">OutputType = &quot;StaticLibrary&quot;
 Prelude = [&quot;greetings.greet&quot;]</textarea><pre><code><span class="line"><span class="c-field">OutputType </span>= <span class="c-literal">"StaticLibrary"</span></span><span class="line"><span class="c-field">Prelude </span>= [<span class="c-literal">"greetings.greet"</span>]</span></code></pre></div>
-<div class="code cella"><div class="code-title">greetings/greetings.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-829"></button><textarea hidden id="copy-829">mod greetings
+<div class="code cella"><div class="code-title">greetings/greetings.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-832"></button><textarea hidden id="copy-832">mod greetings
 
 pvt ext
 {
@@ -495,7 +495,7 @@ pvt ext
 }
 
 greet: pub fun =&gt; printf(&quot;hello from the prelude\n&quot;)</textarea><pre><code><span class="line"><span class="c-keyword">mod</span> <span class="c-module">greetings</span></span><span class="line"> </span><span class="line"><span class="c-keyword">pvt</span> <span class="c-keyword">ext</span></span><span class="line">{</span><span class="line">	<span class="c-function">printf</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">format</span>: <span class="c-type">cstr</span>, ...) -&gt; <span class="c-type">i32</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">greet</span>: <span class="c-keyword">pub</span> <span class="c-keyword">fun</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"hello from the prelude\n"</span>)</span></code></pre></div>
-<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-830"></button><textarea hidden id="copy-830">mod example
+<div class="code cella"><div class="code-title">main.ce</div><button class="copy" type="button" aria-label="Copy code" data-copy="copy-833"></button><textarea hidden id="copy-833">mod example
 
 main: fun
 {
