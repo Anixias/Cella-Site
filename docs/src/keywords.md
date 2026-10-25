@@ -38,7 +38,7 @@ main: fun
 | `fun` | Declares a function (`area: fun(...)`), starts a lambda (`fun(x) => x * 2`) and names function types (`fun[i32 -> i32]`). | [Functions](functions.md), [Closures](closures.md) |
 | `val` | Declares a binding that can't be reassigned; also a read-only static field and a pattern binding. | [Variables](variables.md) |
 | `var` | Declares a binding that can be reassigned; also a writable static field and a pattern binding. | [Variables](variables.md) |
-| `const` | Declares a compile-time constant; also marks constant functions (`const fun`, `const op`), value parameters (`const length: usize`), constant implementations (`impl const Hash`) and constant bounds (`T: const Hash`). | [Variables](variables.md), [Constant functions](constant-functions.md), [Generics](generics.md) |
+| `const` | Declares a compile-time constant; also marks constant functions (`const fun`, `const op`), constant accessors (`const get`, `const set`, `const prop`), value parameters (`const length: usize`), constant implementations (`impl const Hash`) and constant bounds (`T: const Hash`). | [Variables](variables.md), [Constant functions](constant-functions.md), [Generics](generics.md) |
 | `new` | Names constructors (`new: op(...)`) and explicit conversions (`new: op(self) -> T`); `T: new(...)` constrains a type parameter. | [Records](records.md), [Conversions](conversions.md) |
 | `drop` | Names destructors (`drop: op`), destroys a value early (`drop x`, `drop *p`); `T: drop` constrains a type parameter. | [Ownership](ownership.md) |
 | `default` | Restores zeroed construction (`new: op() = default`); `T: default` constrains a type parameter. | [Records](records.md), [Generics](generics.md) |

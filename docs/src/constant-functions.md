@@ -212,6 +212,89 @@ main: fun
 
 A constructor declared `new: op() = default` is always constant, and so is building a record field by field. Destructors can't be constant.
 
+## Properties
+
+A [property](methods.md#properties)'s getter and setter are constant the same way, with `const` before `get` or `set`. Reading a constant getter or writing through a constant setter then works in constants and constant functions, compound assignments such as `+=` included. A static getter with no receiver works like a [function without parameters](#functions-without-parameters):
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Bits: rec
+{
+	value: u32
+
+	high: const get(self) -> u32 => self.value >> 16
+	none: const get -> u32 => 0
+
+	level: prop u32
+	{
+		const get(self) => self.value
+		set(mut self, value)
+		{
+			self.value = value
+		}
+	}
+
+	count: const prop u32
+	{
+		get(self) => self.value
+		set(mut self, value)
+		{
+			self.value = value
+		}
+	}
+}
+
+counted: const fun -> u32
+{
+	var bits = Bits(5)
+	bits.count += 4
+	ret bits.count + bits.level
+}
+
+top: const u32 = Bits(0x30001).high
+total: const u32 = counted()
+
+main: fun
+{
+	printf("%u %u %u\n", top, total, Bits.none)
+}
+```
+
+```output
+3 18 0
+```
+
+In a `prop`, `const` can go on each accessor, as `level` does to make only its getter constant, or on `prop` itself to make both constant, as `count` does. Writing it on an accessor of a `const prop` gets the hint "Redundant 'const'".
+
+Reading or writing a property that isn't constant inside a constant function is an error:
+
+```cella error
+~ mod example
+~
+Bits: rec
+{
+	value: u32
+
+	low: get(self) -> u32 => self.value & 0xFFFF
+}
+
+masked: const fun -> u32 => Bits(3).low
+~
+~ main: fun
+~ {
+~ }
+```
+
+```errors
+Cannot read 'Bits.low' in constant functions
+```
+
 ## Functions without parameters
 
 A constant function that takes no parameters and isn't generic works like a constant. The compiler runs it once, where it's declared, and every call to it is that value. Its errors are reported where it's declared, even if nothing calls it:
@@ -394,6 +477,8 @@ main: fun
 ```errors
 '|' must be 'const' to match 'Bits.|'
 ```
+
+Property requirements work the same way: `width: const get(imm self) -> u32` in a trait needs a constant getter, and a missing `const` gets "'width' must be 'const' to match 'Sized.width'". For a `prop` with both accessors, the message names the accessor, as in 'depth.get'.
 
 ### Constant implementations and bounds
 

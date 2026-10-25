@@ -762,7 +762,7 @@ Setters cannot return values
 
 A property isn't stored anywhere, so it can't be borrowed, moved or have its address taken. Passing `mut hero.health` to a function is the error "Cannot mutably borrow properties". Read it into a variable, change that, and assign it back.
 
-An assignment to a property has no value, so `val x = (hero.health = 5)` is an error, unlike an assignment to a field.
+An assignment to a property has no value, so `val x = (hero.health = 5)` is an error, unlike an assignment to a field. Accessors can be constant, usable at compile time; [Constant functions](constant-functions.md#properties) covers `const get`, `const set` and `const prop`.
 
 ### Static properties
 
