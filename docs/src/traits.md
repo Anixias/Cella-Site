@@ -814,7 +814,7 @@ main: fun
 10 3 5
 ```
 
-A parameter like `count`'s `T` can also be declared inside the bound. A name in a bound's brackets that doesn't name anything else declares a new parameter, so `[I: Iterator[T]]` declares `T`, and `[I: Iterator[T: copy]]` declares it with constraints. Records, enums and traits declare parameters the same way. The parameter is inferred from the type it's attached to: first from the arguments, then from that type's implementation. So `Skipping[Countdown]` needs no second argument:
+A parameter like `count`'s `T` can also be declared inside the bound. A name in a bound's brackets that doesn't name anything else declares a new parameter, so `[I: Iterator[T]]` declares `T`, and `[I: Iterator[T: copy]]` declares it with constraints. Records, enums and traits declare parameters the same way. The new parameter also gets the constraints the trait puts on that position: for `Ranked[T: copy]`, `[R: Ranked[T]]` can copy a `T`. The parameter is inferred from the type it's attached to: first from the arguments, then from that type's implementation. So `Skipping[Countdown]` needs no second argument:
 
 ```cella
 ~ mod example
@@ -1374,7 +1374,7 @@ main: fun
 3
 ```
 
-The argument can still be written, and one that doesn't match the tag type is an error. A type that isn't an enum without payloads gets "'Flags' requires 'Self: enum(T)'". Bounds and `dyn` types always need the argument, as in `[E: Flags[T]]`. With `const` operators and an `impl const Integral`, `Access.read | Access.write` also works in constants ([Constant functions](constant-functions.md)).
+The argument can still be written, and one that doesn't match the tag type is an error. A type that isn't an enum without payloads gets "'Flags' requires 'Self: enum(T)'". Bounds and `dyn` types always need the argument, as in `[E: Flags[T]]`, where `T` gets `Flags`'s `T: Integral` as well. With `const` operators and an `impl const Integral`, `Access.read | Access.write` also works in constants ([Constant functions](constant-functions.md)).
 
 ## Blanket implementations
 
