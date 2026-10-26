@@ -1423,7 +1423,7 @@ Cannot return 'imm[i32]' from 'in' operators
 
 ## The `?` operator
 
-Postfix `?` unwraps a value or leaves the function early. A type declares it as `?: op(self) -> T` with an expression body. When a function writes `x?`, the body runs in that function: its value becomes the value of `x?`, and a `ret` in the body returns from the function that wrote `x?`.
+Postfix `?` unwraps a value or leaves the function early. A type declares it as `?: op(self) -> T` with an expression body, or as `?: op(self)` with no result. When a function writes `x?`, the body runs in that function: its value becomes the value of `x?`, and a `ret` in the body returns from the function that wrote `x?`.
 
 The usual use is a result type that holds either a value or an error. `?` gives the value, or returns the error to the caller:
 
@@ -1529,7 +1529,99 @@ Cannot use '?' on 'Result[i32, i32]' in 'nothing'
 Cannot use '?' on 'i32'
 ```
 
-A `?` operator takes `self` and nothing else, has a return type and a `=>` body, and can't be generic or required by a trait:
+A `?` operator with no result suits operations that either succeed with nothing to give back or fail. It can have a block body, and `x?` is then a statement:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Status[E]: enum
+{
+	done
+	failed(error: E)
+
+	?: op(self)
+	{
+		if self is failed(val error)
+			ret failed(error)
+	}
+}
+
+flush: fun(fail: bool) -> Status[i32]
+{
+	if fail
+		ret failed(5)
+
+	ret done
+}
+
+save: fun(first: bool, second: bool) -> Status[i32]
+{
+	flush(first)?
+	flush(second)?
+	ret done
+}
+
+show: fun(status: Status[i32])
+{
+	match status
+	{
+		done => printf("done\n")
+		failed(val error) => printf("failed %d\n", error)
+	}
+}
+
+main: fun
+{
+	show(save(false, false))
+	show(save(false, true))
+}
+```
+
+```output
+done
+failed 5
+```
+
+Since there's no result, using such a `?` as a value is an error:
+
+```cella error
+~ mod example
+~
+~ Status[E]: enum
+~ {
+~ 	done
+~ 	failed(error: E)
+~
+~ 	?: op(self)
+~ 	{
+~ 		if self is failed(val error)
+~ 			ret failed(error)
+~ 	}
+~ }
+~
+flush: fun -> Status[i32] => done
+
+save: fun -> Status[i32]
+{
+	val result = flush()?
+	ret done
+}
+
+main: fun
+{
+}
+```
+
+```errors
+'flush()?' doesn't return a value
+```
+
+A `?` operator takes `self` and nothing else and can't be generic or required by a trait. One with a return type needs a `=>` body:
 
 ```cella error
 ~ mod example
@@ -1551,13 +1643,6 @@ Block: enum
 	}
 }
 
-Untyped: enum
-{
-	one
-
-	?: op(self) => 1
-}
-
 Fallible: trait
 {
 	?: op(self) -> i32
@@ -1571,7 +1656,6 @@ main: fun
 ```errors
 Cannot take 'imm self' in '?' operators
 '?' operators must have an expression body
-'?' operators need a return type
 Cannot declare '?' operators in traits
 ```
 

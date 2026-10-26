@@ -37,7 +37,7 @@ try {
 <p>Records and enums can declare their own operators. An operator member is a function written with <code>op</code> and named by its symbol, and <code>a + b</code> on that type calls it. The same form declares indexers (<code>v[i]</code>), the dereference operator (<code>*p</code>) and the operators that let <code>for</code> walk a type.</p>
 <h2 id="declaring-an-operator"><a class="anchor" href="#declaring-an-operator">Declaring an operator</a></h2>
 <p>A binary operator is a static member that takes both operands as parameters:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-624"></button><textarea hidden id="copy-624">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-1"></button><textarea hidden id="copy-1">mod example
 
 ext
 {
@@ -69,7 +69,7 @@ main: fun
 <p>These binary operators can be declared:</p>
 <div class="table-wrap"><table><thead><tr><th>Kind</th><th>Operators</th></tr></thead><tbody><tr><td>Arithmetic</td><td><code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>%</code></td></tr><tr><td>Wrapping</td><td><code>+%</code> <code>-%</code> <code>*%</code></td></tr><tr><td>Bitwise</td><td><code>&amp;</code> <code>|</code> <code>^</code></td></tr><tr><td>Shifts and rotations</td><td><code>&lt;&lt;</code> <code>&gt;&gt;</code> <code>&lt;&lt;&lt;</code> <code>&gt;&gt;&gt;</code></td></tr><tr><td>Comparisons</td><td><code>==</code> <code>!=</code> <code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code></td></tr></tbody></table></div>
 <p>A binary operator takes exactly two parameters, and at least one of them must have the declaring type. The other can be any type, and either one can come first, so a type can declare both <code>v * 2.0</code> and <code>2.0 * v</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-625"></button><textarea hidden id="copy-625">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-2"></button><textarea hidden id="copy-2">mod example
 
 ext
 {
@@ -99,7 +99,7 @@ main: fun
 1 1</pre></div>
 <p>The literal <code>3</code> in <code>v * 3</code> becomes an <code>f64</code>, the type the parameter asks for, as a literal does for any call.</p>
 <p>The rules on the parameters:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-626"></button><textarea hidden id="copy-626">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-3"></button><textarea hidden id="copy-3">mod example
 
 Point: rec
 {
@@ -115,7 +115,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">+</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">i32</span>, <span class="c-parameter">b</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-parameter">a</span> + <span class="c-parameter">b</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;+&#x27; operators need a &#x27;Point&#x27; parameter</span></span><span class="line">	<span class="c-function">/</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>, <span class="c-parameter">other</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-parameter">other</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:10ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:10ch">Cannot take &#x27;self&#x27; in &#x27;/&#x27; operators</span></span><span class="line">	<span class="c-function">*</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-parameter">b</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot take &#x27;mut&#x27; parameters in &#x27;*&#x27; operators</span></span><span class="line">	<span class="c-function">!=</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-keyword">true</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;!=&#x27; operators need two parameters</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>Declared comparisons chain like the built-in ones, so <code>a &lt; b &lt; c</code> means <code>a &lt; b &amp;&amp; b &lt; c</code>, with <code>b</code> evaluated once:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-627"></button><textarea hidden id="copy-627">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-4"></button><textarea hidden id="copy-4">mod example
 
 ext
 {
@@ -140,7 +140,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>1 0</pre></div>
 <h2 id="unary-operators"><a class="anchor" href="#unary-operators">Unary operators</a></h2>
 <p><code>-</code>, <code>+</code> and <code>~</code> take one operand, which the operator receives as <code>self</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-628"></button><textarea hidden id="copy-628">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-5"></button><textarea hidden id="copy-5">mod example
 
 ext
 {
@@ -164,7 +164,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>245 0 8</pre></div>
 <p><code>-</code> and <code>+</code> can be declared both ways: with <code>self</code> as unary operators and with two parameters as binary ones. <code>~</code> is only unary. The receiver can be <code>self</code> or <code>imm self</code>, but not <code>mut self</code>: a unary operator gives a new value and leaves its operand as it was.</p>
 <p>Some operators can't be declared at all: <code>!</code>, <code>&amp;&amp;</code>, <code>||</code>, <code>=</code> and <code>.</code>.</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-629"></button><textarea hidden id="copy-629">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-6"></button><textarea hidden id="copy-6">mod example
 
 Point: rec
 {
@@ -180,7 +180,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">~</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-parameter">a</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare &#x27;~&#x27; operators without &#x27;self&#x27;</span></span><span class="line">	<span class="c-function">-</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-keyword">self</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot take &#x27;mut self&#x27; in &#x27;-&#x27; operators</span></span><span class="line">	<span class="c-function">!</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-keyword">self</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare &#x27;!&#x27; operators</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h2 id="compound-assignment"><a class="anchor" href="#compound-assignment">Compound assignment</a></h2>
 <p>A compound assignment such as <code>+=</code> changes its left side in place. It takes <code>mut self</code> and one parameter, and returns nothing:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-630"></button><textarea hidden id="copy-630">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-7"></button><textarea hidden id="copy-7">mod example
 
 ext
 {
@@ -209,7 +209,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Score</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">points</span>: <span class="c-type">i32</span></span><span class="line">	<span class="c-field">bonus</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">+=</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">points</span>: <span class="c-type">i32</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">points</span> += <span class="c-parameter">points</span></span><span class="line">		<span class="c-keyword">if</span> <span class="c-parameter">points</span> &gt;= <span class="c-literal">10</span></span><span class="line">			<span class="c-keyword">self</span>.<span class="c-field">bonus</span> += <span class="c-literal">1</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> score = <span class="c-type">Score</span>(<span class="c-literal">0</span>, <span class="c-literal">0</span>)</span><span class="line">	score <span class="c-function">+=</span> <span class="c-literal">5</span></span><span class="line">	score <span class="c-function">+=</span> <span class="c-literal">12</span></span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, score.<span class="c-field">points</span>, score.<span class="c-field">bonus</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>17 1</pre></div>
 <p>Every compound form of the binary operators can be declared: <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code>, <code>%=</code>, <code>+%=</code>, <code>-%=</code>, <code>*%=</code>, <code>&amp;=</code>, <code>|=</code>, <code>^=</code>, <code>&lt;&lt;=</code>, <code>&gt;&gt;=</code>, <code>&lt;&lt;&lt;=</code> and <code>&gt;&gt;&gt;=</code>. Since the operator borrows its left side mutably, that side must be something that can change, such as a <code>var</code>:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-631"></button><textarea hidden id="copy-631">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-8"></button><textarea hidden id="copy-8">mod example
 
 Score: rec
 {
@@ -228,7 +228,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Score</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">points</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">+=</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">points</span>: <span class="c-type">i32</span>) =&gt; <span class="c-keyword">self</span>.<span class="c-field">points</span> += <span class="c-parameter">points</span></span><span class="line">	<span class="c-function">-=</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>, <span class="c-parameter">points</span>: <span class="c-type">i32</span>) =&gt; <span class="c-keyword">ret</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:11ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:11ch">Cannot take &#x27;self&#x27; in &#x27;-=&#x27; operators</span></span><span class="line">	<span class="c-function">*=</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) =&gt; <span class="c-keyword">ret</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;*=&#x27; operators need one parameter</span></span><span class="line">	<span class="c-function">/=</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">divisor</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Score</span> =&gt; <span class="c-keyword">self</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:38ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:38ch">Cannot return values from &#x27;/=&#x27; operators</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> score = <span class="c-type">Score</span>(<span class="c-literal">0</span>)</span><span class="line">	score <span class="c-function">+=</span> <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot mutably borrow values</span></span><span class="line">}</span></code></pre></div>
 <h2 id="nothing-is-derived"><a class="anchor" href="#nothing-is-derived">Nothing is derived</a></h2>
 <p>Each operator stands alone. Declaring <code>+</code> doesn't give <code>+=</code>, <code>==</code> doesn't give <code>!=</code>, and <code>&lt;</code> doesn't give <code>&gt;</code>, <code>&lt;=</code> or <code>&gt;=</code>. Each one a type supports has to be declared:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-632"></button><textarea hidden id="copy-632">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-9"></button><textarea hidden id="copy-9">mod example
 
 Point: rec
 {
@@ -247,7 +247,7 @@ main: fun
 	val greater = a &gt; Point(0)
 }</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">+</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-type">Point</span>(<span class="c-parameter">a</span>.<span class="c-field">x</span> + <span class="c-parameter">b</span>.<span class="c-field">x</span>)</span><span class="line">	<span class="c-function">==</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">a</span>.<span class="c-field">x</span> == <span class="c-parameter">b</span>.<span class="c-field">x</span></span><span class="line">	<span class="c-function">&lt;</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">a</span>.<span class="c-field">x</span> &lt; <span class="c-parameter">b</span>.<span class="c-field">x</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> a = <span class="c-type">Point</span>(<span class="c-literal">1</span>)</span><span class="line">	a += <span class="c-type">Point</span>(<span class="c-literal">2</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:4ch">No operation defined for &#x27;+=&#x27; between &#x27;Point&#x27; and &#x27;Point&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> different = a != <span class="c-type">Point</span>(<span class="c-literal">3</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:13ch"></span><span class="diagnostic-text" style="margin-left:20ch">No operation defined for &#x27;!=&#x27; between &#x27;Point&#x27; and &#x27;Point&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> greater = a &gt; <span class="c-type">Point</span>(<span class="c-literal">0</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:12ch"></span><span class="diagnostic-text" style="margin-left:18ch">No operation defined for &#x27;&gt;&#x27; between &#x27;Point&#x27; and &#x27;Point&#x27;</span></span><span class="line">}</span></code></pre></div>
 <p>A record has no operators of its own, not even <code>==</code>. An enum whose cases have no payloads compares with <code>==</code> and <code>!=</code> already, and declaring either is an error ("Operator '==' between 'Color' and 'Color' is built in"), as is declaring any operator that a built-in type already has for the same operands. An enum with payloads has neither until it declares them. Enums declare operators the same way records do:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-633"></button><textarea hidden id="copy-633">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-10"></button><textarea hidden id="copy-10">mod example
 
 ext
 {
@@ -279,7 +279,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>1 1</pre></div>
 <h2 id="operands-and-parameter-modes"><a class="anchor" href="#operands-and-parameter-modes">Operands and parameter modes</a></h2>
 <p>An operand without a mode is taken by value, as for any parameter (see <a href="parameter-modes.html">Parameter modes</a>): a copy, or the value itself for a type that can't be copied. Such a type usually takes its operands with <code>imm</code> to borrow them. Operands carry no marks, so <code>a + b</code> borrows or moves each operand as the operator's declaration says:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-634"></button><textarea hidden id="copy-634">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-11"></button><textarea hidden id="copy-11">mod example
 
 ext
 {
@@ -315,7 +315,7 @@ drop 1</pre></div>
 <p><code>c - b</code> hands <code>c</code> to the operator, which drops it when it returns, and <code>c</code> can't be used afterwards. A compound assignment's parameter takes modes the same way, except <code>mut</code>.</p>
 <h2 id="calling-an-operator-through-its-type"><a class="anchor" href="#calling-an-operator-through-its-type">Calling an operator through its type</a></h2>
 <p><code>Type.op(...)</code> calls an operator like a static function. The operands are the arguments, receiver first, and a compound assignment's left side is passed with <code>mut</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-635"></button><textarea hidden id="copy-635">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-12"></button><textarea hidden id="copy-12">mod example
 
 ext
 {
@@ -345,7 +345,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">-</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-type">Point</span>(-<span class="c-keyword">self</span>.<span class="c-field">x</span>)</span><span class="line">	<span class="c-function">-</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-type">Point</span>(<span class="c-parameter">a</span>.<span class="c-field">x</span> - <span class="c-parameter">b</span>.<span class="c-field">x</span>)</span><span class="line"> </span><span class="line">	<span class="c-function">+=</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">other</span>: <span class="c-type">Point</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>.<span class="c-field">x</span> += <span class="c-parameter">other</span>.<span class="c-field">x</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> p = <span class="c-type">Point</span>(<span class="c-literal">3</span>)</span><span class="line">	<span class="c-keyword">val</span> negated = <span class="c-type">Point</span>.-(p)</span><span class="line">	<span class="c-keyword">val</span> difference = <span class="c-type">Point</span>.-(p, <span class="c-type">Point</span>(<span class="c-literal">1</span>))</span><span class="line">	<span class="c-type">Point</span>.+=(<span class="c-keyword">mut</span> p, <span class="c-type">Point</span>(<span class="c-literal">10</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d\n"</span>, negated.<span class="c-field">x</span>, difference.<span class="c-field">x</span>, p.<span class="c-field">x</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>-3 2 13</pre></div>
 <p>Built-in types work the same way, so <code>i32.+(1, 2)</code> adds two <code>i32</code>s and <code>f64.*(1.5, 2.0)</code> multiplies two <code>f64</code>s:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-636"></button><textarea hidden id="copy-636">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-13"></button><textarea hidden id="copy-13">mod example
 
 ext
 {
@@ -361,7 +361,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> small: <span class="c-type">i8</span> = <span class="c-literal">100</span></span><span class="line">	<span class="c-keyword">var</span> total = <span class="c-literal">7</span></span><span class="line">	<span class="c-type">i32</span>.+=(<span class="c-keyword">mut</span> total, <span class="c-literal">3</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %.1f\n"</span>, <span class="c-type">i32</span>.+(<span class="c-literal">1</span>, <span class="c-literal">2</span>), <span class="c-type">i32</span>.+(small, small), total, <span class="c-type">f64</span>.*(<span class="c-literal">1.5</span>, <span class="c-literal">2.0</span>))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>3 200 10 3.0</pre></div>
 <p><code>i32.+(small, small)</code> converts both <code>i8</code>s to <code>i32</code> first, so the sum doesn't overflow. An operator can't be called through a value:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-637"></button><textarea hidden id="copy-637">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-14"></button><textarea hidden id="copy-14">mod example
 
 Point: rec
 {
@@ -377,7 +377,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">-</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-type">Point</span>(-<span class="c-keyword">self</span>.<span class="c-field">x</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = <span class="c-type">Point</span>(<span class="c-literal">1</span>)</span><span class="line">	<span class="c-keyword">val</span> negated = p.-()</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot call &#x27;-&#x27; through a value</span></span><span class="line">}</span></code></pre></div>
 <h2 id="ambiguous-operators"><a class="anchor" href="#ambiguous-operators">Ambiguous operators</a></h2>
 <p>Both operand types can declare an operator for the same pair. Using it is then an error, because neither declaration wins:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-638"></button><textarea hidden id="copy-638">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-15"></button><textarea hidden id="copy-15">mod example
 
 Matrix: rec
 {
@@ -398,7 +398,7 @@ main: fun
 	val product = Matrix(3) * Vector(5)
 }</textarea><pre><code><span class="line"><span class="c-type">Matrix</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">scale</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">*</span>: <span class="c-keyword">op</span>(<span class="c-parameter">m</span>: <span class="c-type">Matrix</span>, <span class="c-parameter">v</span>: <span class="c-type">Vector</span>) -&gt; <span class="c-type">Vector</span> =&gt; <span class="c-type">Vector</span>(<span class="c-parameter">v</span>.<span class="c-field">x</span> * <span class="c-parameter">m</span>.<span class="c-field">scale</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Vector</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">*</span>: <span class="c-keyword">op</span>(<span class="c-parameter">m</span>: <span class="c-type">Matrix</span>, <span class="c-parameter">v</span>: <span class="c-type">Vector</span>) -&gt; <span class="c-type">Vector</span> =&gt; <span class="c-type">Vector</span>(<span class="c-parameter">v</span>.<span class="c-field">x</span> * <span class="c-parameter">m</span>.<span class="c-field">scale</span> + <span class="c-literal">1</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> product = <span class="c-type">Matrix</span>(<span class="c-literal">3</span>) * <span class="c-type">Vector</span>(<span class="c-literal">5</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:18ch;width:21ch"></span><span class="diagnostic-text" style="margin-left:18ch">Operation &#x27;*&#x27; between &#x27;Matrix&#x27; and &#x27;Vector&#x27; is ambiguous</span></span><span class="line">}</span></code></pre></div>
 <p>Calling the operator through one of the types picks its declaration:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-639"></button><textarea hidden id="copy-639">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-16"></button><textarea hidden id="copy-16">mod example
 
 ext
 {
@@ -427,7 +427,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> a = <span class="c-type">Matrix</span>.*(<span class="c-type">Matrix</span>(<span class="c-literal">3</span>), <span class="c-type">Vector</span>(<span class="c-literal">5</span>))</span><span class="line">	<span class="c-keyword">val</span> b = <span class="c-type">Vector</span>.*(<span class="c-type">Matrix</span>(<span class="c-literal">3</span>), <span class="c-type">Vector</span>(<span class="c-literal">5</span>))</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d\n"</span>, a.<span class="c-field">x</span>, b.<span class="c-field">x</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>15 16</pre></div>
 <p>Two declarations in the same type with the same parameter types conflict, and both are reported:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-640"></button><textarea hidden id="copy-640">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-17"></button><textarea hidden id="copy-17">mod example
 
 Point: rec
 {
@@ -442,7 +442,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">&lt;</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">a</span>.<span class="c-field">x</span> &lt; <span class="c-parameter">b</span>.<span class="c-field">x</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;Point.&lt;&#x27; is declared more than once with the same signature</span></span><span class="line">	<span class="c-function">&lt;</span>: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-parameter">a</span>.<span class="c-field">x</span> &gt; <span class="c-parameter">b</span>.<span class="c-field">x</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;Point.&lt;&#x27; is declared more than once with the same signature</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h2 id="visibility"><a class="anchor" href="#visibility">Visibility</a></h2>
 <p>An operator is visible wherever its type is. <code>pvt</code> limits it to the type's own members, like any other member (see <a href="methods.html">Methods and properties</a>):</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-641"></button><textarea hidden id="copy-641">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-18"></button><textarea hidden id="copy-18">mod example
 
 Point: rec
 {
@@ -461,7 +461,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Point</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">*</span>: <span class="c-keyword">pvt</span> <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Point</span>, <span class="c-parameter">b</span>: <span class="c-type">Point</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-type">Point</span>(<span class="c-parameter">a</span>.<span class="c-field">x</span> * <span class="c-parameter">b</span>.<span class="c-field">x</span>)</span><span class="line"> </span><span class="line">	<span class="c-function">square</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">Point</span> =&gt; <span class="c-keyword">self</span> <span class="c-function">*</span> <span class="c-keyword">self</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> p = <span class="c-type">Point</span>(<span class="c-literal">3</span>)</span><span class="line">	<span class="c-keyword">val</span> squared = p.<span class="c-function">square</span>()</span><span class="line">	<span class="c-keyword">val</span> product = p * p</span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:20ch">&#x27;*&#x27; is private to its type</span></span><span class="line">}</span></code></pre></div>
 <h2 id="generic-operators"><a class="anchor" href="#generic-operators">Generic operators</a></h2>
 <p>An operator can have type parameters, written after its symbol. They must be inferable from the operands:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-642"></button><textarea hidden id="copy-642">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-19"></button><textarea hidden id="copy-19">mod example
 
 ext
 {
@@ -487,7 +487,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Box</span>[<span class="c-typeparam">T</span>]: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">value</span>: <span class="c-typeparam">T</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Counter</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">n</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">+</span>[<span class="c-typeparam">T</span>: <span class="c-keyword">copy</span>]: <span class="c-keyword">op</span>(<span class="c-parameter">a</span>: <span class="c-type">Counter</span>, <span class="c-parameter">b</span>: <span class="c-type">Box</span>[<span class="c-typeparam">T</span>]) -&gt; <span class="c-type">Counter</span> =&gt; <span class="c-type">Counter</span>(<span class="c-parameter">a</span>.<span class="c-field">n</span> + <span class="c-literal">1</span>)</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> c = <span class="c-type">Counter</span>(<span class="c-literal">0</span>) <span class="c-function">+</span> <span class="c-type">Box</span>(<span class="c-literal">2.5</span>) <span class="c-function">+</span> <span class="c-type">Box</span>(<span class="c-literal">'x'</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d\n"</span>, c.<span class="c-field">n</span>)</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>2</pre></div>
 <p>A type parameter that only appears in the result can't be inferred, since an operator use has no place to write type arguments:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-643"></button><textarea hidden id="copy-643">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-20"></button><textarea hidden id="copy-20">mod example
 
 Counter: rec
 {
@@ -502,7 +502,7 @@ main: fun
 <p>Generics are covered in <a href="generics.html">Generics</a>.</p>
 <h2 id="indexers"><a class="anchor" href="#indexers">Indexers</a></h2>
 <p>An indexer makes <code>value[i]</code> work on a type. It's an operator named <code>[]</code>, and it usually comes as a pair: one with <code>imm self</code> that lends the element for reading, and one with <code>mut self</code> that lends it for writing.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-644"></button><textarea hidden id="copy-644">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-21"></button><textarea hidden id="copy-21">mod example
 
 ext
 {
@@ -535,7 +535,7 @@ main: fun
 <p>The read-only indexer returns <code>imm[T]</code> and the writable one <code>mut[T]</code>, borrows of the element (see <a href="borrows.html">Borrows</a>). <code>scores[i]</code> then works like an array element: it can be read, assigned, changed with <code>+=</code>, passed as <code>mut scores[i]</code>, and used with <code>.</code> to reach the element's fields and methods.</p>
 <h3 id="which-indexer-a-use-picks"><a class="anchor" href="#which-indexer-a-use-picks">Which indexer a use picks</a></h3>
 <p>The compiler picks the indexer from how the element is used. Reading the element, borrowing it with <code>imm</code> or calling a method on it that doesn't change it uses the <code>imm self</code> indexer. Assigning to it, changing it with a compound assignment, passing it as <code>mut</code>, assigning to one of its fields or calling a <code>mut self</code> method on it uses the <code>mut self</code> indexer:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-645"></button><textarea hidden id="copy-645">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-22"></button><textarea hidden id="copy-22">mod example
 
 ext
 {
@@ -571,7 +571,7 @@ main: fun
 <div class="output"><div class="label">Output</div><pre>read write write read 
 1 6</pre></div>
 <p>A type with only a writable indexer uses it for reads too, as long as the value is writable. A type with only a read-only one can't have its elements changed:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-646"></button><textarea hidden id="copy-646">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-23"></button><textarea hidden id="copy-23">mod example
 
 Readings: rec
 {
@@ -595,7 +595,7 @@ main: fun
 	val first = slots[0]
 }</textarea><pre><code><span class="line"><span class="c-type">Readings</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">values</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">2</span>]</span><span class="line"> </span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>, <span class="c-parameter">i</span>: <span class="c-type">usize</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">values</span>[<span class="c-parameter">i</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Slots</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">values</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">2</span>]</span><span class="line"> </span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">i</span>: <span class="c-type">usize</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">mut</span> <span class="c-keyword">self</span>.<span class="c-field">values</span>[<span class="c-parameter">i</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> readings = <span class="c-type">Readings</span>([<span class="c-literal">1</span>, <span class="c-literal">2</span>])</span><span class="line">	readings[<span class="c-literal">0</span>] = <span class="c-literal">5</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:11ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;Readings&#x27; has no writable &#x27;[]&#x27;</span></span><span class="line">	<span class="c-keyword">val</span> slots = <span class="c-type">Slots</span>([<span class="c-literal">1</span>, <span class="c-literal">2</span>])</span><span class="line">	<span class="c-keyword">val</span> first = slots[<span class="c-literal">0</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:16ch">&#x27;Slots&#x27; has no read-only &#x27;[]&#x27;</span></span><span class="line">}</span></code></pre></div>
 <p>When the writable indexer is <code>pvt</code>, the elements are read-only outside the type, while the type's own members can still write them:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-647"></button><textarea hidden id="copy-647">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-24"></button><textarea hidden id="copy-24">mod example
 
 Scores: rec
 {
@@ -618,7 +618,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Scores</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">values</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">3</span>]</span><span class="line"> </span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>, <span class="c-parameter">i</span>: <span class="c-type">usize</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">values</span>[<span class="c-parameter">i</span>]</span><span class="line">	[]: <span class="c-keyword">pvt</span> <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">i</span>: <span class="c-type">usize</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">mut</span> <span class="c-keyword">self</span>.<span class="c-field">values</span>[<span class="c-parameter">i</span>]</span><span class="line"> </span><span class="line">	<span class="c-function">reset</span>: <span class="c-keyword">fun</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">i</span>: <span class="c-type">usize</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">self</span>[<span class="c-parameter">i</span>] = <span class="c-literal">0</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">var</span> scores = <span class="c-type">Scores</span>([<span class="c-literal">4</span>, <span class="c-literal">5</span>, <span class="c-literal">6</span>])</span><span class="line">	scores.<span class="c-function">reset</span>(<span class="c-literal">1</span>)</span><span class="line">	scores[<span class="c-literal">0</span>] = <span class="c-literal">9</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:9ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;[]&#x27; is read-only outside its type</span></span><span class="line">}</span></code></pre></div>
 <h3 id="indexers-that-return-values"><a class="anchor" href="#indexers-that-return-values">Indexers that return values</a></h3>
 <p>The read-only indexer can return the element by value instead of lending it. This is how a type gives out elements that aren't stored anywhere, such as single bits:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-648"></button><textarea hidden id="copy-648">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-25"></button><textarea hidden id="copy-25">mod example
 
 ext
 {
@@ -639,7 +639,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Bits</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">word</span>: <span class="c-type">u64</span></span><span class="line"> </span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>, <span class="c-parameter">i</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">bool</span> =&gt; ((<span class="c-keyword">self</span>.<span class="c-field">word</span> &gt;&gt; <span class="c-type">u64</span>(<span class="c-parameter">i</span>)) &amp; <span class="c-literal">1</span>) != <span class="c-literal">0</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> bits = <span class="c-type">Bits</span>(<span class="c-literal">0b1010</span>)</span><span class="line">	<span class="c-function">printf</span>(<span class="c-literal">"%d %d %d %d\n"</span>, <span class="c-type">i32</span>(bits[<span class="c-literal">0</span>]), <span class="c-type">i32</span>(bits[<span class="c-literal">1</span>]), <span class="c-type">i32</span>(bits[<span class="c-literal">2</span>]), <span class="c-type">i32</span>(bits[<span class="c-literal">3</span>]))</span><span class="line">}</span></code></pre></div>
 <div class="output"><div class="label">Output</div><pre>0 1 0 1</pre></div>
 <p>A value that an indexer returns isn't stored in the type, so it can't be assigned, borrowed or changed:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-649"></button><textarea hidden id="copy-649">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-26"></button><textarea hidden id="copy-26">mod example
 
 Bits: rec
 {
@@ -662,7 +662,7 @@ main: fun
 <p>A by-value indexer can be paired with a writable one, which handles every write while the by-value one handles reads.</p>
 <h3 id="several-parameters"><a class="anchor" href="#several-parameters">Several parameters</a></h3>
 <p>An indexer takes any number of parameters of any type, so <code>m[row, column]</code> and <code>table[color]</code> work:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-650"></button><textarea hidden id="copy-650">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-27"></button><textarea hidden id="copy-27">mod example
 
 ext
 {
@@ -709,7 +709,7 @@ main: fun
 <p>A bare case name like <code>green</code> works as an index because the parameter expects a <code>Color</code>.</p>
 <h3 id="indexer-rules"><a class="anchor" href="#indexer-rules">Indexer rules</a></h3>
 <p>An indexer needs a receiver and at least one parameter, and none of its parameters can be <code>mut</code>. A type has at most one read-only and one writable indexer, and the two must take the same parameters and give the same element type. The read-only one takes <code>self</code> or <code>imm self</code> and returns <code>imm[T]</code> or <code>T</code>; the writable one takes <code>mut self</code> and returns <code>mut[T]</code>:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-651"></button><textarea hidden id="copy-651">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-28"></button><textarea hidden id="copy-28">mod example
 
 Grid: rec
 {
@@ -739,7 +739,7 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-type">Grid</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">cells</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">4</span>]</span><span class="line"> </span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>, <span class="c-parameter">i</span>: <span class="c-type">usize</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">cells</span>[<span class="c-parameter">i</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;[]&#x27; with &#x27;self&#x27; is declared more than once in &#x27;Grid&#x27;</span></span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>, <span class="c-parameter">row</span>: <span class="c-type">usize</span>, <span class="c-parameter">column</span>: <span class="c-type">usize</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">cells</span>[<span class="c-parameter">row</span> * <span class="c-literal">2</span> + <span class="c-parameter">column</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;[]&#x27; with &#x27;self&#x27; is declared more than once in &#x27;Grid&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Mixed</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">cells</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">4</span>]</span><span class="line"> </span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>, <span class="c-parameter">i</span>: <span class="c-type">usize</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">cells</span>[<span class="c-parameter">i</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare &#x27;[]&#x27; operators with different parameters</span></span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">i</span>: <span class="c-type">isize</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">mut</span> <span class="c-keyword">self</span>.<span class="c-field">cells</span>[<span class="c-literal">0</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare &#x27;[]&#x27; operators with different parameters</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Wrong</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">cells</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">4</span>]</span><span class="line"> </span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">i</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-keyword">self</span>.<span class="c-field">cells</span>[<span class="c-parameter">i</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:34ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:34ch">Cannot return &#x27;i32&#x27; from &#x27;[]&#x27; with &#x27;mut self&#x27;</span></span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-parameter">i</span>: <span class="c-type">usize</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">0</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare &#x27;[]&#x27; operators without &#x27;self&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <p>Indexing with the wrong number of arguments says how many the type takes:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-652"></button><textarea hidden id="copy-652">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-29"></button><textarea hidden id="copy-29">mod example
 
 Grid: rec
 {
@@ -755,7 +755,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Grid</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">cells</span>: <span class="c-type">array</span>[<span class="c-type">i32</span>, <span class="c-literal">4</span>]</span><span class="line"> </span><span class="line">	[]: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>, <span class="c-parameter">row</span>: <span class="c-type">usize</span>, <span class="c-parameter">column</span>: <span class="c-type">usize</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">cells</span>[<span class="c-parameter">row</span> * <span class="c-literal">2</span> + <span class="c-parameter">column</span>]</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> grid = <span class="c-type">Grid</span>([<span class="c-literal">1</span>, <span class="c-literal">2</span>, <span class="c-literal">3</span>, <span class="c-literal">4</span>])</span><span class="line">	<span class="c-keyword">val</span> cell = grid[<span class="c-literal">1</span>]</span><span class="diagnostic"><span class="squiggle" style="margin-left:15ch;width:7ch"></span><span class="diagnostic-text" style="margin-left:15ch">Indexing &#x27;Grid&#x27; takes 2 arguments</span></span><span class="line">}</span></code></pre></div>
 <h2 id="the-dereference-operator"><a class="anchor" href="#the-dereference-operator">The dereference operator</a></h2>
 <p>A type that holds a pointer to a value can make <code>*</code> reach that value. The operator is <code>*</code> with a receiver and no parameters. Like indexers, it comes as a read-only form with <code>imm self</code> returning <code>imm[T]</code> and a writable form with <code>mut self</code> returning <code>mut[T]</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-653"></button><textarea hidden id="copy-653">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-30"></button><textarea hidden id="copy-30">mod example
 
 ext
 {
@@ -803,7 +803,7 @@ main: fun
 <p>The use picks the form the same way as for indexers: reads take the <code>imm self</code> one, and writes, <code>mut</code> borrows and <code>mut self</code> calls take the <code>mut self</code> one. A read-only <code>*</code> can also return its target by value, as in <code>*: op(imm self) -&gt; i32</code>.</p>
 <h3 id="looks-through"><a class="anchor" href="#looks-through"><code>.</code> looks through <code>*</code></a></h3>
 <p><code>.</code> on a value whose type declares <code>*</code> reaches the target's members, so <code>boxed.health</code> means <code>(*boxed).health</code>:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-654"></button><textarea hidden id="copy-654">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-31"></button><textarea hidden id="copy-31">mod example
 
 ext
 {
@@ -857,7 +857,7 @@ enemy 26</pre></div>
 <p>The type's own members come first: <code>boxed.describe()</code> calls <code>EnemyBox.describe</code>, and <code>(*boxed).describe()</code> reaches the one on <code>Enemy</code>. <code>.</code> looks through one level only. If the target also declares <code>*</code>, its members are reached with <code>(*outer).field</code>, not <code>outer.field</code>.</p>
 <h3 id="dereference-rules"><a class="anchor" href="#dereference-rules">Dereference rules</a></h3>
 <p><code>*</code> takes a receiver and no other parameters, and a <code>self</code> receiver needs a type that copies. A type has at most one form of each kind, and both must give the same target type:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-655"></button><textarea hidden id="copy-655">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-32"></button><textarea hidden id="copy-32">mod example
 
 Holder: rec
 {
@@ -888,7 +888,7 @@ main: fun
 }</textarea><pre><code><span class="line"><span class="c-type">Holder</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">pointer</span>: <span class="c-keyword">req</span> <span class="c-type">ptr</span>[<span class="c-type">i32</span>]</span><span class="line">	<span class="c-field">count</span>: <span class="c-type">i64</span></span><span class="line"> </span><span class="line">	<span class="c-function">*</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>, <span class="c-parameter">index</span>: <span class="c-type">i32</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> *<span class="c-keyword">self</span>.<span class="c-field">pointer</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:16ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:16ch">Cannot take parameters in &#x27;*&#x27; operators with &#x27;self&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Mixed</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">pointer</span>: <span class="c-keyword">req</span> <span class="c-type">ptr</span>[<span class="c-type">i32</span>]</span><span class="line">	<span class="c-field">count</span>: <span class="c-type">i64</span></span><span class="line"> </span><span class="line">	<span class="c-function">*</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> *<span class="c-keyword">self</span>.<span class="c-field">pointer</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:23ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:23ch">Cannot declare &#x27;*&#x27; operators with different target types</span></span><span class="line">	<span class="c-function">*</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">i64</span>] =&gt; <span class="c-keyword">mut</span> <span class="c-keyword">self</span>.<span class="c-field">count</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:23ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:23ch">Cannot declare &#x27;*&#x27; operators with different target types</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Swapped</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">pointer</span>: <span class="c-keyword">req</span> <span class="c-type">ptr</span>[<span class="c-type">i32</span>]</span><span class="line"> </span><span class="line">	<span class="c-function">*</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-keyword">mut</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">mut</span> *<span class="c-keyword">self</span>.<span class="c-field">pointer</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:19ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:19ch">Cannot return &#x27;mut[i32]&#x27; from &#x27;*&#x27; with &#x27;self&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h2 id="custom-for-loops"><a class="anchor" href="#custom-for-loops">Custom <code>for</code> loops</a></h2>
 <p><code>for</code> walks integer ranges and arrays on its own (see <a href="control-flow.html">Control flow</a> and <a href="arrays.html">Arrays</a>). Any other type takes part through two operators: <code>for: op(mut self) -&gt; bool</code> and <code>*</code>. A type with both is a <em>cursor</em>. Before each pass, the loop calls <code>for</code>; when it returns <code>true</code>, the loop reads the element with <code>*</code> and runs the body, and when it returns <code>false</code>, the loop ends.</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-656"></button><textarea hidden id="copy-656">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-33"></button><textarea hidden id="copy-33">mod example
 
 ext
 {
@@ -919,7 +919,7 @@ main: fun
 <p><code>for</code> takes <code>mut self</code> and nothing else, and returns <code>bool</code>. <code>break</code>, <code>cont</code> and <code>ret</code> work as in any loop.</p>
 <h3 id="stepping-a-cursor-in-place"><a class="anchor" href="#stepping-a-cursor-in-place">Stepping a cursor in place</a></h3>
 <p>A cursor in a variable is copied into the loop, like an argument, so the variable doesn't change. <code>for x in mut c</code> steps the variable itself, so a loop that stops early leaves it where it stopped, and a second loop carries on from there:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-657"></button><textarea hidden id="copy-657">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-34"></button><textarea hidden id="copy-34">mod example
 
 ext
 {
@@ -966,7 +966,7 @@ left 3
 <p>Without <code>mut</code>, <code>for x in c</code> takes the cursor by value instead: it copies a cursor that copies and moves one that doesn't.</p>
 <h3 id="collections"><a class="anchor" href="#collections">Collections</a></h3>
 <p>A collection hands out a cursor through <code>in</code>. <code>in: op(imm self) -&gt; Cursor</code> makes the cursor for loops that read; a second <code>in: op(mut self) -&gt; Cursor</code> makes one for loops that change the elements. A cursor that refers back to its collection holds a borrow of it, so it's a <code>ref rec</code> (see <a href="borrows.html">Borrows</a>):</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-658"></button><textarea hidden id="copy-658">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-35"></button><textarea hidden id="copy-35">mod example
 
 ext
 {
@@ -1030,7 +1030,7 @@ main: fun
 <p>The binding picks the <code>in</code>: <code>for x in bag</code> and <code>for imm x in bag</code> use the <code>imm self</code> one, and <code>for mut x in bag</code> uses the <code>mut self</code> one. <code>for x in bag</code> copies each element, which needs a copyable element type, while <code>for imm x in bag</code> borrows it. Writing to a <code>mut</code> binding goes through the cursor's writable <code>*</code>.</p>
 <h3 id="when-a-loop-ends"><a class="anchor" href="#when-a-loop-ends">When a loop ends</a></h3>
 <p>The cursor lives until the loop ends, however it ends, and is dropped then. A cursor with a destructor finds out that the loop is over, which a collection can use to check, for example, that it wasn't changed during the loop:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-659"></button><textarea hidden id="copy-659">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-36"></button><textarea hidden id="copy-36">mod example
 
 ext
 {
@@ -1087,7 +1087,7 @@ main: fun
 [done 4] 8</pre></div>
 <h3 id="loop-operator-rules"><a class="anchor" href="#loop-operator-rules">Loop operator rules</a></h3>
 <p><code>in</code> takes a receiver, <code>imm self</code>, <code>mut self</code> or, for a type that copies, <code>self</code>, and no other parameters, and returns a cursor rather than a borrow. <code>for</code> takes <code>mut self</code> only and returns <code>bool</code>. A type declares each form once:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-660"></button><textarea hidden id="copy-660">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-37"></button><textarea hidden id="copy-37">mod example
 
 Steps: rec
 {
@@ -1111,9 +1111,9 @@ main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-type">Steps</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">left</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">for</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-keyword">true</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:12ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:12ch">Cannot take &#x27;self&#x27; in &#x27;for&#x27; operators</span></span><span class="line">	<span class="c-function">for</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>, <span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">bool</span> =&gt; <span class="c-keyword">true</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:22ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:22ch">Cannot take parameters in &#x27;for&#x27; operators</span></span><span class="line">	<span class="c-function">for</span>: <span class="c-keyword">op</span>(<span class="c-keyword">mut</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:25ch;width:3ch"></span><span class="diagnostic-text" style="margin-left:25ch">Cannot return &#x27;i32&#x27; from &#x27;for&#x27; operators</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Sources</span>: <span class="c-keyword">rec</span></span><span class="line">{</span><span class="line">	<span class="c-field">x</span>: <span class="c-type">i32</span></span><span class="line"> </span><span class="line">	<span class="c-function">in</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">Steps</span> =&gt; <span class="c-type">Steps</span>(<span class="c-literal">0</span>)</span><span class="line">	<span class="c-function">in</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>, <span class="c-parameter">extra</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Steps</span> =&gt; <span class="c-type">Steps</span>(<span class="c-parameter">extra</span>)</span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:5ch"></span><span class="diagnostic-text" style="margin-left:17ch">Cannot take parameters in &#x27;in&#x27; operators</span></span><span class="line">	<span class="c-function">in</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-keyword">imm</span>[<span class="c-type">i32</span>] =&gt; <span class="c-keyword">imm</span> <span class="c-keyword">self</span>.<span class="c-field">x</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:24ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:24ch">Cannot return &#x27;imm[i32]&#x27; from &#x27;in&#x27; operators</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h2 id="the-operator"><a class="anchor" href="#the-operator">The <code>?</code> operator</a></h2>
-<p>Postfix <code>?</code> unwraps a value or leaves the function early. A type declares it as <code>?: op(self) -&gt; T</code> with an expression body. When a function writes <code>x?</code>, the body runs in that function: its value becomes the value of <code>x?</code>, and a <code>ret</code> in the body returns from the function that wrote <code>x?</code>.</p>
+<p>Postfix <code>?</code> unwraps a value or leaves the function early. A type declares it as <code>?: op(self) -&gt; T</code> with an expression body, or as <code>?: op(self)</code> with no result. When a function writes <code>x?</code>, the body runs in that function: its value becomes the value of <code>x?</code>, and a <code>ret</code> in the body returns from the function that wrote <code>x?</code>.</p>
 <p>The usual use is a result type that holds either a value or an error. <code>?</code> gives the value, or returns the error to the caller:</p>
-<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-661"></button><textarea hidden id="copy-661">mod example
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-38"></button><textarea hidden id="copy-38">mod example
 
 ext
 {
@@ -1166,7 +1166,7 @@ error -1
 error -5</pre></div>
 <p>In <code>sumTwo(-1, 2)</code>, <code>parse(-1)?</code> runs the <code>err</code> arm, which returns <code>Result.err(-1)</code> from <code>sumTwo</code>; <code>parse(2)</code> never runs.</p>
 <p>The function that uses <code>?</code> must be able to return what the body returns. Using it in a function with another result type, with no result, or that never returns is an error, and so is <code>?</code> on a type that doesn't declare it:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-662"></button><textarea hidden id="copy-662">mod example
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-39"></button><textarea hidden id="copy-39">mod example
 
 Result[T, E]: enum
 {
@@ -1198,8 +1198,85 @@ number: fun -&gt; i32
 main: fun
 {
 }</textarea><pre><code><span class="line"><span class="c-function">parse</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">n</span>: <span class="c-type">i32</span>) -&gt; <span class="c-type">Result</span>[<span class="c-type">i32</span>, <span class="c-type">i32</span>] =&gt; <span class="c-type">Result</span>.<span class="c-case">ok</span>(<span class="c-parameter">n</span>)</span><span class="line"> </span><span class="line"><span class="c-function">plain</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span> =&gt; <span class="c-function">parse</span>(<span class="c-literal">1</span>)<span class="c-function">?</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:29ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:29ch">Cannot use &#x27;?&#x27; on &#x27;Result[i32, i32]&#x27; in &#x27;plain&#x27;<span class="diagnostic-note">&#x27;plain&#x27; returns &#x27;i32&#x27;</span></span></span><span class="line"> </span><span class="line"><span class="c-function">nothing</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x = <span class="c-function">parse</span>(<span class="c-literal">1</span>)<span class="c-function">?</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:20ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:20ch">Cannot use &#x27;?&#x27; on &#x27;Result[i32, i32]&#x27; in &#x27;nothing&#x27;<span class="diagnostic-note">&#x27;nothing&#x27; doesn&#x27;t return a value</span></span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">number</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">i32</span></span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> x = <span class="c-literal">5</span></span><span class="line">	<span class="c-keyword">ret</span> x?</span><span class="diagnostic"><span class="squiggle" style="margin-left:8ch;width:2ch"></span><span class="diagnostic-text" style="margin-left:8ch">Cannot use &#x27;?&#x27; on &#x27;i32&#x27;</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
-<p>A <code>?</code> operator takes <code>self</code> and nothing else, has a return type and a <code>=&gt;</code> body, and can't be generic or required by a trait:</p>
-<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-663"></button><textarea hidden id="copy-663">mod example
+<p>A <code>?</code> operator with no result suits operations that either succeed with nothing to give back or fail. It can have a block body, and <code>x?</code> is then a statement:</p>
+<div class="code cella"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-40"></button><textarea hidden id="copy-40">mod example
+
+ext
+{
+	printf: fun(format: cstr, ...) -&gt; i32
+}
+
+Status[E]: enum
+{
+	done
+	failed(error: E)
+
+	?: op(self)
+	{
+		if self is failed(val error)
+			ret failed(error)
+	}
+}
+
+flush: fun(fail: bool) -&gt; Status[i32]
+{
+	if fail
+		ret failed(5)
+
+	ret done
+}
+
+save: fun(first: bool, second: bool) -&gt; Status[i32]
+{
+	flush(first)?
+	flush(second)?
+	ret done
+}
+
+show: fun(status: Status[i32])
+{
+	match status
+	{
+		done =&gt; printf(&quot;done\n&quot;)
+		failed(val error) =&gt; printf(&quot;failed %d\n&quot;, error)
+	}
+}
+
+main: fun
+{
+	show(save(false, false))
+	show(save(false, true))
+}</textarea><pre><code><span class="line"><span class="c-type">Status</span>[<span class="c-typeparam">E</span>]: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">done</span></span><span class="line">	<span class="c-case">failed</span>(<span class="c-field">error</span>: <span class="c-typeparam">E</span>)</span><span class="line"> </span><span class="line">	<span class="c-function">?</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>)</span><span class="line">	{</span><span class="line">		<span class="c-keyword">if</span> <span class="c-keyword">self</span> <span class="c-keyword">is</span> <span class="c-case">failed</span>(<span class="c-keyword">val</span> error)</span><span class="line">			<span class="c-keyword">ret</span> <span class="c-case">failed</span>(error)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">flush</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">fail</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">Status</span>[<span class="c-type">i32</span>]</span><span class="line">{</span><span class="line">	<span class="c-keyword">if</span> <span class="c-parameter">fail</span></span><span class="line">		<span class="c-keyword">ret</span> <span class="c-case">failed</span>(<span class="c-literal">5</span>)</span><span class="line"> </span><span class="line">	<span class="c-keyword">ret</span> <span class="c-case">done</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">save</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">first</span>: <span class="c-type">bool</span>, <span class="c-parameter">second</span>: <span class="c-type">bool</span>) -&gt; <span class="c-type">Status</span>[<span class="c-type">i32</span>]</span><span class="line">{</span><span class="line">	<span class="c-function">flush</span>(<span class="c-parameter">first</span>)<span class="c-function">?</span></span><span class="line">	<span class="c-function">flush</span>(<span class="c-parameter">second</span>)<span class="c-function">?</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-case">done</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">show</span>: <span class="c-keyword">fun</span>(<span class="c-parameter">status</span>: <span class="c-type">Status</span>[<span class="c-type">i32</span>])</span><span class="line">{</span><span class="line">	<span class="c-keyword">match</span> <span class="c-parameter">status</span></span><span class="line">	{</span><span class="line">		<span class="c-case">done</span> =&gt; <span class="c-function">printf</span>(<span class="c-literal">"done\n"</span>)</span><span class="line">		<span class="c-case">failed</span>(<span class="c-keyword">val</span> error) =&gt; <span class="c-function">printf</span>(<span class="c-literal">"failed %d\n"</span>, error)</span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">	<span class="c-function">show</span>(<span class="c-function">save</span>(<span class="c-keyword">false</span>, <span class="c-keyword">false</span>))</span><span class="line">	<span class="c-function">show</span>(<span class="c-function">save</span>(<span class="c-keyword">false</span>, <span class="c-keyword">true</span>))</span><span class="line">}</span></code></pre></div>
+<div class="output"><div class="label">Output</div><pre>done
+failed 5</pre></div>
+<p>Since there's no result, using such a <code>?</code> as a value is an error:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-41"></button><textarea hidden id="copy-41">mod example
+
+Status[E]: enum
+{
+	done
+	failed(error: E)
+
+	?: op(self)
+	{
+		if self is failed(val error)
+			ret failed(error)
+	}
+}
+
+flush: fun -&gt; Status[i32] =&gt; done
+
+save: fun -&gt; Status[i32]
+{
+	val result = flush()?
+	ret done
+}
+
+main: fun
+{
+}</textarea><pre><code><span class="line"><span class="c-function">flush</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">Status</span>[<span class="c-type">i32</span>] =&gt; <span class="c-case">done</span></span><span class="line"> </span><span class="line"><span class="c-function">save</span>: <span class="c-keyword">fun</span> -&gt; <span class="c-type">Status</span>[<span class="c-type">i32</span>]</span><span class="line">{</span><span class="line">	<span class="c-keyword">val</span> result = <span class="c-function">flush</span>()<span class="c-function">?</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:17ch;width:8ch"></span><span class="diagnostic-text" style="margin-left:17ch">&#x27;flush()?&#x27; doesn&#x27;t return a value</span></span><span class="line">	<span class="c-keyword">ret</span> <span class="c-case">done</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+<p>A <code>?</code> operator takes <code>self</code> and nothing else and can't be generic or required by a trait. One with a return type needs a <code>=&gt;</code> body:</p>
+<div class="code cella error"><button class="copy" type="button" aria-label="Copy code" data-copy="copy-42"></button><textarea hidden id="copy-42">mod example
 
 Copied: enum
 {
@@ -1218,13 +1295,6 @@ Block: enum
 	}
 }
 
-Untyped: enum
-{
-	one
-
-	?: op(self) =&gt; 1
-}
-
 Fallible: trait
 {
 	?: op(self) -&gt; i32
@@ -1232,7 +1302,7 @@ Fallible: trait
 
 main: fun
 {
-}</textarea><pre><code><span class="line"><span class="c-type">Copied</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">one</span></span><span class="line"> </span><span class="line">	<span class="c-function">?</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot take &#x27;imm self&#x27; in &#x27;?&#x27; operators</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Block</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">one</span></span><span class="line"> </span><span class="line">	?: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;?&#x27; operators must have an expression body</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">ret</span> <span class="c-literal">1</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Untyped</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">one</span></span><span class="line"> </span><span class="line">	?: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;?&#x27; operators need a return type</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Fallible</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">?</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare &#x27;?&#x27; operators in traits</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
+}</textarea><pre><code><span class="line"><span class="c-type">Copied</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">one</span></span><span class="line"> </span><span class="line">	<span class="c-function">?</span>: <span class="c-keyword">op</span>(<span class="c-keyword">imm</span> <span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span> =&gt; <span class="c-literal">1</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:14ch;width:4ch"></span><span class="diagnostic-text" style="margin-left:14ch">Cannot take &#x27;imm self&#x27; in &#x27;?&#x27; operators</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-type">Block</span>: <span class="c-keyword">enum</span></span><span class="line">{</span><span class="line">	<span class="c-case">one</span></span><span class="line"> </span><span class="line">	?: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">&#x27;?&#x27; operators must have an expression body</span></span><span class="line">	{</span><span class="line">		<span class="c-keyword">ret</span> <span class="c-literal">1</span></span><span class="line">	}</span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-trait">Fallible</span>: <span class="c-keyword">trait</span></span><span class="line">{</span><span class="line">	<span class="c-function">?</span>: <span class="c-keyword">op</span>(<span class="c-keyword">self</span>) -&gt; <span class="c-type">i32</span></span><span class="diagnostic"><span class="squiggle" style="margin-left:4ch;width:1ch"></span><span class="diagnostic-text" style="margin-left:4ch">Cannot declare &#x27;?&#x27; operators in traits</span></span><span class="line">}</span><span class="line"> </span><span class="line"><span class="c-function">main</span>: <span class="c-keyword">fun</span></span><span class="line">{</span><span class="line">}</span></code></pre></div>
 <h2 id="operators-in-traits"><a class="anchor" href="#operators-in-traits">Operators in traits</a></h2>
 <p>A trait can require operators, indexers, <code>*</code> and <code>in</code> like any other member, and generic code can then use them on a type parameter. <code>?</code> is the exception. See <a href="traits.html">Traits</a>.</p>
 </article>
