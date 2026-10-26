@@ -566,7 +566,6 @@ Rock: rec impl Ranked
 }
 
 total[T: copy + const Ranked]: const fun(x: T) -> i32 => x.rank()
-plain[T: copy + Ranked]: const fun(x: T) -> i32 => x.rank()
 
 rock: const i32 = total(Rock(1))
 
@@ -578,11 +577,53 @@ main: fun
 ```errors
 'Score.bonus' has no 'const' default
 'score' must be 'const' in 'impl const Score'
-Cannot call 'Ranked.rank' in constant functions
 'total' requires 'T: const Ranked'
 ```
 
 A constant implementation is only ever the written `impl const`: a conformance whose members happen to all be constant doesn't meet `const Trait`.
+
+A plain bound works in a constant function too. `abs` below takes any `Number`. A call to it runs at compile time when the type argument has an `impl const Number`, and at run time for any type. Use `T: const Number` instead when every type the function takes must have a constant implementation:
+
+```cella
+~ mod example
+~
+~ ext
+~ {
+~ 	printf: fun(format: cstr, ...) -> i32
+~ }
+~
+Number: trait req copy
+{
+	abs: fun(x: Self) -> Self
+}
+
+i32: impl const Number
+{
+	abs: const fun(x: i32) -> i32 => match x < 0 { true => -x, else => x }
+}
+
+Big: rec impl Number
+{
+	value: i32
+
+	abs: fun(x: Big) -> Big => match x.value < 0 { true => Big(-x.value), else => x }
+}
+
+abs[T: Number]: const fun(x: T) -> T => T.abs(x)
+
+small: const i32 = abs(-7)
+
+main: fun
+{
+	printf("%d %d\n", small, abs(Big(-3)).value)
+}
+```
+
+```output
+7 3
+```
+
+Using `abs(Big(-7))` where a constant is needed gives "Cannot evaluate 'abs' at compile time", with the hint "'Big' doesn't implement 'const Number'".
 
 A type can implement one trait as constant and another as not. `f32` below implements `Float` constantly and `Transcendental`, which requires `Float`, at run time only. Bounds can mix them the same way: `[T: const Float + Transcendental]` can use `Float`'s members in constants and `Transcendental`'s at run time. Naming `Float` there isn't redundant, since `Transcendental` alone doesn't make it constant.
 
