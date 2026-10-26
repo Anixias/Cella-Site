@@ -353,11 +353,13 @@ Conversions between pointer types are written out, except to `ptr`:
 | --- | --- | --- |
 | `ptr[T]` | `ptr` | implicit, or `ptr(p)` |
 | `ptr` | `ptr[T]` | `ptr[T](raw)` |
-| `ptr[T]` | `ptr[U]` | `ptr[U](ptr(p))` |
+| `ptr[T]` | `ptr[U]` | `ptr[U](p)` |
 | `ptr[T]` | `usize` or `isize` | `usize(p)` |
 | `usize` or `isize` | `ptr[T]` | `ptr[T](address)` |
 | `cstr` | `ptr[u8]` | `ptr[u8](text)` |
 | `ptr[u8]` | `cstr` | `cstr(bytes)` |
+
+A converted pointer holds the same address, and reading through it reads the memory there as its new type.
 
 ```cella
 ~ mod example
@@ -371,7 +373,7 @@ main: fun
 {
 	var value: u32 = 0x07070707
 	val p = @value
-	val bytes = ptr[u8](ptr(p))
+	val bytes = ptr[u8](p)
 	val address = usize(p)
 	val again = ptr[u32](address)
 	printf("%d %d\n", i32(bytes[0]), i32(*again == value))
@@ -386,7 +388,7 @@ main: fun
 e
 ```
 
-Going from one typed pointer to another directly is an error:
+A typed pointer never becomes a pointer to a different type on its own:
 
 ```cella error
 ~ mod example
@@ -394,12 +396,12 @@ Going from one typed pointer to another directly is an error:
 main: fun
 {
 	var value: u32 = 1
-	val bytes = ptr[u8](@value)
+	val bytes: ptr[u8] = @value
 }
 ```
 
 ```errors
-No constructor for 'ptr[u8]' accepts argument of type 'ptr[u32]'
+Cannot convert type 'ptr[u32]' to 'ptr[u8]'
 ```
 
 ## Allocating memory
